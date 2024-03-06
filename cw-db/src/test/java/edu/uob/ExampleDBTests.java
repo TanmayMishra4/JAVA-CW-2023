@@ -101,4 +101,13 @@ public class ExampleDBTests {
         assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
     }
 
+//    @Test
+//    public void testForUSE() {
+//        String randomName = generateRandomName();
+//        sendCommandToServer("USE               " + randomName + ";");
+//        String response = sendCommandToServer("USE " + randomName + ";");
+//        assertTrue(response.contains("Successfully"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
+//        assertFalse(response.contains("not"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
+//    }
+
 }

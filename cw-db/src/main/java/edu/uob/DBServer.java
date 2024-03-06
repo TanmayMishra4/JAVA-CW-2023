@@ -1,11 +1,6 @@
 package edu.uob;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
@@ -21,6 +16,27 @@ public class DBServer {
         DBServer server = new DBServer();
         server.blockingListenOn(8888);
     }
+
+//    private static void printFileContents(){
+//        String fileName = Paths.get("people.tab").toAbsolutePath().toString();
+//        try{
+//            File file = new File(fileName);
+//            System.out.println(file.exists());
+//            BufferedReader br = new BufferedReader(new FileReader(file));
+//            String line = br.readLine();
+//            while(line != null) {
+//                System.out.println(line);
+//                line.trim();
+//                String[] lineArr = line.split("\t");
+//                System.out.println("size of arr = "+lineArr.length);
+//                line = br.readLine();
+//            }
+//            br.close();
+//        }
+//        catch(Exception e){
+//            System.out.println(e);
+//        }
+//    }
 
     /**
     * KEEP this signature otherwise we won't be able to mark your submission correctly.
@@ -43,7 +59,10 @@ public class DBServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
-        return "";
+        command.trim();
+        SQLParser sqlParser = new SQLParser(command);
+        return sqlParser.handleCommand();
+//        return "";
     }
 
     //  === Methods below handle networking aspects of the project - you will not need to change these ! ===
