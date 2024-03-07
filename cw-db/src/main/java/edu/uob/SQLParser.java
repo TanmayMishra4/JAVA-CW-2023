@@ -4,20 +4,24 @@ public class SQLParser {
     private final String tabSeparatorRegex = "\t";
     private final String spaceSeparatorRegex = "\s";
     private String res;
-    Token tokens;
+
+	public String getResult(){
+		return this.res;
+	}
+    Tokenizer tokenizer;
     SQLParser(String command){
-        this.tokens = new Token(command);
-        res = new String();
+		res = new String();
+		try {
+			this.tokenizer = new Tokenizer(command);
+		}
+		catch(IllegalArgumentException e){
+			res = e.toString();
+		}
+
     }
 
     public String handleCommand(){
-        String currentToken = tokens.getLastToken();
-        if(!currentToken.equals(";")){ // TODO deal with no semi colon case (maybe raise an exception as well)
-            return "[ERROR] No semi colon";
-        }
-        if(checkUse() || checkCreate() || checkDrop() || checkAlter() || checkInsert() || checkSelect()){
-            return res;
-        }
+//		tokenizer.tokens.stream().forEach(System.out::println);
         return res;
     }
 
