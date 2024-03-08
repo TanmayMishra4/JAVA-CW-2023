@@ -28,6 +28,10 @@ public class Tokenizer {
 	public String getCurrentToken(){
 		return tokens.get(pos);
 	}
+
+	public String get(int index) throws IndexOutOfBoundsException{
+		return tokens.get(index);
+	}
 	public void next(){
 		setPos(pos+1);
 	}

@@ -16,7 +16,7 @@ public class SQLParser {
         this.tokenizer = new Tokenizer(command);
     }
 
-    public String handleCommand(){
+    public String handleCommand(){// TODO check only one semi colon is present
         String lastToken = tokenizer.getLastToken();
         if(lastToken.equals(";")) {
             if(checkCommandType())
@@ -66,7 +66,7 @@ public class SQLParser {
             tokenizer.next();
             if(operationType.equalsIgnoreCase("DATABASE"))
                 isValid = checkDatabaseName();
-            if(operationType.equalsIgnoreCase("TABLE"))
+            else if(operationType.equalsIgnoreCase("TABLE"))
                 isValid = checkTableName();
             tokenizer.previous();
         }
@@ -94,11 +94,24 @@ public class SQLParser {
             tokenizer.next();
             tokenizer.next();
             String additionalToken = tokenizer.getCurrentToken();
-            if(additionalToken.equals())
+            if(additionalToken.equals("(")){
+                isValid = checkAttributeList();
+            }
+            String closingBracket = tokenizer.get(tokenizer.getSize()-2);
+            if(closingBracket.equalsIgnoreCase(")")){
+                isValid = isValid && true;
+            }
+            // TODO check for ")" closing bracket
         }
         tokenizer.previous();
         tokenizer.previous();
         return isValid;
+    }
+
+    private boolean checkAttributeList() {
+        // TODO to be completed
+        
+        return false;
     }
 
     private boolean checkCreateDatabase() {
