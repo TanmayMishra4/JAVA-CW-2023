@@ -60,7 +60,7 @@ public class DBServer {
     public String handleCommand(String command) {
         // TODO implement your server logic here
 		SQLParser sqlParser = new SQLParser(command);
-        return sqlParser.getResult();
+        return sqlParser.handleCommand();
     }
 
     //  === Methods below handle networking aspects of the project - you will not need to change these ! ===

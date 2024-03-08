@@ -5,10 +5,58 @@ import java.util.Arrays;
 // TODO check for semicolons and tab characters
 
 public class Tokenizer {
+	int pos;
+	int size;
+
+	public int getPos() {
+		return pos;
+	}
+
+	public void setPos(int pos) {
+		if(pos < 0) this.pos = 0;
+		else if(pos >= size) this.pos = size-1;
+		else this.pos = pos;
+	}
+
+	public int getSize() {
+		return size;
+	}
+
 	String[] specialCharacters = {"(",")",",",";"};
-	ArrayList<String> tokens = new ArrayList<String>();
+	ArrayList<String> tokens;
+
+	public String getCurrentToken(){
+		return tokens.get(pos);
+	}
+	public void next(){
+		setPos(pos+1);
+	}
+	public void previous(){
+		setPos(pos-1);
+	}
+	public String getLastToken(){
+		return tokens.get(size-1);
+	}
+
+	public String getNextToken(){
+		return tokens.get(++pos);
+	}
+
+	public String getPreviousToken(){
+		return tokens.get(--pos);
+	}
+
+	public String peekPreviousToken(){
+		return tokens.get(pos+1);
+	}
+
+	public String peekNextToken(){
+		return tokens.get(pos-1);
+	}
 
 	Tokenizer(String query) {
+		pos = 0;
+		tokens = new ArrayList<String>();
 		query = query.trim();
 		// Split the query on single quotes (to separate out query characters from string literals)
 		String[] fragments = query.split("'");
@@ -23,12 +71,7 @@ public class Tokenizer {
 				tokens.addAll(Arrays.asList(nextBatchOfTokens));
 			}
 		}
-		int len = tokens.size();
-		if(!tokens.get(len-1).equals(";")){
-			throw new IllegalArgumentException("No semicolon present !!!!");
-		}
-		// Finally, loop through the result array list, printing out each token a line at a time
-		for(int i=0; i<tokens.size(); i++) System.out.println(tokens.get(i));
+		size = tokens.size();
 	}
 
 	String[] tokenise(String input) {
