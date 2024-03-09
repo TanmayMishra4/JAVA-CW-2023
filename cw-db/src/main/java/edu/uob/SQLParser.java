@@ -1,16 +1,11 @@
 package edu.uob;
 
-import com.sun.jdi.Value;
 import edu.uob.Controller.DBController;
 import edu.uob.DBExceptions.DBException;
-import jdk.jshell.spi.ExecutionControlProvider;
-
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static edu.uob.AlterationType.ADD;
 import static edu.uob.AlterationType.DROP;
 import static edu.uob.ResponseType.ERROR;
@@ -22,14 +17,14 @@ public class SQLParser {
     private String res;
     Tokenizer tokenizer;
     SQLParser(String command, DBController dbController){
-		res = new String();
+		res = "";
         this.dbController = dbController;
         this.tokenizer = new Tokenizer(command);
-        dbController = new DBController();
+        this.dbController = new DBController();
     }
 
     public String handleCommand(){// TODO check only one semi colon is present
-        res = new String();
+        res = "";
         String lastToken = tokenizer.getLastToken();
         if (lastToken.equals(";")) {
             try {
@@ -114,7 +109,7 @@ public class SQLParser {
                 String closingBracket = tokenizer.get(tokenizer.getSize()-2);
                 if(!openingBracket.equals("(") && !closingBracket.equals(")")) throw new DBException("Illegal Query brackets mismatch or not found");
                 List<ValueLiteral> valueList = checkValueList();
-                dbController.insertValues(valueList);
+                dbController.insertValues(tableName, valueList);
             }
             catch (DBException e){
                 tokenizer.setPos(initialIndex2);

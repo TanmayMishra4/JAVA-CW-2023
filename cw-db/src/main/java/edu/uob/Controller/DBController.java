@@ -46,6 +46,6 @@ public class DBController {
     public void joinTables(String tableName1, String tableName2, String attributeName1, String attributeName2) {
     }
 
-    public void insertValues(List<ValueLiteral> valueList) {
+    public void insertValues(String tableName, List<ValueLiteral> valueList) {
     }
 }
