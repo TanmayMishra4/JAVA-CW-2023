@@ -4,9 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+
+import edu.uob.DBExceptions.DBException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.sql.Array;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ExampleDBTests {
 
@@ -21,14 +28,16 @@ public class ExampleDBTests {
     // Random name generator - useful for testing "bare earth" queries (i.e. where tables don't previously exist)
     private String generateRandomName() {
         String randomName = "";
-        for(int i=0; i<10 ;i++) randomName += (char)( 97 + (Math.random() * 25.0));
+        for (int i = 0; i < 10; i++) randomName += (char) (97 + (Math.random() * 25.0));
         return randomName;
     }
 
     private String sendCommandToServer(String command) {
         // Try to send a command to the server - this call will timeout if it takes too long (in case the server enters an infinite loop)
-        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> { return server.handleCommand(command);},
-        "Server took too long to respond (probably stuck in an infinite loop)");
+        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> {
+                    return server.handleCommand(command);
+                },
+                "Server took too long to respond (probably stuck in an infinite loop)");
     }
 
     // A basic test that creates a database, creates a table, inserts some test data, then queries it.
@@ -61,11 +70,11 @@ public class ExampleDBTests {
         sendCommandToServer("INSERT INTO marks VALUES ('Simon', 65, TRUE);");
         String response = sendCommandToServer("SELECT id FROM marks WHERE name == 'Simon';");
         // Convert multi-lined responses into just a single line
-        String singleLine = response.replace("\n"," ").trim();
+        String singleLine = response.replace("\n", " ").trim();
         // Split the line on the space character
         String[] tokens = singleLine.split(" ");
         // Check that the very last token is a number (which should be the ID of the entry)
-        String lastToken = tokens[tokens.length-1];
+        String lastToken = tokens[tokens.length - 1];
         try {
             Integer.parseInt(lastToken);
         } catch (NumberFormatException nfe) {
@@ -113,15 +122,42 @@ public class ExampleDBTests {
     }
 
     @Test
-    public void testForDrop(){
+    public void testForUSEFail() {
+        String randomName = generateRandomName();
+        String response = sendCommandToServer("UsEr               " + randomName + "  ; ");
+        assertFalse(response.contains("[OK]"), "Checking for USE Fail case wrong spelling, expected -> [ERROR] returned -> [OK]");
+        assertTrue(response.contains("[ERROR]"), "Checking for USE Fail case wrong spelling, expected -> [ERROR] returned -> [OK]");
+        response = sendCommandToServer("USE TRUE " + ";");
+        assertFalse(response.contains("[OK]"), "Checking for USE Keyword Fail case, expected -> [ERROR] returned -> [OK]");
+        assertTrue(response.contains("[ERROR]"), "Checking for USE Keyword Fail case, expected -> [ERROR] returned -> [OK]");
+    }
+
+    @Test
+    public void testForDrop() {
         String randomName = generateRandomName();
         String response = sendCommandToServer("DroP   DataBASe " + randomName + "  ; ");
         assertTrue(response.contains("[OK]"), "DROP DATABASE case not working for case insensitive");
         assertFalse(response.contains("[ERROR]"), "DROP DATABASE case not working for case insensitive, should not contain [ERROR] tag");
+        randomName = generateRandomName();
+        response = sendCommandToServer("DroP   TaBle " + randomName + "  ; ");
+        assertTrue(response.contains("[OK]"), "DROP TABLE case not working for case insensitive");
+        assertFalse(response.contains("[ERROR]"), "DROP TABLE case not working for case insensitive, should not contain [ERROR] tag");
     }
 
     @Test
-    public void testCreateTableParse(){
+    public void testForDropFail() {
+        String randomName = generateRandomName();
+        String response = sendCommandToServer("DroPer   DataBASe " + randomName + "  ; ");
+        assertFalse(response.contains("[OK]"), "DROP DATABASE case not working for DROPER, found->[OK], expected->[ERROR]");
+        assertTrue(response.contains("[ERROR]"), "DROP DATABASE case not working for DROPER, found->[ERROR], expected->[OK]");
+        randomName = generateRandomName();
+        response = sendCommandToServer("DroP   Tableer " + randomName + "  ; ");
+        assertFalse(response.contains("[OK]"), "DROP DATABASE case not working for Tableer, found->[OK], expected->[ERROR]");
+        assertTrue(response.contains("[ERROR]"), "DROP DATABASE case not working for Tableer, found->[ERROR], expected->[OK]");
+    }
+
+    @Test
+    public void testCreateTableParse() {
         String randomName = generateRandomName();
         String response = sendCommandToServer(" CReaTE       TablE        " + randomName + "  ; ");
         assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
@@ -132,11 +168,148 @@ public class ExampleDBTests {
     }
 
     @Test
-    public void testCreateDatabaseParse(){
+    public void testCreateDatabaseParse() {
         String randomName = generateRandomName();
         String response = sendCommandToServer(" CReaTE       DAtabASE        " + randomName + "  ; ");
         assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
         assertFalse(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
     }
 
+    @Test
+    public void testCreateTableWithAttributes() {
+        String randomName = generateRandomName();
+        String response = sendCommandToServer(" CReaTE       TaBLe        " + randomName + " ( name, mark, pass ) ; ");
+        assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
+        assertFalse(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
+
+        randomName = generateRandomName();
+        response = sendCommandToServer(" CReaTE       TaBLe        " + randomName + " ; ");
+        assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
+        assertFalse(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
+
+        randomName = generateRandomName();
+        response = sendCommandToServer(" CReaTE       TaBLe        " + randomName + " ( name, mark, pass, AHSB, 78sbc9 ) ; ");
+        assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
+        assertFalse(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
+    }
+
+    @Test
+    public void testCreateTableWithAttributesFail() {
+        String randomName = generateRandomName();
+        String response = sendCommandToServer(" CReaTE       TaBLe        " + randomName + " ( name, mark pass ) ; ");
+        assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [OK] tag was not returned");
+        assertTrue(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was returned");
+
+        randomName = generateRandomName();
+        response = sendCommandToServer(" CReaTE       TaBLe        " + randomName + " ( name, mark pass  ; ");
+        assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [OK] tag was not returned");
+        assertTrue(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was returned");
+
+        randomName = generateRandomName();
+        response = sendCommandToServer(" CReaTE       TaBLe        " + randomName + " ( ) ; ");
+        assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [OK] tag was not returned");
+        assertTrue(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was returned");
+    }
+
+    @Test
+    public void testJoin() {
+        String response = sendCommandToServer("JOIN coursework AND marks ON submission AND id;");
+        assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
+        assertFalse(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
+
+        response = sendCommandToServer("JoiN coursework AND marks On submission AnD id;");
+        assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
+        assertFalse(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
+    }
+
+    @Test
+    public void testJoinFail() {
+        String response = sendCommandToServer("JOIN AND marks ON submission AND id;");
+        assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned 1");
+        assertTrue(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned 1");
+
+        response = sendCommandToServer("JoiN coursework AND marks submission AnD id;");
+        assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned 2");
+        assertTrue(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned 2");
+
+        response = sendCommandToServer("JoiN coursework AND marks submission id;");
+        assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned 3");
+        assertTrue(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned 3");
+
+        response = sendCommandToServer("JoiN coursework AND marks TRuE AnD id;");
+        assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned 4");
+        assertTrue(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned 4");
+    }
+
+    @Test
+    public void testAlter() {
+        String response = sendCommandToServer("ALTER TABLE marks DROP pass;");
+        assertTrue(response.contains("[OK]"), "Tried Running Alter command, expected [OK] 1");
+        assertFalse(response.contains("[ERROR]"), "Tried Running Alter command, expected [OK], but recieved [ERROR] 1");
+
+        response = sendCommandToServer("ALteR TAbLe mSArks DroP paSs;");
+        assertTrue(response.contains("[OK]"), "Tried Running Alter command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running Alter command, expected [OK], but recieved [ERROR] 2");
+
+        response = sendCommandToServer("ALTER TABLE marks ADD pass;");
+        assertTrue(response.contains("[OK]"), "Tried Running Alter command, expected [OK] 3");
+        assertFalse(response.contains("[ERROR]"), "Tried Running Alter command, expected [OK], but recieved [ERROR] 3");
+    }
+
+    @Test
+    public void testAlterFail() {
+        String response = sendCommandToServer("ALTER marks DROP pass;");
+        assertFalse(response.contains("[OK]"), "Tried Running Alter command, expected [ERROR] 1");
+        assertTrue(response.contains("[ERROR]"), "Tried Running Alter command, expected [ERROR], but recieved [OK] 1");
+
+        response = sendCommandToServer("ALteR TAbLe mSArks DOP paSs;");
+        assertFalse(response.contains("[OK]"), "Tried Running Alter command, expected [ERROR] 2");
+        assertTrue(response.contains("[ERROR]"), "Tried Running Alter command, expected [ERROR], but recieved [OK] 2");
+
+        response = sendCommandToServer("ALTER TABLE marks ADD ;");
+        assertFalse(response.contains("[OK]"), "Tried Running Alter command, expected [ERROR] 3");
+        assertTrue(response.contains("[ERROR]"), "Tried Running Alter command, expected [ERROR], but recieved [OK] 3");
+    }
+
+    @Test
+    public void testInsert() {
+        String response = sendCommandToServer("INSERT INTO marks VALUES ('Chris', 20, FALSE);");
+        assertTrue(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 1");
+        assertFalse(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 1");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Chris', 20, TRUE);");
+        assertTrue(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 2");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Chri@#$ s', '20', FALSE);");
+        assertTrue(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 3");
+        assertFalse(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 3");
+    }
+
+    @Test
+    public void testInsertFail() {
+        String response = sendCommandToServer("INSERT INTO marks VALUES ('Chris\"', '20', FALSE);");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 1");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 1");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Chris\'', 20 TRUE);");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 2");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 2");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES 'Chri@#$ s', 20, FALSE);");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 3");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 3");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ( );");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 4");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 4");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Chris'', 20 TRUE);");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 5");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 5");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Chris', 20 TRUE);");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 6");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 6");
+    }
 }

@@ -1,2 +1,16 @@
-/Users/sl17668/Documents/Work/Teaching/Units/JAV/2023/JavaWorkbookDevelopment/Weekly Workbooks/07 Briefing on DB assignment/resources/cw-db/src/main/java/edu/uob/DBClient.java
-/Users/sl17668/Documents/Work/Teaching/Units/JAV/2023/JavaWorkbookDevelopment/Weekly Workbooks/07 Briefing on DB assignment/resources/cw-db/src/main/java/edu/uob/DBServer.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/SQLParser.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/Token.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/Tokenizer.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/Table.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/ValueType.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/NULLObject.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/AlterationType.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/Controller/DBController.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/ResponseType.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/DBExceptions/DBException.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/DBServer.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/Column.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/DBClient.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/ValueLiteral.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/Utils.java
+/Users/pdmishra/Projects/JAVA-CW-2023/cw-db/src/main/java/edu/uob/Database.java
