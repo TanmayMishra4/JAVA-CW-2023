@@ -270,4 +270,46 @@ public class ExampleDBTests {
         assertFalse(response.contains("[OK]"), "Tried Running Alter command, expected [ERROR] 3");
         assertTrue(response.contains("[ERROR]"), "Tried Running Alter command, expected [ERROR], but recieved [OK] 3");
     }
+
+    @Test
+    public void testInsert() {
+        String response = sendCommandToServer("INSERT INTO marks VALUES ('Chris', 20, FALSE);");
+        assertTrue(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 1");
+        assertFalse(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 1");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Chris', 20, TRUE);");
+        assertTrue(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 2");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Chri@#$ s', '20', FALSE);");
+        assertTrue(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 3");
+        assertFalse(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 3");
+    }
+
+    @Test
+    public void testInsertFail() {
+        String response = sendCommandToServer("INSERT INTO marks VALUES ('Chris\"', '20', FALSE);");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 1");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 1");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Chris\'', 20 TRUE);");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 2");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 2");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES 'Chri@#$ s', 20, FALSE);");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 3");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 3");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ( );");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 4");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 4");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Chris'', 20 TRUE);");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 5");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 5");
+
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Chris', 20 TRUE);");
+        assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 6");
+        assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 6");
+    }
 }

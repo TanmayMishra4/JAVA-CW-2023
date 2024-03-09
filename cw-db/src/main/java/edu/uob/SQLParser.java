@@ -108,13 +108,13 @@ public class SQLParser {
                 String tableName = checkTableName();
                 String valuesToken = tokenizer.getCurrentToken();
                 tokenizer.next();
-                if(!valuesToken.equalsIgnoreCase("VALUES")) throw new DBException("Illegal Query");
+                if(!valuesToken.equalsIgnoreCase("VALUES")) throw new DBException("Illegal Query keyword VALUES not found");
                 String openingBracket = tokenizer.getCurrentToken();
                 tokenizer.next();
                 String closingBracket = tokenizer.get(tokenizer.getSize()-2);
-                if(!openingBracket.equals("(") && !closingBracket.equals(")")) throw new DBException("Illegal Query");
+                if(!openingBracket.equals("(") && !closingBracket.equals(")")) throw new DBException("Illegal Query brackets mismatch or not found");
                 List<ValueLiteral> valueList = checkValueList();
-
+                dbController.insertValues(valueList);
             }
             catch (DBException e){
                 tokenizer.setPos(initialIndex2);
@@ -133,13 +133,13 @@ public class SQLParser {
         int index = tokenizer.getPos();
         int initialIndex = index;
         try {
-            while (tokenizer.get(index).equals(")")) {
+            while (!tokenizer.getCurrentToken().equals(")")) {
                 ValueLiteral value = checkValue();
                 resultList.add(value);
                 String comma = tokenizer.getCurrentToken();
                 tokenizer.next();
                 if(comma.equals(")")) break;
-                if(!comma.equals(",")) throw new DBException("ValueList should be separated by ,(comma)");
+                if(!comma.equals(",")) throw new DBException("Values should be separated by ,(comma)");
                 index++;
             }
         }
@@ -154,24 +154,28 @@ public class SQLParser {
 
     private ValueLiteral checkValue() throws DBException {
         String currentToken = tokenizer.getCurrentToken();
-        tokenizer.next();
         try(ValueLiteral<String> val = checkStringLiteral()){
+            tokenizer.next();
             return val;
         } catch (Exception e) {}
 
         try(ValueLiteral<Boolean> val = checkBooleanLiteral()){
+            tokenizer.next();
             return val;
         } catch (Exception e) {}
 
         try(ValueLiteral<Double> val = checkFloatLiteral()){
+            tokenizer.next();
             return val;
         } catch (Exception e) {}
 
         try(ValueLiteral<Integer> val = checkIntegerLiteral()){
+            tokenizer.next();
             return val;
         } catch (Exception e) {}
 
         try(ValueLiteral<NULLObject> val = checkNullLiteral()){
+            tokenizer.next();
             return val;
         } catch (Exception e) {}
 
@@ -181,9 +185,7 @@ public class SQLParser {
 
     private ValueLiteral<NULLObject> checkNullLiteral() throws Exception {
         String currentToken = tokenizer.getCurrentToken();
-        tokenizer.next();
         if(!currentToken.equalsIgnoreCase("NULL")) {
-            tokenizer.previous();
             throw new Exception("Not NULL Value in NULL Object");
         }
         return new ValueLiteral<>(new NULLObject());
@@ -191,13 +193,11 @@ public class SQLParser {
 
     private ValueLiteral<Integer> checkIntegerLiteral() throws Exception {
         String currentToken = tokenizer.getCurrentToken();
-        tokenizer.next();
         Integer val = null;
         try{
             val = Integer.parseInt(currentToken);
         }
         catch(Exception e){
-            tokenizer.previous();
             throw e;
         }
         return new ValueLiteral<Integer>(val);
@@ -205,13 +205,11 @@ public class SQLParser {
 
     private ValueLiteral<Double> checkFloatLiteral() throws Exception {
         String currentToken = tokenizer.getCurrentToken();
-        tokenizer.next();
         Double val = null;
         try{
             val = Double.parseDouble(currentToken);
         }
         catch(Exception e){
-            tokenizer.previous();
             throw e;
         }
         return new ValueLiteral<Double>(val);
@@ -219,12 +217,10 @@ public class SQLParser {
 
     private ValueLiteral<Boolean> checkBooleanLiteral() throws Exception {
         String currentToken = tokenizer.getCurrentToken();
-        tokenizer.next();
         Boolean val = null;
         if(currentToken.equalsIgnoreCase("TRUE")) val = Boolean.valueOf("true");
         else if(currentToken.equalsIgnoreCase("FALSE")) val = Boolean.valueOf("false");
         else{
-            tokenizer.previous();
             throw new Exception("Not a Boolean Literal");
         }
         return new ValueLiteral<Boolean>(val);
@@ -232,7 +228,6 @@ public class SQLParser {
 
     private ValueLiteral<String> checkStringLiteral() throws Exception {
         String currentToken = tokenizer.getCurrentToken();
-        tokenizer.next();
         int stringLength = currentToken.length();
         char closingBracket = currentToken.charAt(stringLength - 1);
         char openingBracket = currentToken.charAt(0);
@@ -266,7 +261,10 @@ public class SQLParser {
                 throw e;
             }
         }
-        else return false;
+        else{
+            tokenizer.previous();
+            return false;
+        }
         return true;
     }
 
