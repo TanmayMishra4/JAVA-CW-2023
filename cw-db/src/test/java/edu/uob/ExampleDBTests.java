@@ -101,4 +101,42 @@ public class ExampleDBTests {
         assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
     }
 
+    @Test
+    public void testForUSE() {
+        String randomName = generateRandomName();
+        String response = sendCommandToServer("UsE               " + randomName + "  ; ");
+        assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
+        assertFalse(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
+        response = sendCommandToServer("USE " + randomName + ";");
+        assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
+        assertFalse(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
+    }
+
+    @Test
+    public void testForDrop(){
+        String randomName = generateRandomName();
+        String response = sendCommandToServer("DroP   DataBASe " + randomName + "  ; ");
+        assertTrue(response.contains("[OK]"), "DROP DATABASE case not working for case insensitive");
+        assertFalse(response.contains("[ERROR]"), "DROP DATABASE case not working for case insensitive, should not contain [ERROR] tag");
+    }
+
+    @Test
+    public void testCreateTableParse(){
+        String randomName = generateRandomName();
+        String response = sendCommandToServer(" CReaTE       TablE        " + randomName + "  ; ");
+        assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
+        assertFalse(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
+        response = sendCommandToServer("CREATE TablE " + randomName + " (name, mark, pass);");
+        assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
+        assertFalse(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
+    }
+
+    @Test
+    public void testCreateDatabaseParse(){
+        String randomName = generateRandomName();
+        String response = sendCommandToServer(" CReaTE       DAtabASE        " + randomName + "  ; ");
+        assertTrue(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned");
+        assertFalse(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
+    }
+
 }
