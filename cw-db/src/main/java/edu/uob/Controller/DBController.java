@@ -1,5 +1,6 @@
 package edu.uob.Controller;
 
+import edu.uob.AlterationType;
 import edu.uob.Database;
 
 import java.util.List;
@@ -36,5 +37,11 @@ public class DBController {
     }
 
     public void createTable(List<String> attbrList) {
+    }
+
+    public void alterTable(String tableName, AlterationType alterationType) {
+    }
+
+    public void joinTables(String tableName1, String tableName2, String attributeName1, String attributeName2) {
     }
 }
