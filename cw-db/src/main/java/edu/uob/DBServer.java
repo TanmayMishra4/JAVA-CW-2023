@@ -1,5 +1,7 @@
 package edu.uob;
 
+import edu.uob.Controller.DBController;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,6 +12,7 @@ import java.nio.file.Files;
 public class DBServer {
 
     private static final char END_OF_TRANSMISSION = 4;
+    private DBController dbController;
     private String storageFolderPath;
 
     public static void main(String args[]) throws IOException {
@@ -43,6 +46,7 @@ public class DBServer {
     */
     public DBServer() {
         storageFolderPath = Paths.get("databases").toAbsolutePath().toString();
+        this.dbController = new DBController();
         try {
             // Create the database storage folder if it doesn't already exist !
             Files.createDirectories(Paths.get(storageFolderPath));
@@ -59,7 +63,7 @@ public class DBServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
-		SQLParser sqlParser = new SQLParser(command);
+		SQLParser sqlParser = new SQLParser(command, this.dbController);
         return sqlParser.handleCommand();
     }
 
