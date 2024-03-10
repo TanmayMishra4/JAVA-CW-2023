@@ -2,6 +2,8 @@ package edu.uob;
 
 import edu.uob.Controller.DBController;
 import edu.uob.DBExceptions.DBException;
+import edu.uob.DBExceptions.IllegalValueTypeException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -54,19 +56,28 @@ public class SQLParser {
                 String andToken = tokenizer.getCurrentToken();
                 tokenizer.next();
                 String tableName2 = null;
-                if (andToken.equalsIgnoreCase("AND")) {
-                    tableName2 = checkTableName();
+                if (andToken.equalsIgnoreCase("AND")) tableName2 = checkTableName();
+                else {
+                    tokenizer.previous();
+                    throw new DBException("Table Name should be followed by AND keyword in JOIN Query");
                 }
                 String onToken = tokenizer.getCurrentToken();
                 tokenizer.next();
                 String attributeName1 = null, attributeName2 = null;
-                if (onToken.equalsIgnoreCase("ON")) {
-                    attributeName1 = checkAttributeName();
+                if (onToken.equalsIgnoreCase("ON")) attributeName1 = checkAttributeName();
+                else{
+                    tokenizer.previous();
+                    tokenizer.previous();
+                    throw new DBException("ON keyword missing in JOIN Query");
                 }
                 andToken = tokenizer.getCurrentToken();
                 tokenizer.next();
-                if (andToken.equalsIgnoreCase("AND")) {
-                    attributeName2 = checkAttributeName();
+                if (andToken.equalsIgnoreCase("AND")) attributeName2 = checkAttributeName();
+                else{
+                    tokenizer.previous();
+                    tokenizer.previous();
+                    tokenizer.previous();
+                    throw new DBException("AND keyword missing in JOIN Query between attributes");
                 }
                 dbController.joinTables(tableName1, tableName2, attributeName1, attributeName2);
             }
@@ -75,12 +86,31 @@ public class SQLParser {
                 throw e;
             }
         }
-        else return false;
+        else {
+            tokenizer.previous();
+            return false;
+        }
         return true;
     }
 
-    private boolean checkDelete() {
-        return false;
+    private boolean checkDelete() throws DBException{
+        String currentToken = tokenizer.getCurrentToken();
+        tokenizer.next();
+        currentToken = currentToken + " " + tokenizer.getCurrentToken();
+        tokenizer.next();
+        if(currentToken.equalsIgnoreCase("DELETE FROM")){
+            String tableName = checkTableName();
+            String whereToken = tokenizer.getCurrentToken();
+            if(!whereToken.equalsIgnoreCase("WHERE")) throw new DBException("DELETE must contain WHERE keyword");
+            tokenizer.next();
+            // TODO check condition to be implemented
+            return true;
+        }
+        else{
+            tokenizer.previous();
+            tokenizer.previous();
+            return false;
+        }
     }
 
     private boolean checkUpdate() {
@@ -129,7 +159,7 @@ public class SQLParser {
         int initialIndex = index;
         try {
             while (!tokenizer.getCurrentToken().equals(")")) {
-                ValueLiteral value = checkValue();
+                ValueLiteral value = getValue();
                 resultList.add(value);
                 String comma = tokenizer.getCurrentToken();
                 tokenizer.next();
@@ -147,96 +177,60 @@ public class SQLParser {
         return resultList;
     }
 
-    private ValueLiteral checkValue() throws DBException {
+    private ValueLiteral getValue() throws DBException {
         String currentToken = tokenizer.getCurrentToken();
         try(ValueLiteral<String> val = checkStringLiteral()){
             tokenizer.next();
             return val;
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
 
         try(ValueLiteral<Boolean> val = checkBooleanLiteral()){
             tokenizer.next();
             return val;
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
 
         try(ValueLiteral<Double> val = checkFloatLiteral()){
             tokenizer.next();
             return val;
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
 
         try(ValueLiteral<Integer> val = checkIntegerLiteral()){
             tokenizer.next();
             return val;
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
 
         try(ValueLiteral<NULLObject> val = checkNullLiteral()){
             tokenizer.next();
             return val;
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
 
         tokenizer.previous();
-        throw new DBException("Illegal Value Type provided");
+        throw new IllegalValueTypeException();
     }
 
     private ValueLiteral<NULLObject> checkNullLiteral() throws Exception {
         String currentToken = tokenizer.getCurrentToken();
-        if(!currentToken.equalsIgnoreCase("NULL")) {
-            throw new Exception("Not NULL Value in NULL Object");
-        }
-        return new ValueLiteral<>(new NULLObject());
+        return Utils.getNullLiteral(currentToken);
     }
 
     private ValueLiteral<Integer> checkIntegerLiteral() throws Exception {
         String currentToken = tokenizer.getCurrentToken();
-        Integer val = null;
-        try{
-            val = Integer.parseInt(currentToken);
-        }
-        catch(Exception e){
-            throw e;
-        }
-        return new ValueLiteral<Integer>(val);
+        return Utils.getIntegerLiteral(currentToken);
     }
 
     private ValueLiteral<Double> checkFloatLiteral() throws Exception {
         String currentToken = tokenizer.getCurrentToken();
-        Double val = null;
-        try{
-            val = Double.parseDouble(currentToken);
-        }
-        catch(Exception e){
-            throw e;
-        }
-        return new ValueLiteral<Double>(val);
+        return Utils.getFloatLiteral(currentToken);
     }
 
     private ValueLiteral<Boolean> checkBooleanLiteral() throws Exception {
         String currentToken = tokenizer.getCurrentToken();
-        Boolean val = null;
-        if(currentToken.equalsIgnoreCase("TRUE")) val = Boolean.valueOf("true");
-        else if(currentToken.equalsIgnoreCase("FALSE")) val = Boolean.valueOf("false");
-        else{
-            throw new Exception("Not a Boolean Literal");
-        }
-        return new ValueLiteral<Boolean>(val);
+        return Utils.getBooleanLiteral(currentToken);
     }
 
     private ValueLiteral<String> checkStringLiteral() throws Exception {
         String currentToken = tokenizer.getCurrentToken();
-        int stringLength = currentToken.length();
-        char closingBracket = currentToken.charAt(stringLength - 1);
-        char openingBracket = currentToken.charAt(0);
-        String stringVal = null;
-        if(openingBracket == '\'' && closingBracket ==  '\''){
-            stringVal = currentToken.substring(1, stringLength-1);
-            for(char charVal : stringVal.toCharArray()){
-                if(Character.isDigit(charVal) || Character.isLetter(charVal) || charVal == ' ' || Utils.isSymbol(charVal)) continue;
-                else throw new DBException("String contains Illegal characters");
-            }
-        }
-        else throw new Exception("Not a String Literal");
-
-        return new ValueLiteral<String>(stringVal);
+        return Utils.getStringLiteral(currentToken);
     }
 
     private boolean checkAlter() throws DBException {
@@ -373,7 +367,6 @@ public class SQLParser {
         tokenizer.next();
         String tokenAhead = tokenizer.getCurrentToken();
         tokenizer.next();
-        boolean isValid = false;
         if(currentToken.equalsIgnoreCase("CREATE") && tokenAhead.equalsIgnoreCase("DATABASE")){
             String dbName = checkDatabaseName();
             dbController.createDB(dbName);
@@ -391,10 +384,10 @@ public class SQLParser {
         if(currentToken.equalsIgnoreCase("USE")){
             String dbName = checkDatabaseName();
             dbController.setActiveDB(dbName);
-            isValid = true;
+            return true;
         }
         tokenizer.previous();
-        return isValid;
+        return false;
     }
 
     private String checkDatabaseName() throws DBException {

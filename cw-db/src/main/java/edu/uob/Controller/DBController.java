@@ -1,19 +1,21 @@
 package edu.uob.Controller;
 
 import edu.uob.AlterationType;
-import edu.uob.Database;
+import edu.uob.Model.Database;
 import edu.uob.ValueLiteral;
 
 import java.util.List;
 
 public class DBController {
-    private static Database activeDBName;
+    private static Database activeDB;
+    private IOController ioController;
     public DBController(){
-        activeDBName = null;
+        ioController = new IOController();
+        activeDB = null;
     }
 
-    public Database getActiveDBName() {
-        return activeDBName;
+    public Database getActiveDB() {
+        return activeDB;
     }
 
     public void setActiveDBName(String activeDB) {
@@ -21,8 +23,14 @@ public class DBController {
     }
 
     public void setActiveDB(String activeDBName){
-        setActiveDBName(activeDBName);
         // TODO do some file IO shit to change activeDB
+        try {
+            activeDB = ioController.loadDatabase(activeDBName);
+        }
+        catch(Exception e){
+            System.out.println("inside setActiveDB methods in DBCOntroller class");
+            System.out.println(e.getMessage());
+        }
     }
 
     public void deleteDB(String dbName) {
