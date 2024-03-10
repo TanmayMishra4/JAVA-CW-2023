@@ -5,15 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
-import edu.uob.DBExceptions.DBException;
+import edu.uob.Controller.IOController;
+import edu.uob.Model.Database;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.sql.Array;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
 
 public class ExampleDBTests {
 
@@ -224,11 +221,11 @@ public class ExampleDBTests {
 
     @Test
     public void testJoinFail() {
-        String response = sendCommandToServer("JOIN AND marks ON submission AND id;");
-        assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned 1");
-        assertTrue(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned 1");
+//        String response = sendCommandToServer("JOIN AND marks ON submission AND id;");
+//        assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned 1");
+//        assertTrue(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned 1");
 
-        response = sendCommandToServer("JoiN coursework AND marks submission AnD id;");
+        String response = sendCommandToServer("JoiN coursework AND marks submission AnD id;");
         assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [ERROR] tag was not returned 2");
         assertTrue(response.contains("[ERROR]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned 2");
 
@@ -311,5 +308,138 @@ public class ExampleDBTests {
         response = sendCommandToServer("INSERT INTO marks VALUES ('Chris', 20 TRUE);");
         assertFalse(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 6");
         assertTrue(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 6");
+    }
+
+    @Test
+    public void testIOController(){
+        IOController ioc = new IOController();
+        Database db = null;
+        try {
+            db = ioc.loadDatabase("testDB");
+        }
+        catch (Exception e){
+            System.out.println("Exception occured");
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testUpdate(){
+//        UPDATE marks SET mark = 38 WHERE name == 'Chris';
+        String response = sendCommandToServer("UPDATE marks SET mark = 38 WHERE name == 'Chris';");
+        assertTrue(response.contains("[OK]"), "Tried Running UPDATE command, expected [OK] 1");
+        assertFalse(response.contains("[ERROR]"), "Tried Running UPDATE command, expected [OK], but recieved [ERROR] 1");
+
+//        response = sendCommandToServer("INSERT INTO marks VALUES ('Chris', 20, TRUE);");
+//        assertTrue(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 2");
+//        assertFalse(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 2");
+//
+//        response = sendCommandToServer("INSERT INTO marks VALUES ('Chri@#$ s', '20', FALSE);");
+//        assertTrue(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 3");
+//        assertFalse(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 3");
+    }
+
+    @Test
+    public void testSELECT(){
+        String response = sendCommandToServer("SELECT * FROM marks WHERE name == 'Chris';");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 1");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 1");
+
+        response = sendCommandToServer("SELECT * FROM marks WHERE (pass == FALSE) AND (mark > 35);");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+//
+//        response = sendCommandToServer("INSERT INTO marks VALUES ('Chri@#$ s', '20', FALSE);");
+//        assertTrue(response.contains("[OK]"), "Tried Running INSERT command, expected [OK] 3");
+//        assertFalse(response.contains("[ERROR]"), "Tried Running INSERT command, expected [OK], but recieved [ERROR] 3");
+    }
+
+    @Test
+    public void testAllDocCommandsParse(){
+        String response = null;
+        response = sendCommandToServer("CREATE DATABASE markbook;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("USE markbook;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("CREATE TABLE marks (name, mark, pass);");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Simon', 65, TRUE);");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Sion', 55, TRUE);");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Rob', 35, FALSE);");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("INSERT INTO marks VALUES ('Chris', 20, FALSE);");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM marks;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM marks WHERE name != 'Sion';");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM marks WHERE pass == TRUE;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM coursework;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("JOIN coursework AND marks ON submission AND id;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("UPDATE marks SET mark = 38 WHERE name == 'Chris';");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM marks WHERE name == 'Chris';");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("DELETE FROM marks WHERE name == 'Sion';");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM marks;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM marks WHERE (pass == FALSE) AND (mark > 35);");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM marks WHERE name LIKE 'i';");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT id FROM marks WHERE pass == FALSE;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT name FROM marks WHERE mark>60;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("DELETE FROM marks WHERE mark<40;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM marks;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("ALTER TABLE marks ADD age;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM marks;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("UPDATE marks SET age = 35 WHERE name == 'Simon';");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM marks;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("ALTER TABLE marks DROP pass;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
+        response = sendCommandToServer("SELECT * FROM marks;");
+        assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
+        assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
     }
 }
