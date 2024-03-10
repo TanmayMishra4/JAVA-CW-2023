@@ -1,4 +1,4 @@
-package edu.uob;
+package edu.uob.Model;
 
 public class NULLObject {
     @Override

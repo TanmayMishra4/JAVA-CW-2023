@@ -3,8 +3,7 @@ package edu.uob.Model;
 import edu.uob.DBExceptions.DBException;
 import edu.uob.DBExceptions.DuplicatePrimaryKeyException;
 import edu.uob.DBExceptions.NumberOfColumnMismatchException;
-import edu.uob.Utils;
-import edu.uob.ValueLiteral;
+import edu.uob.Utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,13 +36,13 @@ public class Table {
     public void addData(String[] columnValues) throws DBException{
         if(columnValues.length != columnNames.size()) throw new NumberOfColumnMismatchException();
         try {
-            ValueLiteral<Integer> primaryKeyLiteral = Utils.getIntegerLiteral(columnValues[0]);
-            int primaryKeyValue = primaryKeyLiteral.getValue();
+            Value primaryKeyLiteral = Utils.getIntegerLiteral(columnValues[0]);
+            int primaryKeyValue = primaryKeyLiteral.getIntVal();
             if(primaryKeys.contains(primaryKeyValue)) throw new DuplicatePrimaryKeyException(primaryKeyValue);
 
             for(int index=1;index<columnValues.length;index++){
                 String columnValue = columnValues[index];
-                ValueLiteral value = Utils.getValueLiteral(columnValue);
+                Value value = Utils.getValueLiteral(columnValue);
                 String columnName = columnNames.get(index);
                 Column column = columnsMap.get(columnName);
                 column.addValue(value);

@@ -1,4 +1,4 @@
-package edu.uob;
+package edu.uob.AllEnums;
 
 public enum ResponseType {
     ERROR,

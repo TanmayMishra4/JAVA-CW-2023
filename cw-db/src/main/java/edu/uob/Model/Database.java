@@ -5,7 +5,6 @@ import edu.uob.DBExceptions.DuplicateTableException;
 import edu.uob.DBExceptions.TableNotFoundException;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class Database {
     private String name;
