@@ -30,8 +30,8 @@ jobs:
     - name: Run Maven
       run: mvn -B package --file cw-db/pom.xml
 
-    - name: JUNIT Test report
-      uses: cpdeethree/test-reporter@v1.0.3
+    # - name: JUNIT Test report
+    #   uses: cpdeethree/test-reporter@v1.0.3
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     # - name: Update dependency graph
