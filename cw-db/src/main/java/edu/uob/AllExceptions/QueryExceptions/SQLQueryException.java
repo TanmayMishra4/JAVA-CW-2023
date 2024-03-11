@@ -1,13 +1,13 @@
-package edu.uob.DBExceptions;
+package edu.uob.AllExceptions.QueryExceptions;
 
-public class DBException extends Exception{
+public class SQLQueryException extends Exception{
     String message;
-    DBException(){
+    SQLQueryException(){
         super();
         message = new String();
     }
 
-    public DBException(String message){
+    public SQLQueryException(String message){
         super(message);
         this.message = message;
     }

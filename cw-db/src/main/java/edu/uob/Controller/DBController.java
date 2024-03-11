@@ -3,12 +3,15 @@ package edu.uob.Controller;
 import edu.uob.AllEnums.AlterationType;
 import edu.uob.AllEnums.BoolOperator;
 import edu.uob.AllEnums.SQLComparator;
+import edu.uob.AllExceptions.DBExceptions.DBException;
+import edu.uob.AllExceptions.DBExceptions.DuplicateColumnNameException;
 import edu.uob.Model.Database;
 import edu.uob.Model.NameValuePair;
 import edu.uob.Model.Value;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DBController {
     private static Database activeDB;
@@ -26,30 +29,39 @@ public class DBController {
         activeDB = activeDB;
     }
 
-    public void setActiveDB(String activeDBName){
+    public void setActiveDB(String activeDBName) throws DBException {
         // TODO some file IO shit to change activeDB
         try {
             activeDB = ioController.loadDatabase(activeDBName);
         }
         catch(Exception e){
-            System.out.println("inside setActiveDB methods in DBCOntroller class");
-            System.out.println(e.getMessage());
+            throw new DBException(e.getMessage());
         }
     }
 
-    public void deleteDB(String dbName) {
+    public void dropDB(String dbName) throws DBException{
+        ioController.dropDB(dbName);
     }
 
-    public void deleteTable(String tableName) {
+    public void dropTable(String tableName) throws DBException{
+        ioController.dropTable(activeDB.getName(), tableName);
     }
 
-    public void createDB(String dbName) {
+    public Database createDB(String dbName) throws DBException{
+        ioController.createDB(dbName);
+        return new Database(dbName);
     }
 
-    public void createTable() {
+    public void createTable(String tableName) throws DBException{
+        ioController.createTable(activeDB.getName(), tableName);
     }
 
-    public void createTable(List<String> attbrList) {
+    public void createTable(String tableName, List<String> attbrList) throws DBException{
+        Set<String> columnVals = new HashSet<>();
+        for(String columnVal : attbrList){
+            if(!columnVals.add(columnVal) || columnVal.equalsIgnoreCase("id")) throw new DuplicateColumnNameException();
+        }
+        ioController.addColumnNames(activeDB.getName(), tableName, attbrList);
     }
 
     public void alterTable(String tableName, AlterationType alterationType) {

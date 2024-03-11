@@ -2,19 +2,22 @@ package edu.uob;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import edu.uob.Controller.IOController;
 import edu.uob.Model.Database;
+import edu.uob.Utils.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.File;
 import java.time.Duration;
 
 
 public class ExampleDBTests {
 
     private DBServer server;
+    final String dbName = "randomNonExistentDB";
 
     // Create a new server _before_ every @Test
     @BeforeEach
@@ -35,6 +38,25 @@ public class ExampleDBTests {
                     return server.handleCommand(command);
                 },
                 "Server took too long to respond (probably stuck in an infinite loop)");
+    }
+
+    void deleteFolder(){
+        String dbPathName = Utils.getDBFilePathName(dbName);
+        File file = new File(dbPathName.substring(0, dbPathName.length()));
+        try{
+            for(File f : file.listFiles()){
+                f.delete();
+            }
+            file.delete();
+        }catch(Exception ignored){}
+    }
+
+    void createFolder(){
+        String dbPathName = Utils.getDBFilePathName(dbName);
+        File file = new File(dbPathName.substring(0, dbPathName.length()));
+        try{
+            boolean val = file.mkdir();
+        } catch (Exception ignored){}
     }
 
     // A basic test that creates a database, creates a table, inserts some test data, then queries it.

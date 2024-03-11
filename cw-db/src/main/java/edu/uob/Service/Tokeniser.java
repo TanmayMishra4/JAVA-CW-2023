@@ -1,13 +1,10 @@
 package edu.uob.Service;
 
-import edu.uob.AllEnums.SQLComparator;
-import edu.uob.DBExceptions.DBException;
-import edu.uob.DBExceptions.TokeniserOutOfBoundsException;
-import edu.uob.Utils.Utils;
+import edu.uob.AllExceptions.QueryExceptions.SQLQueryException;
+import edu.uob.AllExceptions.QueryExceptions.TokeniserOutOfBoundsException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 // TODO check for semicolons and tab characters
 
 public class Tokeniser {
@@ -29,7 +26,7 @@ public class Tokeniser {
 	String[] specialCharacters = {"(", ")", ",", ";", "==", ">", "<", ">=", "<=", "!="};
 	ArrayList<String> tokens;
 
-	public String getCurrentToken() throws DBException{
+	public String getCurrentToken() throws SQLQueryException {
 		try {
 			return tokens.get(pos);
 		}
@@ -38,7 +35,7 @@ public class Tokeniser {
 		}
 	}
 
-	public String get(int index) throws DBException{
+	public String get(int index) throws SQLQueryException {
 		try {
 			return tokens.get(index);
 		}

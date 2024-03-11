@@ -1,8 +1,8 @@
 package edu.uob.Model;
 
-import edu.uob.DBExceptions.DBException;
-import edu.uob.DBExceptions.DuplicatePrimaryKeyException;
-import edu.uob.DBExceptions.NumberOfColumnMismatchException;
+import edu.uob.AllExceptions.QueryExceptions.SQLQueryException;
+import edu.uob.AllExceptions.QueryExceptions.DuplicatePrimaryKeyException;
+import edu.uob.AllExceptions.QueryExceptions.NumberOfColumnMismatchException;
 import edu.uob.Utils.Utils;
 
 import java.util.ArrayList;
@@ -26,33 +26,33 @@ public class Table {
         columnsMap.put(primaryKey, new Column<Integer>(primaryKey));
     }
 
-    public void addColumn(String columnName) throws DBException {
+    public void addColumn(String columnName) throws SQLQueryException {
         if(columnName.equals(primaryKey)) return;
-        if(columnsMap.containsKey(columnName)) throw new DBException("Duplicate Columns found");
+        if(columnsMap.containsKey(columnName)) throw new SQLQueryException("Duplicate Columns found");
         columnNames.add(columnName);
         columnsMap.put(columnName, new Column(columnName));
     }
 
-    public void addData(String[] columnValues) throws DBException{
+    public void addData(String[] columnValues) throws SQLQueryException {
         if(columnValues.length != columnNames.size()) throw new NumberOfColumnMismatchException();
         try {
             Value primaryKeyLiteral = Utils.getIntegerLiteral(columnValues[0]);
             int primaryKeyValue = primaryKeyLiteral.getIntVal();
-            if(primaryKeys.contains(primaryKeyValue)) throw new DuplicatePrimaryKeyException(primaryKeyValue);
+            if(!primaryKeys.add(primaryKeyValue)) throw new DuplicatePrimaryKeyException(primaryKeyValue);
 
             for(int index=1;index<columnValues.length;index++){
                 String columnValue = columnValues[index];
-                Value value = Utils.getValueLiteral(columnValue);
+                Value value = Utils.getValue(columnValue);
                 String columnName = columnNames.get(index);
                 Column column = columnsMap.get(columnName);
                 column.addValue(value);
             }
         }
-        catch(DBException d){
+        catch(SQLQueryException d){
             throw d;
         }
         catch (Exception e){
-            throw new DBException("Primary Key Error");
+            throw new SQLQueryException("Primary Key Error");
         }
     }
 }
