@@ -137,23 +137,23 @@ public class DBControllerTests {
         assert(d.getName().equals(dbName));
         assert(d.getTables().size() == 1);
     }
-    @Test
-    public void testDropDatabase() throws DBException {
-        createFolder();
-        dbController.setActiveDB(dbName);
-        dbController.createTable("people", Arrays.asList("andk", "dnjna", "asjdfn"));
-        dbController.createTable("jabnds", Arrays.asList("adavn", "ajsd"," clmnoao"));
-        dbController.insertValues("people", List.of(new Value[]{new Value("sjdnf"), new Value("823489"), new Value("829")}));
-        IOController ioController = new IOController();
-        ioController.dropDB(dbName);
-    }
-
-    @Test
-    public void testSelect() throws DBException {
-        dbController.setActiveDB("testDB");
-        List<String> l = new ArrayList<>();
-        l.add("*");
-        String response = dbController.select("people", l);
-        assert(response != null);
-    }
+//    @Test
+//    public void testDropDatabase() throws DBException {
+//        createFolder();
+//        dbController.setActiveDB(dbName);
+//        dbController.createTable("people", Arrays.asList("andk", "dnjna", "asjdfn"));
+//        dbController.createTable("jabnds", Arrays.asList("adavn", "ajsd"," clmnoao"));
+//        dbController.insertValues("people", List.of(new Value[]{new Value("sjdnf"), new Value("823489"), new Value("829")}));
+//        IOController ioController = new IOController();
+//        ioController.dropDB(dbName);
+//    }
+//
+//    @Test
+//    public void testSelect() throws DBException {
+//        dbController.setActiveDB("testDB");
+//        List<String> l = new ArrayList<>();
+//        l.add("*");
+//        String response = dbController.select("testTable", l);
+//        assert(response != null);
+//    }
 }

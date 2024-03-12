@@ -10,8 +10,11 @@ import edu.uob.Utils.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Random;
 
 
 public class ExampleDBTests {
@@ -464,4 +467,32 @@ public class ExampleDBTests {
         assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
         assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
     }
+
+//    @Test
+//    public void testAddFile() throws IOException {
+//        File file = new File("testTable.tab");
+//        file.createNewFile();
+//        BufferedWriter br = new BufferedWriter(new FileWriter(file));
+//        br.write("id\tksnck\tland\taknf\tasknfk\tksndfk\tnsdfkn\tshf\taojo\n");
+//        for(int i=0;i<10000;i++){
+//            br.write(String.valueOf(i+"\t"));
+//            for(int j=0;j<8;j++){
+//                br.write(rndChar());
+//                if(j != 7) br.write("\t");
+//            }
+//            if(i+1 != 10000)
+//                br.write("\n");
+//        }
+//        br.close();
+//    }
+//
+//    private static String rndChar () {
+//        StringBuilder sb = new StringBuilder();
+//        for(int i=0;i<8;i++) {
+//            int rnd = (int) (Math.random() * 52); // or use Random or whatever
+//            char base = (rnd < 26) ? 'A' : 'a';
+//            sb.append((char) (base + rnd % 26));
+//        }
+//        return sb.toString();
+//    }
 }
