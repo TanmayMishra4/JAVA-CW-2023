@@ -1,5 +1,6 @@
 package edu.uob.Model;
 
+import edu.uob.AllEnums.SQLComparator;
 import edu.uob.AllExceptions.DBExceptions.ColumnNotFoundException;
 import edu.uob.AllExceptions.DBExceptions.DBException;
 import edu.uob.AllExceptions.DBExceptions.RemovalOfPrimaryKeyException;
@@ -13,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class Table {
     private PrimaryKeyGenerator pkgen;
@@ -50,7 +50,7 @@ public class Table {
         try {
             Value primaryKeyLiteral = pkgen.getPrimaryKey();
             int primaryKeyValue = primaryKeyLiteral.getIntVal();
-            columnsMap.get("id").addValue(primaryKeyLiteral);
+            columnsMap.get("id").addValue(primaryKeyLiteral, primaryKeyValue);
             if (!primaryKeys.add(primaryKeyValue)) throw new DuplicatePrimaryKeyException(primaryKeyValue);
 
             for (int index = 0; index < rowOfValues.length; index++) {
@@ -58,7 +58,7 @@ public class Table {
                 Value value = Utils.getValue(columnValue);
                 String columnName = columnNames.get(index + 1);
                 Column column = columnsMap.get(columnName);
-                column.addValue(value);
+                column.addValue(value, primaryKeyValue);
             }
         } catch (SQLQueryException d) {
             throw new DBException(d.getMessage());
@@ -70,12 +70,13 @@ public class Table {
     public void loadDataRows(String[] rowOfValues) throws DBException{
         if (rowOfValues.length != columnNames.size()) throw new NumberOfColumnMismatchException();
         try {// TODO refactor this method to be the same as above
+            int primaryKeyValue = Integer.parseInt(rowOfValues[0]);
             for (int index = 0; index < rowOfValues.length; index++) {
                 String columnValue = rowOfValues[index];
                 Value value = Utils.getValue(columnValue);
                 String columnName = columnNames.get(index);
                 Column column = columnsMap.get(columnName);
-                column.addValue(value);
+                column.addValue(value, primaryKeyValue);
             }
         } catch (SQLQueryException d) {
             throw new DBException(d.getMessage());
@@ -107,7 +108,7 @@ public class Table {
         columnsMap.remove(columnName);
     }
 
-    public void removeRowsWithIndex(HashSet<Integer> indexesToDelete) throws DBException {
+    public void removeRowsWithIndex(List<Integer> indexesToDelete) throws DBException {
         // TODO to be implemented
         for (Column column : columnsMap.values()) {
             column.deleteValuesWithIndex(indexesToDelete);
@@ -119,17 +120,28 @@ public class Table {
             wildAttributes.clear();
             wildAttributes.addAll(columnNames);
         }
+        return selectQuery(wildAttributes, primaryKeys);
+    }
 
-        int maxRows = columnsMap.get("id").getValues().size();
-        StringBuilder sb = new StringBuilder();
-        extractRowNames(wildAttributes, sb);
-        for (int index = 0; index < maxRows; index++) {
-            extractRow(wildAttributes, index, sb, maxRows);
+    public String selectQuery(List<String> wildAttributes, HashSet<Integer> filteredValues) throws Exception {
+        if (wildAttributes.get(0).equals("*")) {
+            wildAttributes.clear();
+            wildAttributes.addAll(columnNames);
         }
+
+        List<Integer> indexList = new ArrayList<>(primaryKeys);
+        indexList.sort(Integer::compareTo);
+        StringBuilder sb = new StringBuilder();
+        extractColNames(wildAttributes, sb);
+        for (int index : indexList) {
+            if(filteredValues.contains(index))
+                extractRow(wildAttributes, index, sb, filteredValues);
+        }
+        sb.append("\n");
         return sb.toString();
     }
 
-    private void extractRowNames(List<String> wildAttributes, StringBuilder sb) throws Exception {
+    private void extractColNames(List<String> wildAttributes, StringBuilder sb) throws Exception {
         int size = wildAttributes.size();
         for (int index = 0; index < size; index++) {
             String columnName = wildAttributes.get(index);
@@ -139,13 +151,20 @@ public class Table {
         }
     }
 
-    private void extractRow(List<String> wildAttributes, int index, StringBuilder sb, int maxRows) throws Exception{
+    private void extractRow(List<String> wildAttributes, int index, StringBuilder sb, HashSet<Integer> filteredValues) throws Exception{
         int size = wildAttributes.size();
         for (int colIndex = 0; colIndex < size; colIndex++) {
             Column column = columnsMap.get(wildAttributes.get(colIndex));
+            Value value = column.getValue(index);
+
             sb.append(column.getValue(index).getStringVal());
-            if(index != maxRows-1 && colIndex == size - 1) sb.append("\n");
+            if(colIndex == size - 1) sb.append("\n");
             else sb.append("\t");
         }
+    }
+
+    public List<Integer> filter(String columnName, SQLComparator sqlComparator, Value value) throws DBException{
+        if(!columnsMap.containsKey(columnName)) throw new ColumnNotFoundException();
+        return columnsMap.get(columnName).filter(sqlComparator, value);
     }
 }

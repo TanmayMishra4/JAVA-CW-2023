@@ -28,7 +28,7 @@ public class Utils {
             return "[ERROR]: " + message;
         }
         else{
-            return "[OK]: " + message;
+            return "[OK]\n" + message;
         }
     }
     public static boolean isNotKeyWord(String word){
@@ -119,7 +119,7 @@ public class Utils {
 
     public static void populateComparatorMap(HashMap<String, SQLComparator> comparatorMap){
         if(!comparatorMap.isEmpty()) return;
-        comparatorMap.put("==", SQLComparator.LIKE);
+        comparatorMap.put("==", SQLComparator.EQUALS);
         comparatorMap.put("!=", SQLComparator.NOT_EQUALS);
         comparatorMap.put(">", SQLComparator.GREATER_THAN);
         comparatorMap.put("<", SQLComparator.LESS_THAN);

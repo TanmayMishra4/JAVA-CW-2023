@@ -77,7 +77,7 @@ public class Database {
         tables.get(tableName).removeColumn(columnName);
     }
 
-    public void deleteFromTable(String tableName, HashSet<Integer> indexesToDelete) throws DBException{
+    public void deleteFromTable(String tableName, List<Integer> indexesToDelete) throws DBException{
         if(!tables.containsKey(tableName)) throw new TableDoesNotExistException();
         tables.get(tableName).removeRowsWithIndex(indexesToDelete);
     }
@@ -86,6 +86,16 @@ public class Database {
         if(!tables.containsKey(tableName)) throw new TableDoesNotExistException();
         try {
             return tables.get(tableName).selectQuery(wildAttributes);
+        }
+        catch(Exception e){
+            throw new DBException("SELECT Query Cannot be executed");
+        }
+    }
+
+    public String selectQuery(String tableName, List<String> wildAttributes, List<Integer> filteredValues) throws DBException{
+        if(!tables.containsKey(tableName)) throw new TableDoesNotExistException();
+        try {
+            return tables.get(tableName).selectQuery(wildAttributes, new HashSet<>(filteredValues));
         }
         catch(Exception e){
             throw new DBException("SELECT Query Cannot be executed");

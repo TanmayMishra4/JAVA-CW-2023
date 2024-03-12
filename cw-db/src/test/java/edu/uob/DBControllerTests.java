@@ -148,12 +148,66 @@ public class DBControllerTests {
 //        ioController.dropDB(dbName);
 //    }
 //
-//    @Test
-//    public void testSelect() throws DBException {
-//        dbController.setActiveDB("testDB");
-//        List<String> l = new ArrayList<>();
-//        l.add("*");
-//        String response = dbController.select("testTable", l);
-//        assert(response != null);
-//    }
+    @Test
+    public void testSelect() throws DBException {
+        dbController.setActiveDB("testDB");
+        List<String> l = new ArrayList<>();
+        l.add("Name");l.add("Age");
+        String response = dbController.select("people", l);
+        assert(response != null);
+    }
+
+    @Test
+    public void testSelect2(){
+        DBServer dbServer = new DBServer();
+        dbServer.handleCommand("use testDB;");
+        String response = "select * from people;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+    }
+
+    @Test
+    public void testSelect3(){
+        DBServer dbServer = new DBServer();
+        dbServer.handleCommand("use testDB;");
+        String response = "select id, Email from people;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+    }
+
+    @Test
+    public void seriesOfCommands(){
+        DBServer dbServer = new DBServer();
+        String response = "CREATE DATABASE markbook;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+
+        response = "USE markbook;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        response = "CREATE TABLE marks (name, mark, pass);";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        response = "INSERT INTO marks VALUES ('Simon', 65, TRUE);";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        response = "INSERT INTO marks VALUES ('Sion', 55, TRUE);";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        response = "INSERT INTO marks VALUES ('Rob', 35, FALSE);";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        response = "INSERT INTO marks VALUES ('Chris', 20, FALSE);";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        response = "SELECT * FROM marks;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        response = "SELECT * FROM marks WHERE name != 'Sion';";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        response = "SELECT * FROM marks WHERE pass == TRUE;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+    }
 }

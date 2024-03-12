@@ -63,8 +63,13 @@ public class DBServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
-		SQLParser sqlParser = new SQLParser(command, this.dbController);
+		SQLParser sqlParser = new SQLParser(command, getDBController());
         return sqlParser.handleCommand();
+    }
+
+    private DBController getDBController(){
+        if(dbController == null) return new DBController();
+        else return dbController;
     }
 
     //  === Methods below handle networking aspects of the project - you will not need to change these ! ===

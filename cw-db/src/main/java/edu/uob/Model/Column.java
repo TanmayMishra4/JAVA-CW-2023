@@ -1,41 +1,64 @@
 package edu.uob.Model;
 
+import edu.uob.AllEnums.SQLComparator;
+import edu.uob.AllExceptions.DBExceptions.DBException;
+
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public class Column {
     String name;
-    HashMap<Integer, Value> pkToValueMap;
-    List<Value> values;
+    HashMap<Integer, Value> values;
 
     Column(String name){
         this.name = name;
-        values = new ArrayList<>();
-        pkToValueMap = new HashMap<>();
+        values = new HashMap<>();
     }
 
-    public void addValue(Value val){
-        values.add(val);
+    public void addValue(Value val, Integer primaryKeyValue) throws DBException{
+        try{
+            values.put(primaryKeyValue, val);
+        }
+        catch(Exception e){
+            throw new DBException("Cannot add value" + val + " to Column "+name);
+        }
     }
 
     public String getName() {
         return name;
     }
 
-    public Value getValue(int index){
-        return values.get(index);
+    public Value getValue(int index) throws DBException{
+        // returns value at index
+        try{
+            return values.get(index);
+        }
+        catch(Exception ignored){
+            throw new DBException("Index not Found in Column");
+        }
     }
 
-    public List<Value> getValues() {
+    public HashMap<Integer, Value> getValues() {
         return values;
     }
 
-    public void deleteValuesWithIndex(HashSet<Integer> pkSet){
-        for(Integer pk : pkSet){
-            if(pkToValueMap.containsKey(pk))
-                pkToValueMap.remove(pk);
+    public void deleteValuesWithIndex(List<Integer> pkSet){
+        for(Integer primaryKey : pkSet){
+            values.remove(primaryKey);
         }
+    }
+
+    public List<Integer> filter(SQLComparator sqlComparator, Value value) throws DBException {
+        List<Integer> result = new ArrayList<>();
+        for(var entry : values.entrySet()){
+            Integer entryPrimaryKey = entry.getKey();
+            Value entryValue = entry.getValue();
+            if(entryValue.compareFunc(sqlComparator, value)){
+                result.add(entryPrimaryKey);
+            }
+        }
+        return result;
     }
 }
