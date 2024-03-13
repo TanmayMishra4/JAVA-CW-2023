@@ -1,5 +1,6 @@
 package edu.uob.Model;
 
+import edu.uob.AllExceptions.DBExceptions.ColumnNotFoundException;
 import edu.uob.AllExceptions.DBExceptions.DBException;
 import edu.uob.AllExceptions.DBExceptions.DuplicateTablesException;
 import edu.uob.AllExceptions.DBExceptions.TableDoesNotExistException;
@@ -26,19 +27,19 @@ public class Database {
     }
 
     public void addTable(String tableName) throws DBException {
-        if(tables.containsKey(tableName)) throw new DuplicateTablesException();
+        if(hasTable(tableName)) throw new DuplicateTablesException();
         Table tableEntry = new Table(tableName);
         this.tables.put(tableName, tableEntry);
     }
 
     public void addColumnToTable(String tableName, String columnName) throws DBException {
-        if(!tables.containsKey(tableName)) throw new TableDoesNotExistException();
+        if(!hasTable(tableName)) throw new TableDoesNotExistException();
         Table table = tables.get(tableName);
         table.addColumn(columnName);
     }
 
     public void addDataToTable(String tableName, String[] rowofValues) throws DBException {
-        if(!tables.containsKey(tableName)) throw new TableDoesNotExistException();
+        if(!hasTable(tableName)) throw new TableDoesNotExistException();
         Table table = tables.get(tableName);
         table.addData(rowofValues);
     }
@@ -52,7 +53,10 @@ public class Database {
     }
 
     public boolean hasTable(String tableName){
-        return tables.containsKey(tableName);
+        for(String name : tables.keySet()){
+            if(tableName.equalsIgnoreCase(name)) return true;
+        }
+        return false;
     }
 
     public void removeTable(String tableName) throws DBException {
@@ -65,24 +69,24 @@ public class Database {
     }
 
     public void dropTable(String tableName) throws DBException{
-        if(tables.containsKey(tableName)){
+        if(hasTable(tableName)){
            tables.remove(tableName);
         }
         else throw new TableDoesNotExistException();
     }
 
     public void removeColumnFromTable(String tableName, String columnName) throws DBException{
-        if(!tables.containsKey(tableName)) throw new TableDoesNotExistException();
+        if(!hasTable(tableName)) throw new TableDoesNotExistException();
         tables.get(tableName).removeColumn(columnName);
     }
 
     public void deleteFromTable(String tableName, List<Integer> indexesToDelete) throws DBException{
-        if(!tables.containsKey(tableName)) throw new TableDoesNotExistException();
+        if(!hasTable(tableName)) throw new TableDoesNotExistException();
         tables.get(tableName).removeRowsWithIndex(indexesToDelete);
     }
 
     public String selectQuery(String tableName, List<String> wildAttributes) throws DBException{
-        if(!tables.containsKey(tableName)) throw new TableDoesNotExistException();
+        if(!hasTable(tableName)) throw new TableDoesNotExistException();
         try {
             return tables.get(tableName).selectQuery(wildAttributes);
         }
@@ -92,7 +96,7 @@ public class Database {
     }
 
     public String selectQuery(String tableName, List<String> wildAttributes, List<Integer> filteredValues) throws DBException{
-        if(!tables.containsKey(tableName)) throw new TableDoesNotExistException();
+        if(!hasTable(tableName)) throw new TableDoesNotExistException();
         try {
             return tables.get(tableName).selectQuery(wildAttributes, new HashSet<>(filteredValues));
         }
@@ -102,7 +106,7 @@ public class Database {
     }
 
     public void update(String tableName, List<NameValuePair> nameValuePairList, List<Integer> resultSet) throws DBException{
-        if(!tables.containsKey(tableName)) throw new TableDoesNotExistException();
+        if(!hasTable(tableName)) throw new TableDoesNotExistException();
         try {
             tables.get(tableName).update(nameValuePairList, resultSet);
         }
@@ -111,16 +115,17 @@ public class Database {
         }
     }
 
-    public String join(String tableName1, String tableName2, String attributeName1, String attributeName2) throws DBException{
-        if(!tables.containsKey(tableName1) || !tables.containsKey(tableName2)) throw new TableDoesNotExistException();
+    public String join(String tableName1, String tableName2, String columnName1, String columnName2) throws DBException{
+        if(!hasTable(tableName1) || !hasTable(tableName2)) throw new TableDoesNotExistException();
         Table table1 =  tables.get(tableName1);
         Table table2 = tables.get(tableName2);
+        if(!table1.hasColumn(columnName1) || !table2.hasColumn(columnName2)) throw new ColumnNotFoundException();
         List<Column> columnList1 = table1.getColumnList();
         List<Column> columnList2 = table2.getColumnList();
         List<Integer> primaryKeysMatch = new ArrayList<>();
         try {
-            Column column1 = columnList1.stream().filter((a) -> a.name.equalsIgnoreCase(attributeName1)).toList().get(0);
-            Column column2 = columnList1.stream().filter((a) -> a.name.equalsIgnoreCase(attributeName2)).toList().get(0);
+            Column column1 = columnList1.stream().filter((a) -> a.name.equalsIgnoreCase(columnName1)).toList().get(0);
+            Column column2 = columnList1.stream().filter((a) -> a.name.equalsIgnoreCase(columnName2)).toList().get(0);
             Set<Integer> column2Set = column2.getValues().keySet();
             for(var val1 : column1.getValues().entrySet()){
                 int primaryKey1 = val1.getKey();
@@ -131,7 +136,7 @@ public class Database {
             primaryKeysMatch.sort(Integer::compareTo);
         }
         catch(Exception e) {throw new DBException("Cannot join tables, error occured !!");}
-        return joinOnPrimaryKeys(primaryKeysMatch, table1, table2, attributeName1, attributeName2);
+        return joinOnPrimaryKeys(primaryKeysMatch, table1, table2, columnName1, columnName2);
     }
 
     private String joinOnPrimaryKeys(List<Integer> primaryKeysMatch, Table table1, Table table2, String attributeName1, String attributeName2) throws DBException{
