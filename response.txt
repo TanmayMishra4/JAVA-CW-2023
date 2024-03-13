@@ -1,5 +1,0 @@
-id	coursework.task	marks.name	marks.mark	marks.pass
-0	OXO	Simon	65.0	TRUE
-1	DB	Sion	55.0	TRUE
-2	OXO	Rob	35.0	FALSE
-3	STAG	Chris	20.0	FALSE
