@@ -132,3 +132,27 @@ ALTER TABLE marks DROP pass;
 [OK]
 
 SELECT * FROM marks;
+[OK]
+id	name	mark	age
+1	Simon	65	35
+
+SELECT * FROM marks
+[ERROR]: Semi colon missing at end of line (or similar message !)
+
+// Assuming there is NOT a table called “crew” in the database
+SELECT * FROM crew;
+[ERROR]: Table does not exist (or similar message !)
+
+// Assuming there is NOT an attribute called “height” in the table
+SELECT height FROM marks WHERE name == 'Chris';
+[ERROR]: Attribute does not exist (or similar message !)
+
+DROP TABLE marks;
+[OK]
+
+DROP DATABASE markbook;
+[OK]
+
+
+Note that this transcript is not intended to be complete and comprehensive…
+The aim is to provide some illustrative examples of typical queries that you might expect to see. When writing your test cases, you should cover all eventualities – including both valid and invalid queries.

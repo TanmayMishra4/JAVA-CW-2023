@@ -3,11 +3,13 @@ package edu.uob.Utils;
 import edu.uob.AllEnums.BoolOperator;
 import edu.uob.AllEnums.ResponseType;
 import edu.uob.AllEnums.SQLComparator;
-import edu.uob.DBExceptions.DBException;
-import edu.uob.DBExceptions.IllegalValueTypeException;
+import edu.uob.AllExceptions.QueryExceptions.SQLQueryException;
+import edu.uob.AllExceptions.QueryExceptions.IllegalValueTypeException;
 import edu.uob.Model.NULLObject;
 import edu.uob.Model.Value;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +18,8 @@ import java.util.Set;
 import static edu.uob.AllEnums.ResponseType.ERROR;
 
 public class Utils {
+
+    private final static String dbPath = Paths.get("databases").toAbsolutePath().toString();
     private static final Set<String> keyWords = new HashSet<>(Arrays.asList("USE", "CREATE", "DATABASE", "TABLE", "DROP", "ALTER", "INSERT", "INTO", "SELECT", "UPDATE", "DELETE", "FROM", "JOIN", "ADD", "TRUE", "FALSE", "NULL", "AND", "OR"));
     private static final Set<Character> symbols = new HashSet<>(Arrays.asList('!' , '#' , '$' , '%' , '&' , '(' , ')' , '*' , '+' , ',' , '-' , '.' , '/' , ':' , ';' , '>' , '=' , '<' , '?' , '@' , '[' , '\\' , ']' , '^' , '_' , '`' , '{' , '}' , '~'));
     public static String generateResponse(ResponseType type, String message){
@@ -23,7 +27,13 @@ public class Utils {
             return "[ERROR]: " + message;
         }
         else{
-            return "[OK]: " + message;
+            int len = message.length();
+            int index = len-1;
+            for(;index>=0;index--){
+                if(message.charAt(index) != '\n') break;
+            }
+            message = message.substring(0, Math.min(len, index+1));
+            return "[OK]\n" + message;
         }
     }
     public static boolean isNotKeyWord(String word){
@@ -35,11 +45,23 @@ public class Utils {
         return symbols.contains(charVal);
     }
 
-    public static Value getValueLiteral(String token) throws IllegalValueTypeException {
-        try(Value val = getStringLiteral(token)){
+    public static Value getValue(String token) throws IllegalValueTypeException {
+        try{
+            return getValueLiteral(token);
+        }catch(Exception ignored){}
+
+        try(Value val = getStringFromDB(token)){
             return val;
         } catch (Exception ignored) {}
 
+        throw new IllegalValueTypeException();
+    }
+
+    private static Value getStringFromDB(String token) throws Exception {
+        return new Value(token);
+    }
+
+    public static Value getValueLiteral(String token) throws IllegalValueTypeException {
         try(Value val = getBooleanLiteral(token)){
             return val;
         } catch (Exception ignored) {}
@@ -53,6 +75,11 @@ public class Utils {
         } catch (Exception ignored) {}
 
         try(Value val = getNullLiteral(token)){
+            return val;
+        }
+        catch(Exception e){}
+
+        try(Value val = getStringLiteral(token)){
             return val;
         } catch (Exception ignored) {}
 
@@ -89,7 +116,7 @@ public class Utils {
             stringVal = token.substring(1, stringLength - 1);
             for(char charVal : stringVal.toCharArray()){
                 if(Character.isDigit(charVal) || Character.isLetter(charVal) || charVal == ' ' || Utils.isSymbol(charVal)) continue;
-                else throw new DBException("String contains Illegal characters");
+                else throw new SQLQueryException("String contains Illegal characters");
             }
         }
         else throw new Exception("Not a String Literal");
@@ -98,7 +125,7 @@ public class Utils {
 
     public static void populateComparatorMap(HashMap<String, SQLComparator> comparatorMap){
         if(!comparatorMap.isEmpty()) return;
-        comparatorMap.put("==", SQLComparator.LIKE);
+        comparatorMap.put("==", SQLComparator.EQUALS);
         comparatorMap.put("!=", SQLComparator.NOT_EQUALS);
         comparatorMap.put(">", SQLComparator.GREATER_THAN);
         comparatorMap.put("<", SQLComparator.LESS_THAN);
@@ -118,5 +145,12 @@ public class Utils {
         if(!boolOpMap.isEmpty()) return;
         boolOpMap.put("AND", BoolOperator.AND);
         boolOpMap.put("OR", BoolOperator.OR);
+    }
+
+    public static String getDBFilePathName(String dbName){
+        return dbPath + File.separator + dbName + File.separator;
+    }
+    public static String getDBFilePathTable(String dbName, String tableName){
+        return getDBFilePathName(dbName) + tableName + ".tab";
     }
 }

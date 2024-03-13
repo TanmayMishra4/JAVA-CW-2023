@@ -2,19 +2,25 @@ package edu.uob;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import edu.uob.Controller.IOController;
 import edu.uob.Model.Database;
+import edu.uob.Utils.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Random;
 
 
 public class ExampleDBTests {
 
     private DBServer server;
+    final String dbName = "randomNonExistentDB";
 
     // Create a new server _before_ every @Test
     @BeforeEach
@@ -35,6 +41,25 @@ public class ExampleDBTests {
                     return server.handleCommand(command);
                 },
                 "Server took too long to respond (probably stuck in an infinite loop)");
+    }
+
+    void deleteFolder(){
+        String dbPathName = Utils.getDBFilePathName(dbName);
+        File file = new File(dbPathName.substring(0, dbPathName.length()));
+        try{
+            for(File f : file.listFiles()){
+                f.delete();
+            }
+            file.delete();
+        }catch(Exception ignored){}
+    }
+
+    void createFolder(){
+        String dbPathName = Utils.getDBFilePathName(dbName);
+        File file = new File(dbPathName.substring(0, dbPathName.length()));
+        try{
+            boolean val = file.mkdir();
+        } catch (Exception ignored){}
     }
 
     // A basic test that creates a database, creates a table, inserts some test data, then queries it.
@@ -442,4 +467,32 @@ public class ExampleDBTests {
         assertTrue(response.contains("[OK]"), "Tried Running SELECT command, expected [OK] 2");
         assertFalse(response.contains("[ERROR]"), "Tried Running SELECT command, expected [OK], but recieved [ERROR] 2");
     }
+
+//    @Test
+//    public void testAddFile() throws IOException {
+//        File file = new File("testTable.tab");
+//        file.createNewFile();
+//        BufferedWriter br = new BufferedWriter(new FileWriter(file));
+//        br.write("id\tksnck\tland\taknf\tasknfk\tksndfk\tnsdfkn\tshf\taojo\n");
+//        for(int i=0;i<10000;i++){
+//            br.write(String.valueOf(i+"\t"));
+//            for(int j=0;j<8;j++){
+//                br.write(rndChar());
+//                if(j != 7) br.write("\t");
+//            }
+//            if(i+1 != 10000)
+//                br.write("\n");
+//        }
+//        br.close();
+//    }
+//
+//    private static String rndChar () {
+//        StringBuilder sb = new StringBuilder();
+//        for(int i=0;i<8;i++) {
+//            int rnd = (int) (Math.random() * 52); // or use Random or whatever
+//            char base = (rnd < 26) ? 'A' : 'a';
+//            sb.append((char) (base + rnd % 26));
+//        }
+//        return sb.toString();
+//    }
 }

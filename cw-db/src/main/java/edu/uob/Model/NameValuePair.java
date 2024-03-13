@@ -1,16 +1,16 @@
 package edu.uob.Model;
 
 public class NameValuePair {
-    private String attributeName;
+    private String columnName;
     private Value value;
 
     public NameValuePair(String attributeName, Value value) {
-        this.attributeName = attributeName;
+        this.columnName = attributeName;
         this.value = value;
     }
 
-    public String getAttributeName() {
-        return attributeName;
+    public String getColumnName() {
+        return columnName;
     }
 
     public Value getValue() {

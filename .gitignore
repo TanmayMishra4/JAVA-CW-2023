@@ -1,4 +1,7 @@
 # Compiled class file
-*.class
-*.DS_Store
+.class
+.DS_Store
 .idea
+target
+databases
+people.tab
