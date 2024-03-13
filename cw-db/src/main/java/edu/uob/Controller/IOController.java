@@ -7,6 +7,7 @@ import edu.uob.Model.Table;
 import edu.uob.Model.Value;
 import edu.uob.Utils.Utils;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -93,6 +94,8 @@ public class IOController {
             file.setReadable(true);file.setWritable(true);
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
             List<String> columnNames = table.getColumnNames();
+            List<Integer> primaryKeys = new ArrayList<>(table.getPrimaryKeys());
+            primaryKeys.sort(Integer::compareTo);
             for (int index = 0; index < columnNames.size(); index++) {
                 String columnName = columnNames.get(index);
                 bw.write(columnName);
@@ -101,7 +104,7 @@ public class IOController {
             HashMap<String, Column> columnsMap = table.getColumnsMap();
             int maxRows = columnsMap.get("id").getValues().size();
 
-            for (int index = 0; index < maxRows; index++) {
+            for (int index : primaryKeys) {
                 bw.write("\n");
                 for (int indexCol = 0; indexCol < columnNames.size(); indexCol++) {
                     String columnName = columnNames.get(indexCol);

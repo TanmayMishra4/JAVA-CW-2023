@@ -5,7 +5,6 @@ import edu.uob.AllEnums.ResponseType;
 import edu.uob.AllEnums.SQLComparator;
 import edu.uob.AllExceptions.QueryExceptions.SQLQueryException;
 import edu.uob.AllExceptions.QueryExceptions.IllegalValueTypeException;
-import edu.uob.Model.Database;
 import edu.uob.Model.NULLObject;
 import edu.uob.Model.Value;
 
@@ -28,6 +27,12 @@ public class Utils {
             return "[ERROR]: " + message;
         }
         else{
+            int len = message.length();
+            int index = len-1;
+            for(;index>=0;index--){
+                if(message.charAt(index) != '\n') break;
+            }
+            message = message.substring(0, Math.min(len, index+1));
             return "[OK]\n" + message;
         }
     }
@@ -41,6 +46,22 @@ public class Utils {
     }
 
     public static Value getValue(String token) throws IllegalValueTypeException {
+        try{
+            return getValueLiteral(token);
+        }catch(Exception ignored){}
+
+        try(Value val = getStringFromDB(token)){
+            return val;
+        } catch (Exception ignored) {}
+
+        throw new IllegalValueTypeException();
+    }
+
+    private static Value getStringFromDB(String token) throws Exception {
+        return new Value(token);
+    }
+
+    public static Value getValueLiteral(String token) throws IllegalValueTypeException {
         try(Value val = getBooleanLiteral(token)){
             return val;
         } catch (Exception ignored) {}
@@ -55,28 +76,13 @@ public class Utils {
 
         try(Value val = getNullLiteral(token)){
             return val;
-        } catch (Exception ignored) {}
+        }
+        catch(Exception e){}
 
-        try(Value val = getStringFromDB(token)){
+        try(Value val = getStringLiteral(token)){
             return val;
         } catch (Exception ignored) {}
 
-        throw new IllegalValueTypeException();
-    }
-
-    private static Value getStringFromDB(String token) throws Exception {
-        return new Value(token);
-    }
-
-    public static Value getValueLiteral(String token) throws IllegalValueTypeException {
-        try{
-            return getValue(token);
-        }
-        catch(Exception e){
-            try(Value val = getStringLiteral(token)){
-                return val;
-            } catch (Exception ignored) {}
-        }
         throw new IllegalValueTypeException();
     }
 

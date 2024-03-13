@@ -2,8 +2,6 @@ package edu.uob.Model;
 
 import edu.uob.AllEnums.SQLComparator;
 import edu.uob.AllExceptions.DBExceptions.DBException;
-
-import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,5 +58,13 @@ public class Column {
             }
         }
         return result;
+    }
+
+    public void update(Value updatedValue, List<Integer> resultSet) {
+        for(int primaryKeyValue : resultSet){
+            if(values.containsKey(primaryKeyValue)){
+                values.put(primaryKeyValue, updatedValue);
+            }
+        }
     }
 }

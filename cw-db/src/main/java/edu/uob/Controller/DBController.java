@@ -84,7 +84,8 @@ public class DBController {
         ioController.saveDB(activeDB);
     }
 
-    public void joinTables(String tableName1, String tableName2, String attributeName1, String attributeName2) {
+    public String joinTables(String tableName1, String tableName2, String attributeName1, String attributeName2) throws DBException{
+        return activeDB.join(tableName1, tableName2, attributeName1, attributeName2);
     }
 
     public void insertValues(String tableName, List<Value> valueList) throws DBException {
@@ -127,7 +128,9 @@ public class DBController {
         ioController.saveDB(activeDB);
     }
 
-    public void update(String tableName, List<NameValuePair> nameValuePairList, List<Integer> resultSet) {
+    public void update(String tableName, List<NameValuePair> nameValuePairList, List<Integer> resultSet) throws DBException{
+        activeDB.update(tableName, nameValuePairList, resultSet);
+        ioController.saveDB(activeDB);
     }
 
     public String select(String tableName, List<String> wildAttributes) throws DBException{
@@ -137,4 +140,5 @@ public class DBController {
     public String select(String tableName, List<String> wildAttributes, List<Integer> filteredValues) throws DBException {
         return activeDB.selectQuery(tableName, wildAttributes, filteredValues);
     }
+    // TODO check if column name is same as table name
 }

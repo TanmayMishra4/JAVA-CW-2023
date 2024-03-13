@@ -38,11 +38,24 @@ public class Table {
         columnsMap.put(primaryKey, new Column(primaryKey));
     }
 
-    public void addColumn(String columnName) throws DBException {
-        if (columnName.equals(primaryKey)) return;
-        if (columnsMap.containsKey(columnName)) throw new DBException("Duplicate Columns found");
+    public void addColumn(String columnName) throws DBException { //TODO figure out a way to compare columns with ignore case
+        if (columnName.equalsIgnoreCase(primaryKey)) return;
+        if(columnsMap.containsKey(primaryKey) && columnName.equalsIgnoreCase(primaryKey)) throw new DBException("Cannot add column id");
+        for (String name : columnNames) {
+            if(name.equalsIgnoreCase(columnName))
+                throw new DBException("Duplicate Columns found");
+        }
         columnNames.add(columnName);
         columnsMap.put(columnName, new Column(columnName));
+        addDefaultValueToColumn(columnName);
+    }
+
+    private void addDefaultValueToColumn(String columnName) throws DBException {
+        Column column = columnsMap.get(columnName);
+        int numberOfRows = columnsMap.size();
+        for(int primaryKey : primaryKeys){
+            column.addValue(new Value(new NULLObject()), primaryKey);
+        }
     }
 
     public void addData(String[] rowOfValues) throws DBException {
@@ -78,6 +91,7 @@ public class Table {
                 Column column = columnsMap.get(columnName);
                 column.addValue(value, primaryKeyValue);
             }
+            primaryKeys.add(primaryKeyValue);
         } catch (SQLQueryException d) {
             throw new DBException(d.getMessage());
         } catch (Exception e) {
@@ -113,6 +127,7 @@ public class Table {
         for (Column column : columnsMap.values()) {
             column.deleteValuesWithIndex(indexesToDelete);
         }
+        indexesToDelete.forEach(primaryKeys::remove);
     }
 
     public String selectQuery(List<String> wildAttributes) throws Exception {
@@ -127,6 +142,9 @@ public class Table {
         if (wildAttributes.get(0).equals("*")) {
             wildAttributes.clear();
             wildAttributes.addAll(columnNames);
+        }
+        for(String columnName : wildAttributes){
+            if(!columnsMap.containsKey(columnName)) throw new ColumnNotFoundException();
         }
 
         List<Integer> indexList = new ArrayList<>(primaryKeys);
@@ -166,5 +184,45 @@ public class Table {
     public List<Integer> filter(String columnName, SQLComparator sqlComparator, Value value) throws DBException{
         if(!columnsMap.containsKey(columnName)) throw new ColumnNotFoundException();
         return columnsMap.get(columnName).filter(sqlComparator, value);
+    }
+
+    public void update(List<NameValuePair> nameValuePairList, List<Integer> resultSet) throws Exception{
+        for(NameValuePair pair : nameValuePairList){
+            String columnName = pair.getColumnName();
+            if(!columnsMap.containsKey(columnName)) throw new ColumnNotFoundException();
+            Column column = columnsMap.get(columnName);
+            Value updatedValue = pair.getValue();
+            column.update(updatedValue, resultSet);
+        }
+    }
+
+    public HashSet<Integer> getPrimaryKeys() {
+        return primaryKeys;
+    }
+
+    public List<Column> getColumnList() throws DBException{
+        List<Column> columnList = new ArrayList<>();
+        try {
+            for (String columnName : columnNames) { // Done this way to get columns in order
+                columnList.add(columnsMap.get(columnName));
+            }
+            return columnList;
+        }
+        catch(Exception ignored){
+            throw new ColumnNotFoundException();
+        }
+    }
+
+    public Column getColumn(String columnName) throws  DBException{
+        try{
+            return columnsMap.get(columnName);
+        }
+        catch(Exception e){
+            throw new ColumnNotFoundException();
+        }
+    }
+
+    public void setPkGenerator(int initialValue) {
+        pkgen = new PrimaryKeyGenerator(initialValue);
     }
 }

@@ -63,7 +63,7 @@ public class SQLParser {
         }
     }
 
-    private boolean checkJoin() throws SQLQueryException {
+    private boolean checkJoin() throws SQLQueryException, DBException {
         int initialIndex = tokeniser.getPos();
         String currentToken = tokeniser.getCurrentToken();
         if (currentToken.equalsIgnoreCase("JOIN")) {
@@ -83,7 +83,7 @@ public class SQLParser {
                 if (!andToken.equalsIgnoreCase("AND")) throw new ANDKeywordMissingException();
                 tokeniser.next();
                 String attributeName2 = checkAttributeName();
-                dbController.joinTables(tableName1, tableName2, attributeName1, attributeName2);
+                this.response = dbController.joinTables(tableName1, tableName2, attributeName1, attributeName2);
                 return true;
             } catch (SQLQueryException e) {
                 tokeniser.setPos(initialIndex);

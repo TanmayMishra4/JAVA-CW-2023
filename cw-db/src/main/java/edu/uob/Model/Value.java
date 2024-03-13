@@ -37,7 +37,7 @@ public class Value implements AutoCloseable{
         return nullVal;
     }
 
-    public Value(NULLObject nullValVal) {
+    public Value(NULLObject nullVal) {
         stringVal = String.valueOf(nullVal);
         valueType = NULL;
         this.nullVal = nullVal;
@@ -61,12 +61,9 @@ public class Value implements AutoCloseable{
     }
 
     public Value(Boolean boolVal) {
-        stringVal = String.valueOf(boolVal);
+        stringVal = String.valueOf(boolVal).toUpperCase();
         valueType = BOOLEAN;
         this.boolVal = boolVal;
-    }
-    public Value(){
-
     }
 
     private ValueType valueType;
@@ -74,16 +71,6 @@ public class Value implements AutoCloseable{
     private Integer intVal;
     private Double floatVal;
     private Boolean boolVal;
-
-    private Integer pkValue;
-
-    public Integer getPkValue() {
-        return pkValue;
-    }
-
-    public void setPkValue(Integer pkValue) {
-        this.pkValue = pkValue;
-    }
 
     private NULLObject nullVal;
 
@@ -98,13 +85,16 @@ public class Value implements AutoCloseable{
 
     public boolean equals(Value other) throws DBException{
         if(this.valueType != other.getValueType()) throw new ValueTypeInconsistent();
-        return switch (this.valueType) {
-            case STRING -> this.stringVal.equals(other.getStringVal());
-            case FLOAT -> this.floatVal.equals(other.getFloatVal());
-            case INTEGER -> this.intVal.equals(other.getIntVal());
-            case BOOLEAN -> this.boolVal == other.boolVal;
-            case NULL -> true;
-        };
+        try{
+            return switch (this.valueType) {
+                case STRING -> this.stringVal.equals(other.getStringVal());
+                case FLOAT -> this.floatVal.equals(Double.parseDouble(other.getStringVal()));
+                case INTEGER -> this.intVal.equals(Integer.parseInt(other.getStringVal()));
+                case BOOLEAN -> this.boolVal == Boolean.parseBoolean(other.getStringVal().toLowerCase());
+                case NULL -> this.nullVal != null;
+            };
+        }
+        catch(Exception e){ throw new DBException("Exception comparing values");}
     }
 
     public boolean compareFunc(SQLComparator sqlComparator, Value value) throws DBException {
@@ -130,12 +120,19 @@ public class Value implements AutoCloseable{
     }
 
     private boolean greater(Value value) throws DBException{
-        if(value.valueType != this.valueType) throw new ValueTypeInconsistent();
+        // TODO check if greater and lesses functions sshoudl be ijplemented for STRING
+        if(value.valueType != INTEGER &&  value.valueType != FLOAT && value.valueType != STRING) throw new ValueTypeInconsistent();
+        if(this.valueType != INTEGER &&  this.valueType != FLOAT && this.valueType != STRING) throw new ValueTypeInconsistent();
         if(this.valueType ==  INTEGER){
-            return this.intVal > value.getIntVal();
+            int otherValue = Integer.parseInt(value.stringVal);
+            return this.intVal > otherValue;
         }
         else if(this.valueType == FLOAT){
-            return this.floatVal > value.getFloatVal();
+            double otherValue = Double.parseDouble(value.stringVal);
+            return this.floatVal > otherValue;
+        }
+        else if(this.valueType == STRING){
+            return this.stringVal.compareTo(value.getStringVal()) > 0;
         }
         else{
             throw new CannotCompareValuesException();
@@ -143,12 +140,18 @@ public class Value implements AutoCloseable{
     }
 
     private boolean lesser(Value value)  throws DBException{
-        if(value.valueType != this.valueType) throw new ValueTypeInconsistent();
+        if(value.valueType != INTEGER &&  value.valueType != FLOAT && value.valueType != STRING) throw new ValueTypeInconsistent();
+        if(this.valueType != INTEGER &&  this.valueType != FLOAT && this.valueType != STRING) throw new ValueTypeInconsistent();
         if(this.valueType ==  INTEGER){
-            return this.intVal < value.getIntVal();
+            int otherValue = Integer.parseInt(value.stringVal);
+            return this.intVal < otherValue;
         }
         else if(this.valueType == FLOAT){
-            return this.floatVal < value.getFloatVal();
+            double otherValue = Double.parseDouble(value.stringVal);
+            return this.floatVal < otherValue;
+        }
+        else if(this.valueType == STRING){
+            return this.stringVal.compareTo(value.getStringVal()) < 0;
         }
         else{
             throw new CannotCompareValuesException();
