@@ -513,8 +513,8 @@ public class SQLParser {
             while (comma.equals(",")) {
                 attributeList.add(attributeName);
                 comma = tokeniser.getCurrentToken();
-                tokeniser.next();
                 if(!comma.equals(",")) break;
+                tokeniser.next();
                 attributeName = checkAttributeName();
             }
         } catch (SQLQueryException e) {

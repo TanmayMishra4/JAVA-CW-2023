@@ -55,7 +55,7 @@ public class DBController {
         dbName = dbName.toLowerCase();
         String dbPathName = Utils.getDBFilePathName(dbName);
         File file = new File(dbPathName);
-        if(file.exists()) throw new DBException("Database Already exists");
+        if(file.isDirectory()) throw new DBException("Database Already exists");
         Database db = new  Database(dbName);
         ioController.saveDB(db);
         return db;
