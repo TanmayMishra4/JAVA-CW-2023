@@ -110,16 +110,15 @@ public class Value implements AutoCloseable{
     }
 
     public boolean compareFunc(SQLComparator sqlComparator, Value value) throws DBException {
-        switch(sqlComparator){
-            case EQUALS: return this.equals(value);
-            case LESS_THAN: return this.lesser(value);
-            case GREATER_THAN: return this.greater(value);
-            case GREATER_EQUALS: return this.equals(value) || this.greater(value);
-            case LESS_EQUALS: return this.equals(value) || this.lesser(value);
-            case LIKE: return this.like(value);
-            case NOT_EQUALS: return !this.equals(value);
-        }
-        return false;
+        return switch (sqlComparator) {
+            case EQUALS -> this.equals(value);
+            case LESS_THAN -> this.lesser(value);
+            case GREATER_THAN -> this.greater(value);
+            case GREATER_EQUALS -> this.equals(value) || this.greater(value);
+            case LESS_EQUALS -> this.equals(value) || this.lesser(value);
+            case LIKE -> this.like(value);
+            case NOT_EQUALS -> !this.equals(value);
+        };
     }
 
     private boolean like(Value value) throws DBException{

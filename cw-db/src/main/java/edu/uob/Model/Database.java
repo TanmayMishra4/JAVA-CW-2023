@@ -38,16 +38,16 @@ public class Database {
         table.addColumn(columnName);
     }
 
-    public void addDataToTable(String tableName, String[] rowofValues) throws DBException {
+    public void addDataToTable(String tableName, String[] rowOfValues) throws DBException {
         if(!hasTable(tableName)) throw new TableDoesNotExistException();
         Table table = tables.get(tableName);
-        table.addData(rowofValues);
+        table.addData(rowOfValues);
     }
 
-    public void loadDataToTable(String tableName, String[] rowofValues) throws DBException {
+    public void loadDataToTable(String tableName, String[] rowOfValues) throws DBException {
         if(!tables.containsKey(tableName)) throw new TableDoesNotExistException();
         Table table = tables.get(tableName);
-        table.loadDataRows(rowofValues);
+        table.loadDataRows(rowOfValues);
         Optional<Integer> largestPk = table.getPrimaryKeys().stream().max(Integer::compareTo);
         largestPk.ifPresent(integer -> table.setPkGenerator(integer + 1));
     }
@@ -57,15 +57,6 @@ public class Database {
             if(tableName.equalsIgnoreCase(name)) return true;
         }
         return false;
-    }
-
-    public void removeTable(String tableName) throws DBException {
-        try {
-            tables.remove(tableName);
-        }
-        catch(Exception e){
-            throw new TableDoesNotExistException();
-        }
     }
 
     public void dropTable(String tableName) throws DBException{
@@ -125,7 +116,7 @@ public class Database {
         List<Integer> primaryKeysMatch = new ArrayList<>();
         try {
             Column column1 = columnList1.stream().filter((a) -> a.name.equalsIgnoreCase(columnName1)).toList().get(0);
-            Column column2 = columnList1.stream().filter((a) -> a.name.equalsIgnoreCase(columnName2)).toList().get(0);
+            Column column2 = columnList2.stream().filter((a) -> a.name.equalsIgnoreCase(columnName2)).toList().get(0);
             Set<Integer> column2Set = column2.getValues().keySet();
             for(var val1 : column1.getValues().entrySet()){
                 int primaryKey1 = val1.getKey();
@@ -135,7 +126,7 @@ public class Database {
             }
             primaryKeysMatch.sort(Integer::compareTo);
         }
-        catch(Exception e) {throw new DBException("Cannot join tables, error occured !!");}
+        catch(Exception e) {throw new DBException("Cannot join tables, error occurred !!");}
         return joinOnPrimaryKeys(primaryKeysMatch, table1, table2, columnName1, columnName2);
     }
 
@@ -161,15 +152,14 @@ public class Database {
         return sb.toString();
     }
 
-    private void writeColumnValuesJoin(int primaryKeyToMatch, Table table, String ignoreColumn, StringBuilder sb, Integer joinpk) throws DBException {
-        if(joinpk != null) sb.append(joinpk).append("\t");
+    private void writeColumnValuesJoin(int primaryKeyToMatch, Table table, String ignoreColumn, StringBuilder sb, Integer joinPK) throws DBException {
+        if(joinPK != null) sb.append(joinPK).append("\t");
         for(String columnName : table.getColumnNames()){
             if(columnName.equalsIgnoreCase(ignoreColumn) || columnName.equals("id")) continue;
             Column column = table.getColumn(columnName);
             sb.append(column.getValue(primaryKeyToMatch));
             sb.append("\t");
         }
-        int lastCharIndex = sb.length()-1;
     }
 
     private void writeColumnNamesJoin(Table table1, Table table2, String attributeName1, String attributeName2, StringBuilder sb) throws Exception{

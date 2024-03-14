@@ -37,8 +37,7 @@ public class Utils {
         }
     }
     public static boolean isNotKeyWord(String word){
-        if(keyWords.contains(word.toUpperCase())) return true;
-        return false;
+        return keyWords.contains(word.toUpperCase());
     }
 
     public static boolean isSymbol(char charVal) {
@@ -57,7 +56,7 @@ public class Utils {
         throw new IllegalValueTypeException();
     }
 
-    private static Value getStringFromDB(String token) throws Exception {
+    private static Value getStringFromDB(String token) {
         return new Value(token);
     }
 
@@ -77,7 +76,7 @@ public class Utils {
         try(Value val = getNullLiteral(token)){
             return val;
         }
-        catch(Exception e){}
+        catch(Exception ignored){}
 
         try(Value val = getStringLiteral(token)){
             return val;
@@ -87,18 +86,18 @@ public class Utils {
     }
 
     public static Value getIntegerLiteral(String token) throws Exception{
-        Integer val = null;
+        Integer val;
         val = Integer.parseInt(token);
         return new Value(val);
     }
     public static Value getFloatLiteral(String token) throws Exception{
-        Double val = null;
+        Double val;
         val = Double.parseDouble(token);
         return new Value(val);
     }
 
     public static Value getBooleanLiteral(String token) throws Exception{
-        Boolean val = null;
+        Boolean val;
         if(token.equalsIgnoreCase("TRUE")) val = Boolean.valueOf("true");
         else if(token.equalsIgnoreCase("FALSE")) val = Boolean.valueOf("false");
         else{
@@ -111,7 +110,7 @@ public class Utils {
         int stringLength = token.length();
         char closingBracket = token.charAt(stringLength - 1);
         char openingBracket = token.charAt(0);
-        String stringVal = null;
+        String stringVal;
         if(openingBracket == '\'' && closingBracket ==  '\''){
             stringVal = token.substring(1, stringLength - 1);
             for(char charVal : stringVal.toCharArray()){

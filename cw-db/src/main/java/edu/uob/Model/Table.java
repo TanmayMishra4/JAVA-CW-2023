@@ -47,7 +47,6 @@ public class Table {
 
     private void addDefaultValueToColumn(String columnName) throws DBException {
         Column column = columnsMap.get(columnName);
-        int numberOfRows = columnsMap.size();
         for (int primaryKey : primaryKeys) {
             column.addValue(new Value(new NULLObject()), primaryKey);
         }
@@ -104,9 +103,6 @@ public class Table {
         return columnNames;
     }
 
-    public void setColumnNames(List<String> columnNames) {
-        this.columnNames = columnNames;
-    }
 
     public void removeColumn(String columnName) throws DBException {
         if (columnName.equals("id")) throw new RemovalOfPrimaryKeyException();
@@ -146,7 +142,7 @@ public class Table {
         extractColNames(wildAttributes, sb);
         for (int index : indexList) {
             if (filteredValues.contains(index))
-                extractRow(wildAttributes, index, sb, filteredValues);
+                extractRow(wildAttributes, index, sb);
         }
         sb.append("\n");
         return sb.toString();
@@ -162,13 +158,12 @@ public class Table {
         }
     }
 
-    private void extractRow(List<String> wildAttributes, int index, StringBuilder sb, HashSet<Integer> filteredValues) throws Exception {
+    private void extractRow(List<String> wildAttributes, int index, StringBuilder sb) throws Exception {
         int size = wildAttributes.size();
         for (int colIndex = 0; colIndex < size; colIndex++) {
             Column column = columnsMap.get(wildAttributes.get(colIndex));
             Value value = column.getValue(index);
-
-            sb.append(column.getValue(index).getStringVal());
+            sb.append(value.getStringVal());
             if (colIndex == size - 1) sb.append("\n");
             else sb.append("\t");
         }

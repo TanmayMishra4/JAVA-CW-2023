@@ -16,39 +16,15 @@ public class Condition {
     Condition secondCondition;
     BoolOperator boolOperator;
 
-    public Condition getFirstCondition() {
-        return firstCondition;
-    }
-
-    public Condition getSecondCondition() {
-        return secondCondition;
-    }
-
-    public BoolOperator getBoolOperator() {
-        return boolOperator;
-    }
-
-    public String getAttributeName() {
-        return attributeName;
-    }
-
     public Value getValue() {
         return value;
-    }
-
-    public SQLComparator getSqlComparator() {
-        return sqlComparator;
     }
 
     public List<Integer> getResultValues() {
         return resultValues;
     }
 
-    public ConditionType getConditionType() {
-        return conditionType;
-    }
-
-    public Condition(Table table, Condition firstCondition, Condition secondCondition, BoolOperator boolOperator) throws DBException{
+    public Condition(Table table, Condition firstCondition, Condition secondCondition, BoolOperator boolOperator) {
         this.firstCondition = firstCondition;
         this.secondCondition = secondCondition;
         this.boolOperator = boolOperator;
@@ -79,7 +55,7 @@ public class Condition {
         performSQLOperatorOperation();
     }
 
-    private void performBoolOperatorOperation() throws DBException{
+    private void performBoolOperatorOperation() {
         HashSet<Integer> result1 = new HashSet<>(firstCondition.getResultValues());
         HashSet<Integer> result2 = new HashSet<>(secondCondition.getResultValues());
         if(boolOperator == BoolOperator.AND){

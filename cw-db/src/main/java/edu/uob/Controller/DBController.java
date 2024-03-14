@@ -1,8 +1,6 @@
 package edu.uob.Controller;
 
 import edu.uob.AllEnums.AlterationType;
-import edu.uob.AllEnums.BoolOperator;
-import edu.uob.AllEnums.SQLComparator;
 import edu.uob.AllExceptions.DBExceptions.DBException;
 import edu.uob.AllExceptions.DBExceptions.DuplicateColumnNameException;
 import edu.uob.AllExceptions.DBExceptions.TableDoesNotExistException;
@@ -11,15 +9,11 @@ import edu.uob.Model.NameValuePair;
 import edu.uob.Model.Table;
 import edu.uob.Model.Value;
 import edu.uob.Utils.Utils;
-
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import static edu.uob.AllEnums.AlterationType.ADD;
-import static edu.uob.AllEnums.BoolOperator.AND;
 
 public class DBController {
     private static Database activeDB;
@@ -107,31 +101,31 @@ public class DBController {
         ioController.saveDB(activeDB);
     }
 
-    public List<Integer> filter(String tableName, String attributeName, SQLComparator sqlComparator, Value value) throws DBException{
-        tableName = tableName.toLowerCase();
-        if(!activeDB.hasTable(tableName)) throw new TableDoesNotExistException();
-        Table table = activeDB.getTables().get(tableName);
-        return table.filter(attributeName, sqlComparator, value);
-    }
-
-    public List<Integer> filter(String tableName, List<Integer> condition1Values, BoolOperator operator, List<Integer> condition2Values) throws DBException{
-        tableName = tableName.toLowerCase();
-        if(!activeDB.hasTable(tableName)) throw new TableDoesNotExistException();
-        HashSet<Integer> firstSet =  new HashSet<>(condition1Values);
-        HashSet<Integer> secondSet =  new HashSet<>(condition1Values);
-        HashSet<Integer> resultSet;
-        if(operator == AND){
-            resultSet = new HashSet<>();
-            for(Integer val :  firstSet){
-                if(secondSet.contains(val)) resultSet.add(val);
-            }
-        }
-        else{
-            resultSet = new HashSet<>(secondSet);
-            resultSet.addAll(firstSet);
-        }
-        return new ArrayList<>(resultSet);
-    }
+//    public List<Integer> filter(String tableName, String attributeName, SQLComparator sqlComparator, Value value) throws DBException{
+//        tableName = tableName.toLowerCase();
+//        if(!activeDB.hasTable(tableName)) throw new TableDoesNotExistException();
+//        Table table = activeDB.getTables().get(tableName);
+//        return table.filter(attributeName, sqlComparator, value);
+//    }
+//
+//    public List<Integer> filter(String tableName, List<Integer> condition1Values, BoolOperator operator, List<Integer> condition2Values) throws DBException{
+//        tableName = tableName.toLowerCase();
+//        if(!activeDB.hasTable(tableName)) throw new TableDoesNotExistException();
+//        HashSet<Integer> firstSet =  new HashSet<>(condition1Values);
+//        HashSet<Integer> secondSet =  new HashSet<>(condition1Values);
+//        HashSet<Integer> resultSet;
+//        if(operator == AND){
+//            resultSet = new HashSet<>();
+//            for(Integer val :  firstSet){
+//                if(secondSet.contains(val)) resultSet.add(val);
+//            }
+//        }
+//        else{
+//            resultSet = new HashSet<>(secondSet);
+//            resultSet.addAll(firstSet);
+//        }
+//        return new ArrayList<>(resultSet);
+//    }
 
     public void deleteValuesFromTable(String tableName, List<Integer> indexesToDelete) throws DBException {
         tableName = tableName.toLowerCase();
