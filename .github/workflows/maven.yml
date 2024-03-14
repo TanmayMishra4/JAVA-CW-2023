@@ -28,8 +28,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
   test:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Tests
-        working-directory: ./cw-db
+        working-directory: cw-db
         run: mvn -f pom.xml clean compile test
