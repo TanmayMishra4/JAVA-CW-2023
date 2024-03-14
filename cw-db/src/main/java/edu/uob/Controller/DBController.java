@@ -154,5 +154,10 @@ public class DBController {
         tableName = tableName.toLowerCase();
         return activeDB.selectQuery(tableName, wildAttributes, filteredValues);
     }
+
+    public Table getTable(String tableName) throws DBException{
+        if(!activeDB.hasTable(tableName)) throw new TableDoesNotExistException();
+        return activeDB.getTables().get(tableName);
+    }
     // TODO check if column name is same as table name
 }

@@ -84,17 +84,29 @@ public class Value implements AutoCloseable{
     }
 
     public boolean equals(Value other) throws DBException{
-        if(this.valueType != other.getValueType()) throw new ValueTypeInconsistent();
+        ValueType type1 = this.valueType;
+        ValueType type2 = other.valueType;
         try{
-            return switch (this.valueType) {
-                case STRING -> this.stringVal.equals(other.getStringVal());
-                case FLOAT -> this.floatVal.equals(Double.parseDouble(other.getStringVal()));
-                case INTEGER -> this.intVal.equals(Integer.parseInt(other.getStringVal()));
-                case BOOLEAN -> this.boolVal == Boolean.parseBoolean(other.getStringVal().toLowerCase());
-                case NULL -> this.nullVal != null;
-            };
+            if(type1 == FLOAT ||  type2 == FLOAT){
+                double val1 = Double.parseDouble(this.stringVal);
+                double val2 = Double.parseDouble(other.stringVal);
+                return val1 == val2;
+            }
+            else if(type1 == INTEGER && type2 == INTEGER){
+                int val1 = Integer.parseInt(this.stringVal);
+                int val2 = Integer.parseInt(other.stringVal);
+                return val1 == val2;
+            }
+            else if(type1 == STRING && type2 == STRING){
+                return this.stringVal.equals(other.getStringVal());
+            }
+            else if(type1 == BOOLEAN && type2 == BOOLEAN){
+                return this.boolVal == other.boolVal;
+            }
+            else if(type1 == NULL && type2 == NULL) return true;
+            else throw new ValueTypeInconsistent();
         }
-        catch(Exception e){ throw new DBException("Exception comparing values");}
+        catch(Exception ignored){ throw new CannotCompareValuesException();}
     }
 
     public boolean compareFunc(SQLComparator sqlComparator, Value value) throws DBException {
@@ -119,42 +131,48 @@ public class Value implements AutoCloseable{
         return match.find();
     }
 
-    private boolean greater(Value value) throws DBException{
+    private boolean greater(Value other) throws DBException{
         // TODO check if greater and lesses functions sshoudl be ijplemented for STRING
-        if(value.valueType != INTEGER &&  value.valueType != FLOAT && value.valueType != STRING) throw new ValueTypeInconsistent();
-        if(this.valueType != INTEGER &&  this.valueType != FLOAT && this.valueType != STRING) throw new ValueTypeInconsistent();
-        if(this.valueType ==  INTEGER){
-            int otherValue = Integer.parseInt(value.stringVal);
-            return this.intVal > otherValue;
+        ValueType type1 = this.valueType;
+        ValueType type2 = other.valueType;
+        try{
+            if(type1 == FLOAT || type2 == FLOAT){
+                double val1 = Double.parseDouble(this.stringVal);
+                double val2 = Double.parseDouble(other.stringVal);
+                return val1 > val2;
+            }
+            else if(type1 == INTEGER && type2 == INTEGER){
+                int val1 = Integer.parseInt(this.stringVal);
+                int val2 = Integer.parseInt(other.stringVal);
+                return val1 > val2;
+            }
+            else if(type1 == STRING && type2 == STRING){
+                return this.stringVal.compareTo(other.getStringVal()) > 0;
+            }
+            else throw new CannotCompareValuesException();
         }
-        else if(this.valueType == FLOAT){
-            double otherValue = Double.parseDouble(value.stringVal);
-            return this.floatVal > otherValue;
-        }
-        else if(this.valueType == STRING){
-            return this.stringVal.compareTo(value.getStringVal()) > 0;
-        }
-        else{
-            throw new CannotCompareValuesException();
-        }
+        catch(Exception ignored){ throw new CannotCompareValuesException();}
     }
 
-    private boolean lesser(Value value)  throws DBException{
-        if(value.valueType != INTEGER &&  value.valueType != FLOAT && value.valueType != STRING) throw new ValueTypeInconsistent();
-        if(this.valueType != INTEGER &&  this.valueType != FLOAT && this.valueType != STRING) throw new ValueTypeInconsistent();
-        if(this.valueType ==  INTEGER){
-            int otherValue = Integer.parseInt(value.stringVal);
-            return this.intVal < otherValue;
+    private boolean lesser(Value other)  throws DBException{
+        ValueType type1 = this.valueType;
+        ValueType type2 = other.valueType;
+        try{
+            if(type1 == FLOAT || type2 == FLOAT){
+                double val1 = Double.parseDouble(this.stringVal);
+                double val2 = Double.parseDouble(other.stringVal);
+                return val1 < val2;
+            }
+            else if(type1 == INTEGER && type2 == INTEGER){
+                int val1 = Integer.parseInt(this.stringVal);
+                int val2 = Integer.parseInt(other.stringVal);
+                return val1 < val2;
+            }
+            else if(type1 == STRING && type2 == STRING){
+                return this.stringVal.compareTo(other.getStringVal()) < 0;
+            }
+            else throw new CannotCompareValuesException();
         }
-        else if(this.valueType == FLOAT){
-            double otherValue = Double.parseDouble(value.stringVal);
-            return this.floatVal < otherValue;
-        }
-        else if(this.valueType == STRING){
-            return this.stringVal.compareTo(value.getStringVal()) < 0;
-        }
-        else{
-            throw new CannotCompareValuesException();
-        }
+        catch(Exception ignored){ throw new CannotCompareValuesException();}
     }
 }

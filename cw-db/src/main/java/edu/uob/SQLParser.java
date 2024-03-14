@@ -6,9 +6,7 @@ import edu.uob.AllEnums.SQLComparator;
 import edu.uob.AllExceptions.DBExceptions.DBException;
 import edu.uob.AllExceptions.QueryExceptions.*;
 import edu.uob.Controller.DBController;
-import edu.uob.Model.Database;
-import edu.uob.Model.NameValuePair;
-import edu.uob.Model.Value;
+import edu.uob.Model.*;
 import edu.uob.Service.Tokeniser;
 import edu.uob.Utils.Utils;
 
@@ -18,6 +16,7 @@ import java.util.regex.Pattern;
 
 import static edu.uob.AllEnums.AlterationType.ADD;
 import static edu.uob.AllEnums.AlterationType.DROP;
+import static edu.uob.AllEnums.BoolOperator.AND;
 import static edu.uob.AllEnums.ResponseType.ERROR;
 import static edu.uob.AllEnums.ResponseType.OK;
 
@@ -57,13 +56,41 @@ public class SQLParser {
     }
 
     private void checkCommandType() throws SQLQueryException, DBException {
-        if (!checkUse() && !checkCreate() && !checkDrop() && !checkAlter() && !checkInsert()
-                && !checkSelect() && !checkDelete() && !checkUpdate() && !checkJoin()) {
-            throw new SQLQueryException("Illegal Query");
+        String commandToken = tokeniser.getCurrentToken();
+        switch(commandToken.toUpperCase()){
+            case "SELECT":
+                checkSelect();
+                break;
+            case "USE":
+                checkUse();
+                break;
+            case "CREATE":
+                checkCreate();
+                break;
+            case "DROP":
+                checkDrop();
+                break;
+            case "ALTER":
+                checkAlter();
+                break;
+            case "INSERT":
+                checkInsert();
+                break;
+            case "DELETE":
+                checkDelete();
+                break;
+            case "UPDATE":
+                checkUpdate();
+                break;
+            case "JOIN":
+                checkJoin();
+                break;
+            default:
+                throw new SQLQueryException("Illegal Query");
         }
     }
 
-    private boolean checkJoin() throws SQLQueryException, DBException {
+    private void checkJoin() throws SQLQueryException, DBException {
         int initialIndex = tokeniser.getPos();
         String currentToken = tokeniser.getCurrentToken();
         if (currentToken.equalsIgnoreCase("JOIN")) {
@@ -84,16 +111,14 @@ public class SQLParser {
                 tokeniser.next();
                 String attributeName2 = checkAttributeName();
                 this.response = dbController.joinTables(tableName1, tableName2, attributeName1, attributeName2);
-                return true;
             } catch (SQLQueryException e) {
                 tokeniser.setPos(initialIndex);
                 throw e;
             }
         }
-        else return false;
     }
 
-    private boolean checkDelete() throws SQLQueryException, DBException {
+    private void checkDelete() throws SQLQueryException, DBException {
         String currentToken = tokeniser.getCurrentToken();
         tokeniser.next();
         currentToken = currentToken + " " + tokeniser.getCurrentToken();
@@ -105,67 +130,114 @@ public class SQLParser {
             tokeniser.next();
             List<Integer> valuesToDelete = checkCondition(tableName);
             dbController.deleteValuesFromTable(tableName, valuesToDelete);
-            return true;
         } else {
             tokeniser.previous();
             tokeniser.previous();
-            return false;
         }
     }
 
     private List<Integer> checkCondition(String tableName) throws SQLQueryException, DBException {
-        String currentToken = tokeniser.getCurrentToken();
-        int initialPos = tokeniser.getPos();
-        tokeniser.next();
-        if (currentToken.equals("(")) {
-            int initialPos1 = tokeniser.getPos();
-            try { // Case : "(" [AttributeName] <Comparator> [Value] ")"
-                String attributeName = checkAttributeName();
-                SQLComparator sqlComparator = checkComparator();
-                Value value = Utils.getValueLiteral(tokeniser.getCurrentToken());
-                String closingBracket = tokeniser.get(tokeniser.getSize() - 2);
-                if (!closingBracket.equals(")")) throw new BracketMismatchException();
-                tokeniser.next();
-                return dbController.filter(tableName, attributeName, sqlComparator, value);
-            } catch (SQLQueryException | DBException ignored) {
-                tokeniser.setPos(initialPos1);
+        Table table = dbController.getTable(tableName);
+        int openingBrackets = 0;
+        Stack<Object> stack = new Stack<>();
+        int index = tokeniser.getPos();
+        int size = tokeniser.getSize();
+        while(index < size-1){
+            String currentToken = tokeniser.getCurrentToken();
+            if(currentToken.equals("(")) openingBrackets++;
+            else if(currentToken.equals(")")){
+                openingBrackets--;
+                Condition condition =  getCondition(table, stack);
+                stack.push(condition);
             }
-            try { // Case : "(" <Condition> <BoolOperator> <Condition> ")"
-                List<Integer> condition1Values = checkCondition(tableName);
-                BoolOperator boolOperator = checkBoolOperator();
-                List<Integer> condition2Values = checkCondition(tableName);
-                String closingBracket = tokeniser.getCurrentToken();
-                if (!closingBracket.equals(")")) throw new BracketMismatchException();
-                tokeniser.next();
-                return dbController.filter(tableName, condition1Values, boolOperator, condition2Values);
-            } catch (SQLQueryException ignored) {
-                tokeniser.setPos(initialPos1);
+            else if(openingBrackets == 0 && stack.size() == 3){
+                Condition condition = getCondition(table, stack);
+                stack.push(condition);
+                stack.push(currentToken);
             }
-        } else {
-            tokeniser.previous();
-            int initialPos2 = tokeniser.getPos();
-            try { // Case : [AttributeName] <Comparator> [Value]
-                String attributeName = checkAttributeName();
-                SQLComparator sqlComparator = checkComparator();
-                Value value = Utils.getValueLiteral(tokeniser.getCurrentToken());
-                tokeniser.next();
-                return dbController.filter(tableName, attributeName, sqlComparator, value);// TODO put this in Where CMD class
-            } catch (InvalidIdentifierNameException e) {
-                throw e;
-            } catch (SQLQueryException ignored) {
-                tokeniser.setPos(initialPos);
+            else{
+                stack.push(currentToken);
             }
-            try { // Case : <Condition> <BoolOperator> <Condition>
-                List<Integer> condition1Values = checkCondition(tableName);
-                BoolOperator boolOperator = checkBoolOperator();
-                List<Integer> condition2Values = checkCondition(tableName);
-                return dbController.filter(tableName, condition1Values, boolOperator, condition2Values);
-            } catch (SQLQueryException ignored) {
-                tokeniser.setPos(initialPos2);
-            }
+
+            index++;
+            tokeniser.next();
         }
-        tokeniser.setPos(initialPos);
-        throw new SQLQueryException("Could not Parse Conditions");
+        if(openingBrackets != 0) throw new BracketMismatchException();
+        if(stack.size() == 3){
+            Condition condition = getCondition(table, stack);
+            stack.push(condition);
+        }
+        if(stack.size() != 1) throw new SQLQueryException("Invalid Condition");
+        try{
+            Condition condition = (Condition) stack.peek();
+            return condition.getResultValues();
+        }
+        catch(Exception e){throw new DBException("Could not solve Condition");}
+    }
+
+    private Condition getCondition(Table table, Stack<Object> stack) throws SQLQueryException, DBException{
+        if(stack.size() < 3) throw new SQLQueryException("Invalid Condition Specified");
+        Object three = stack.pop();
+        Object two = stack.pop();
+        Object one =  stack.pop();
+        if(one instanceof String){
+            String columnName = checkColumnName((String) one);
+            SQLComparator sqlComparator = getSQLComparator((String) two);
+            Value value = Utils.getValueLiteral((String) three);
+            return new Condition(table, columnName, value, sqlComparator);
+        }
+        else if(one instanceof Condition){
+            Condition first = (Condition) one;
+            BoolOperator boolOperator = getBoolOperator((String) two);
+            Condition second = (Condition) three;
+            return new Condition(table, first, second, boolOperator);
+        }
+        else{
+            throw new DBException("Cannot Solve Condition");
+        }
+    }
+
+    private BoolOperator getBoolOperator(String token) throws SQLQueryException{
+        if (boolOperatorSymbols.containsKey(token.toUpperCase()))
+            return boolOperatorSymbols.get(token.toUpperCase());
+        throw new NotBoolOperatorException();
+    }
+
+    private SQLComparator getSQLComparator(String token) throws SQLQueryException{
+        if (comparatorSymbols.containsKey(token.toUpperCase()))
+            return comparatorSymbols.get(token.toUpperCase());
+        throw new InvalidComparatorException();
+    }
+
+    public List<Integer> checkCase1Condition(String tableName) throws SQLQueryException, DBException {
+        String attributeName = checkAttributeName();
+        SQLComparator sqlComparator = checkComparator();
+        Value value = Utils.getValueLiteral(tokeniser.getCurrentToken());
+        tokeniser.next();
+        String closingBracket = tokeniser.getCurrentToken();
+        if (!closingBracket.equals(")")) throw new BracketMismatchException();
+        tokeniser.next();
+        String endingToken = tokeniser.getCurrentToken();
+        List<Integer> result = dbController.filter(tableName, attributeName, sqlComparator, value);
+        if(endingToken.equals(";")) // end
+            return result;
+        BoolOperator boolOperator = checkBoolOperator();
+        return performBoolOperation(result, boolOperator, checkCondition(tableName));
+    }
+
+    private List<Integer> performBoolOperation(List<Integer> result1, BoolOperator boolOperator, List<Integer> result2) {
+        HashSet<Integer> result1Values = new HashSet<>(result1);
+        if(boolOperator == AND){
+            HashSet<Integer> result = new HashSet<>();
+            for(int result2Val : result2){
+                if(result1Values.contains(result2Val)) result.add(result2Val);
+            }
+            return new ArrayList<>(result);
+        }
+        else{
+            result1Values.addAll(result2);
+            return new ArrayList<>(result1Values);
+        }
     }
 
     private SQLComparator checkComparator() throws SQLQueryException {
@@ -188,7 +260,7 @@ public class SQLParser {
         throw new NotBoolOperatorException();
     }
 
-    private boolean checkUpdate() throws SQLQueryException, DBException {
+    private void checkUpdate() throws SQLQueryException, DBException {
         String updateToken = tokeniser.getCurrentToken();
         tokeniser.next();
         if (updateToken.equalsIgnoreCase("UPDATE")) {
@@ -214,9 +286,7 @@ public class SQLParser {
             }
         } else {
             tokeniser.previous();
-            return false;
         }
-        return true;
     }
 
     private List<NameValuePair> checkNameValueList() throws SQLQueryException {
@@ -254,9 +324,9 @@ public class SQLParser {
         return new NameValuePair(attributeName, value);
     }
 
-    private boolean checkSelect() throws SQLQueryException, DBException {
+    private void checkSelect() throws SQLQueryException, DBException {
         String selectToken = tokeniser.getCurrentToken();
-        if (!selectToken.equalsIgnoreCase("SELECT")) return false;
+        if (!selectToken.equalsIgnoreCase("SELECT")) return;
         tokeniser.next();
         try {
             List<String> wildAttributes = checkWildAttributeList();
@@ -272,11 +342,8 @@ public class SQLParser {
                 List<Integer> filteredValues = checkCondition(tableName);
                 this.response = dbController.select(tableName, wildAttributes, filteredValues);
             }
-            return true;
-        } catch (DBException e) {
-            throw new DBException("Could not parse  SELECT Query");
-        } catch (Exception e) {
-            return false;
+        }catch (Exception e) {
+            throw new DBException(e.getMessage());
         }
     }
 
@@ -290,7 +357,7 @@ public class SQLParser {
         }
     }
 
-    private boolean checkInsert() throws SQLQueryException, DBException {
+    private void checkInsert() throws SQLQueryException, DBException {
         String currentToken = tokeniser.getCurrentToken();
         int initialIndex = tokeniser.getPos();
         tokeniser.next();
@@ -316,10 +383,8 @@ public class SQLParser {
                 throw e;
             }
         } else {
-            tokeniser.setPos(initialIndex);
-            return false;
+            throw new DBException("Could not parse Query");
         }
-        return true;
     }
 
     private List<Value> checkValueList() throws SQLQueryException {
@@ -403,7 +468,7 @@ public class SQLParser {
         return Utils.getStringLiteral(currentToken);
     }
 
-    private boolean checkAlter() throws SQLQueryException, DBException {
+    private void checkAlter() throws SQLQueryException, DBException {
         String currentToken = tokeniser.getCurrentToken();
         tokeniser.next();
         if (currentToken.equalsIgnoreCase("ALTER")) {
@@ -421,9 +486,7 @@ public class SQLParser {
             }
         } else {
             tokeniser.previous();
-            return false;
         }
-        return true;
     }
 
     private AlterationType checkAlterationType() throws SQLQueryException {
@@ -439,7 +502,7 @@ public class SQLParser {
         return result;
     }
 
-    private boolean checkDrop() throws SQLQueryException, DBException {
+    private void checkDrop() throws SQLQueryException, DBException {
         String currentToken = tokeniser.getCurrentToken();
         tokeniser.next();
         if (currentToken.equalsIgnoreCase("DROP")) {
@@ -448,15 +511,14 @@ public class SQLParser {
             if (operationType.equalsIgnoreCase("DATABASE")) {
                 String dbName = checkDatabaseName().toLowerCase();
                 dbController.dropDB(dbName);
-                return true;
+                return;
             } else if (operationType.equalsIgnoreCase("TABLE")) {
                 String tableName = checkTableName().toLowerCase();
                 dbController.dropTable(tableName);
-                return true;
+                return;
             } else tokeniser.previous();
         }
         tokeniser.previous();
-        return false;
     }
 
     private String checkTableName() throws SQLQueryException {
@@ -464,8 +526,10 @@ public class SQLParser {
         return checkDatabaseName();
     }
 
-    private boolean checkCreate() throws SQLQueryException, DBException {
-        return checkCreateTable() || checkCreateDatabase();
+    private void checkCreate() throws SQLQueryException, DBException {
+        if (!checkCreateTable()) {
+            checkCreateDatabase();
+        }
     }
 
     private boolean checkCreateTable() throws SQLQueryException, DBException {
@@ -547,17 +611,16 @@ public class SQLParser {
         return false;
     }
 
-    private boolean checkUse() throws SQLQueryException, DBException {
+    private void checkUse() throws SQLQueryException, DBException {
         String currentToken = tokeniser.getCurrentToken();
         tokeniser.next();
         boolean isValid = false;
         if (currentToken.equalsIgnoreCase("USE")) {
             String dbName = checkDatabaseName().toLowerCase();
             dbController.setActiveDB(dbName);
-            return true;
+            return;
         }
         tokeniser.previous();
-        return false;
     }
 
     private String checkDatabaseName() throws SQLQueryException {
@@ -575,5 +638,17 @@ public class SQLParser {
             throw new KeywordIdentifierException();
         }
         return currentToken;
+    }
+
+    private String checkColumnName(String name) throws SQLQueryException{
+        Pattern pattern = Pattern.compile("^[A-Za-z0-9]{1,}$");
+        Matcher matcher = pattern.matcher(name);
+        if (!matcher.find()) {
+            throw new InvalidIdentifierNameException();
+        }
+        if (Utils.isNotKeyWord(name)) {
+            throw new KeywordIdentifierException();
+        }
+        return name;
     }
 }

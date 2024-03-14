@@ -242,7 +242,7 @@ public class DBControllerTests {
         response = "SELECT * FROM marks;";
         response = dbServer.handleCommand(response);
         assert(response.contains("[OK]"));
-        response = "SELECT * FROM marks WHERE (pass == FALSE) AND (mark > 35);"; // TODO Not working
+        response = "SELECT * FROM marks WHERE (pass == FALSE) AND (mark > 35);";
         response = dbServer.handleCommand(response);
         assert(response.contains("[OK]"));
         response = "SELECT * FROM marks WHERE name LIKE 'i';";
@@ -291,4 +291,13 @@ public class DBControllerTests {
         response = dbServer.handleCommand(response);
         assert(response.contains("[OK]"));
     }
+
+//    @Test
+//    public void testNestedChecks(){
+//        String response = "select * from marks where ((mark == 55.0) OR (pass == FALSE));";
+//        DBServer dbServer = new DBServer();
+//        dbServer.handleCommand("use markbook;");
+//        response = dbServer.handleCommand(response);
+//        assert(response.contains("[OK]"));
+//    }
 }
