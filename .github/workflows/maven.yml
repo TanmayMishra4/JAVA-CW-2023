@@ -27,9 +27,6 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
-      working-directory: ./cw-db
-      run: mvn -B package --file pom.xml
     - name: Tests
       working-directory: ./cw-db
       run: mvn clean compile test
