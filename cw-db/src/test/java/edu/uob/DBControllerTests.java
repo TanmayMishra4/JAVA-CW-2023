@@ -6,11 +6,10 @@ import edu.uob.Controller.IOController;
 import edu.uob.Model.Database;
 import edu.uob.Model.Value;
 import edu.uob.Utils.Utils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +21,12 @@ public class DBControllerTests {
     // TODO populate dummy databases for testing
     private DBController dbController;
     final String dbName = "randomNonExistentDB";
+
+    @BeforeAll
+    public static void makeFolder(){
+        File file = new File(Paths.get("databases").toUri());
+        if(!file.exists()) file.mkdir();
+    }
     @BeforeEach
     public void setup(){
         dbController = new DBController();
@@ -30,6 +35,20 @@ public class DBControllerTests {
     public void afterTest(){
         deleteFolder(dbName);
         deleteFolder("markbook");
+    }
+
+    @AfterAll
+    public static void cleanFolder(){
+        File file = new File(Paths.get("databases").toAbsolutePath().toString());
+        File[] fileList = file.listFiles();
+        if(fileList == null) return;
+        for(File internalDirectory : file.listFiles()){
+            if(internalDirectory.getName().equalsIgnoreCase("testDB")) continue;
+            File[] internalFileList = internalDirectory.listFiles();
+            if(internalFileList == null) continue;
+            for(File f : internalDirectory.listFiles()) f.delete();
+            internalDirectory.delete();
+        }
     }
 
     @Test

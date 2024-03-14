@@ -1,6 +1,7 @@
 package edu.uob;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,16 +22,25 @@ public class UseTest {
             dbServer = new DBServer();
     }
 
+    @BeforeAll
+    public static void makeFolder(){
+        File file = new File(Paths.get("databases").toUri());
+        if(!file.exists()) file.mkdir();
+    }
+
     @AfterAll
     public static void cleanFolder(){
         File file = new File(Paths.get("databases").toAbsolutePath().toString());
+        File[] fileList = file.listFiles();
+        if(fileList == null) return;
         for(File internalDirectory : file.listFiles()){
             if(internalDirectory.getName().equalsIgnoreCase("testDB")) continue;
+            File[] internalFileList = internalDirectory.listFiles();
+            if(internalFileList == null) continue;
             for(File f : internalDirectory.listFiles()) f.delete();
             internalDirectory.delete();
         }
     }
-
     @Test
     public void testUse(){
         String randomName = generateRandomName();

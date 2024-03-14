@@ -10,6 +10,11 @@ import java.nio.file.Paths;
 
 public class CreateTest {
     DBServer dbServer;
+    @BeforeAll
+    public static void makeFolder(){
+        File file = new File(Paths.get("databases").toUri());
+        if(!file.exists()) file.mkdir();
+    }
     @BeforeEach
     public void setup(){
         if(dbServer == null)
@@ -25,8 +30,12 @@ public class CreateTest {
     @AfterAll
     public static void cleanFolder(){
         File file = new File(Paths.get("databases").toAbsolutePath().toString());
+        File[] fileList = file.listFiles();
+        if(fileList == null) return;
         for(File internalDirectory : file.listFiles()){
             if(internalDirectory.getName().equalsIgnoreCase("testDB")) continue;
+            File[] internalFileList = internalDirectory.listFiles();
+            if(internalFileList == null) continue;
             for(File f : internalDirectory.listFiles()) f.delete();
             internalDirectory.delete();
         }
