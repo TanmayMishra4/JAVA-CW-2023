@@ -28,7 +28,8 @@ public class DBControllerTests {
     }
     @AfterEach
     public void afterTest(){
-        deleteFolder();
+        deleteFolder(dbName);
+        deleteFolder("markbook");
     }
 
     @Test
@@ -92,7 +93,7 @@ public class DBControllerTests {
         assertDoesNotThrow(()->dbController.createTable("testTable", Arrays.asList("name", "age", "Uni")));
     }
 
-    void deleteFolder(){
+    void deleteFolder(String dbName){
         String dbPathName = Utils.getDBFilePathName(dbName);
         File file = new File(dbPathName.substring(0, dbPathName.length()));
         try{
