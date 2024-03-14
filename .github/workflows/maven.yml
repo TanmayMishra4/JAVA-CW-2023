@@ -27,6 +27,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Tests
-      working-directory: ./cw-db
-      run: mvn -f pom.xml clean compile test
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tests
+        working-directory: ./cw-db
+        run: mvn -f pom.xml clean compile test
