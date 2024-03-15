@@ -32,4 +32,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Tests
-        run: cd cw-db && ./mvnw clean compile test
+        run: $ cd ~/JAVA-CW-2023/cw-db && ./mvnw clean compile test
