@@ -32,5 +32,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Tests
-        working-directory: cw-db
+        working-directory: ./cw-db
         run: ./mvnw clean compile test
