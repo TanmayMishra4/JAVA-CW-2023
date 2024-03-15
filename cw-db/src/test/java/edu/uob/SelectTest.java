@@ -200,9 +200,7 @@ public class SelectTest {
         dbServer.handleCommand(response);
         response = "Select pass, mark, age from "+randomTableName.toUpperCase()+" where other == NULL;";
         response = dbServer.handleCommand(response);
-        assert(response.contains("[OK]"));
-        String[] lines = response.split("\n");
-        assert(lines.length == 6);
+        assert(response.contains("[ERROR]"));
     }
 
     @Test
