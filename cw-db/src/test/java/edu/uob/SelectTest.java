@@ -64,8 +64,8 @@ public class SelectTest {
         assert(response.contains("[OK]"));
         String[] lines = response.split("\n");
         assert(lines.length == 6);
-        assert(lines[2].equals("0\tJohn\t86.23\t12\tTRUE\t "));
-        assert(lines[5].equals("3\tWhoCares\t90.23\t84\tTRUE\t "));
+        assert(lines[2].equals("0\tJohn\t86.23\t12\tTRUE\t"));
+        assert(lines[5].equals("3\tWhoCares\t90.23\t84\tTRUE\t"));
     }
 
     @Test
@@ -90,8 +90,8 @@ public class SelectTest {
         assert(response.contains("[OK]"));
         String[] lines = response.split("\n");
         assert(lines.length == 6);
-        assert(lines[2].equals("0\tJohn\t86.23\t12\tTRUE\t "));
-        assert(lines[5].equals("3\tWhoCares\t90.23\t84\tTRUE\t "));
+        assert(lines[2].equals("0\tJohn\t86.23\t12\tTRUE\t"));
+        assert(lines[5].equals("3\tWhoCares\t90.23\t84\tTRUE\t"));
     }
 
     @Test
@@ -182,7 +182,7 @@ public class SelectTest {
     }
 
     @Test
-    public void testSelectConditionalNULL(){ // TODO NULL case not working in select
+    public void testSelectConditionalNULL(){
         String randomName = generateRandomName();
         String response = "CREATE DATABASE "+randomName+";";
         dbServer.handleCommand(response);
@@ -198,9 +198,9 @@ public class SelectTest {
         dbServer.handleCommand(response);
         response = "Insert into "+randomTableName+" values ('WhoCares', 90.23, 84, TRUE, NULL);";
         dbServer.handleCommand(response);
-        response = "Select pass, mark, age from "+randomTableName.toUpperCase()+" where other == NULL;";
+        response = "Select pass, mark, age, name from "+randomTableName.toUpperCase()+" where other == NULL;";
         response = dbServer.handleCommand(response);
-        assert(response.contains("[ERROR]"));
+        assert(response.contains("[OK]"));
     }
 
     @Test
