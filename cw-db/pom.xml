@@ -46,7 +46,7 @@
                     <showDeprecation>true</showDeprecation>
                     <parameters>true</parameters>
                     <compilerArgs>
-                        <arg>-Xlint:all</arg>
+<!--                        <arg>-Xlint:all</arg>-->
                         <arg>-Xlint:-processing</arg>
                     </compilerArgs>
                 </configuration>
