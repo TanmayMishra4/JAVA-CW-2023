@@ -74,9 +74,6 @@ public class Tokeniser {
 	}
 
 	String[] tokenise(String input) {
-		// TODO add checks for dealing with marks>60
-		// Add in some extra padding spaces around the "special characters"
-		// so we can be sure that they are separated by AT LEAST one space (possibly more)
 		for(int i=0; i<specialCharacters.length ;i++) {
 			input = input.replace(specialCharacters[i], " " + specialCharacters[i] + " ");
 		}
@@ -85,23 +82,9 @@ public class Tokeniser {
 		while (input.contains("  ")) input = input.replaceAll("  ", " ");
 		// Again, remove any whitespace from the beginning and end that might have been introduced
 		input = input.trim();
-//		if(hasSymbol(input)){
-//
-//		}
 		// Finally split on the space char (since there will now ALWAYS be a space between tokens)
 		return input.split(" ");
 	}
 
-//	private boolean hasSymbol(String input) {
-//		HashMap<String, SQLComparator> comparatorMap = new HashMap<>();
-//		Utils.populateComparatorMap(comparatorMap);
-//		StringBuilder sb = new StringBuilder();
-//		for(int index=0;index<input.length()-1;index++){
-//			String comparator = input.substring(index, index+2);
-//			if(comparatorMap.containsKey(comparator)){
-//				sb.append();
-//			}
-//		}
-//	}
 
 }

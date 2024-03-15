@@ -1,12 +1,9 @@
 package edu.uob.Model;
 
 import edu.uob.AllEnums.SQLComparator;
-import edu.uob.AllExceptions.DBExceptions.ColumnNotFoundException;
-import edu.uob.AllExceptions.DBExceptions.DBException;
-import edu.uob.AllExceptions.DBExceptions.RemovalOfPrimaryKeyException;
+import edu.uob.AllExceptions.DBExceptions.*;
 import edu.uob.AllExceptions.QueryExceptions.SQLQueryException;
 import edu.uob.AllExceptions.QueryExceptions.DuplicatePrimaryKeyException;
-import edu.uob.AllExceptions.DBExceptions.NumberOfColumnMismatchException;
 import edu.uob.Utils.PrimaryKeyGenerator;
 import edu.uob.Utils.Utils;
 
@@ -40,11 +37,9 @@ public class Table {
 
     public void addColumn(String columnName) throws DBException { //TODO figure out a way to compare columns with ignore case
         if (columnName.equalsIgnoreCase(primaryKey)) return;
-        if(columnsMap.containsKey(primaryKey) && columnName.equalsIgnoreCase(primaryKey)) throw new DBException("Cannot add column id");
-        for (String name : columnNames) {
-            if(name.equalsIgnoreCase(columnName))
-                throw new DBException("Duplicate Columns found");
-        }
+        if (columnsMap.containsKey(primaryKey) && columnName.equalsIgnoreCase(primaryKey))
+            throw new DBException("Cannot add column id");
+        if (hasColumn(columnName)) throw new DuplicateColumnNameException();
         columnNames.add(columnName);
         columnsMap.put(columnName, new Column(columnName));
         addDefaultValueToColumn(columnName);
@@ -52,19 +47,20 @@ public class Table {
 
     private void addDefaultValueToColumn(String columnName) throws DBException {
         Column column = columnsMap.get(columnName);
-        int numberOfRows = columnsMap.size();
-        for(int primaryKey : primaryKeys){
+        for (int primaryKey : primaryKeys) {
             column.addValue(new Value(new NULLObject()), primaryKey);
         }
     }
 
     public void addData(String[] rowOfValues) throws DBException {
-        if (rowOfValues.length != columnNames.size() - 1) throw new NumberOfColumnMismatchException();
+        if (rowOfValues.length != columnNames.size() - 1)
+            throw new NumberOfColumnMismatchException();
         try {
             Value primaryKeyLiteral = pkgen.getPrimaryKey();
             int primaryKeyValue = primaryKeyLiteral.getIntVal();
             columnsMap.get("id").addValue(primaryKeyLiteral, primaryKeyValue);
-            if (!primaryKeys.add(primaryKeyValue)) throw new DuplicatePrimaryKeyException(primaryKeyValue);
+            if (!primaryKeys.add(primaryKeyValue))
+                throw new DuplicatePrimaryKeyException(primaryKeyValue);
 
             for (int index = 0; index < rowOfValues.length; index++) {
                 String columnValue = rowOfValues[index];
@@ -80,7 +76,7 @@ public class Table {
         }
     }
 
-    public void loadDataRows(String[] rowOfValues) throws DBException{
+    public void loadDataRows(String[] rowOfValues) throws DBException {
         if (rowOfValues.length != columnNames.size()) throw new NumberOfColumnMismatchException();
         try {// TODO refactor this method to be the same as above
             int primaryKeyValue = Integer.parseInt(rowOfValues[0]);
@@ -99,10 +95,6 @@ public class Table {
         }
     }
 
-    public boolean hasAttribute(String attribute) {
-        return columnNames.contains(attribute);
-    }
-
     public HashMap<String, Column> getColumnsMap() {
         return columnsMap;
     }
@@ -111,13 +103,10 @@ public class Table {
         return columnNames;
     }
 
-    public void setColumnNames(List<String> columnNames) {
-        this.columnNames = columnNames;
-    }
 
     public void removeColumn(String columnName) throws DBException {
         if (columnName.equals("id")) throw new RemovalOfPrimaryKeyException();
-        if (!columnsMap.containsKey(columnName)) throw new ColumnNotFoundException();
+        if (!hasColumn(columnName)) throw new ColumnNotFoundException();
         columnNames.remove(columnName);
         columnsMap.remove(columnName);
     }
@@ -143,8 +132,8 @@ public class Table {
             wildAttributes.clear();
             wildAttributes.addAll(columnNames);
         }
-        for(String columnName : wildAttributes){
-            if(!columnsMap.containsKey(columnName)) throw new ColumnNotFoundException();
+        for (String columnName : wildAttributes) {
+            if (!hasColumn(columnName)) throw new ColumnNotFoundException();
         }
 
         List<Integer> indexList = new ArrayList<>(primaryKeys);
@@ -152,8 +141,8 @@ public class Table {
         StringBuilder sb = new StringBuilder();
         extractColNames(wildAttributes, sb);
         for (int index : indexList) {
-            if(filteredValues.contains(index))
-                extractRow(wildAttributes, index, sb, filteredValues);
+            if (filteredValues.contains(index))
+                extractRow(wildAttributes, index, sb);
         }
         sb.append("\n");
         return sb.toString();
@@ -164,32 +153,31 @@ public class Table {
         for (int index = 0; index < size; index++) {
             String columnName = wildAttributes.get(index);
             sb.append(columnName);
-            if(index == size - 1) sb.append("\n");
+            if (index == size - 1) sb.append("\n");
             else sb.append("\t");
         }
     }
 
-    private void extractRow(List<String> wildAttributes, int index, StringBuilder sb, HashSet<Integer> filteredValues) throws Exception{
+    private void extractRow(List<String> wildAttributes, int index, StringBuilder sb) throws Exception {
         int size = wildAttributes.size();
         for (int colIndex = 0; colIndex < size; colIndex++) {
             Column column = columnsMap.get(wildAttributes.get(colIndex));
             Value value = column.getValue(index);
-
-            sb.append(column.getValue(index).getStringVal());
-            if(colIndex == size - 1) sb.append("\n");
+            sb.append(value.getStringVal());
+            if (colIndex == size - 1) sb.append("\n");
             else sb.append("\t");
         }
     }
 
-    public List<Integer> filter(String columnName, SQLComparator sqlComparator, Value value) throws DBException{
-        if(!columnsMap.containsKey(columnName)) throw new ColumnNotFoundException();
+    public List<Integer> filter(String columnName, SQLComparator sqlComparator, Value value) throws DBException {
+        if (!hasColumn(columnName)) throw new ColumnNotFoundException();
         return columnsMap.get(columnName).filter(sqlComparator, value);
     }
 
-    public void update(List<NameValuePair> nameValuePairList, List<Integer> resultSet) throws Exception{
-        for(NameValuePair pair : nameValuePairList){
+    public void update(List<NameValuePair> nameValuePairList, List<Integer> resultSet) throws Exception {
+        for (NameValuePair pair : nameValuePairList) {
             String columnName = pair.getColumnName();
-            if(!columnsMap.containsKey(columnName)) throw new ColumnNotFoundException();
+            if (!hasColumn(columnName)) throw new ColumnNotFoundException();
             Column column = columnsMap.get(columnName);
             Value updatedValue = pair.getValue();
             column.update(updatedValue, resultSet);
@@ -200,29 +188,34 @@ public class Table {
         return primaryKeys;
     }
 
-    public List<Column> getColumnList() throws DBException{
+    public List<Column> getColumnList() throws DBException {
         List<Column> columnList = new ArrayList<>();
         try {
             for (String columnName : columnNames) { // Done this way to get columns in order
                 columnList.add(columnsMap.get(columnName));
             }
             return columnList;
-        }
-        catch(Exception ignored){
+        } catch (Exception ignored) {
             throw new ColumnNotFoundException();
         }
     }
 
-    public Column getColumn(String columnName) throws  DBException{
-        try{
+    public Column getColumn(String columnName) throws DBException {
+        try {
             return columnsMap.get(columnName);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             throw new ColumnNotFoundException();
         }
     }
 
     public void setPkGenerator(int initialValue) {
         pkgen = new PrimaryKeyGenerator(initialValue);
+    }
+
+    public boolean hasColumn(String name) {
+        for (String columnName : columnsMap.keySet()) {
+            if (name.equalsIgnoreCase(columnName)) return true;
+        }
+        return false;
     }
 }

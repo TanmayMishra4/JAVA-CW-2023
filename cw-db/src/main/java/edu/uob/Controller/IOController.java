@@ -76,7 +76,6 @@ public class IOController {
 
     public void saveDB(Database db) throws DBException{
         String dbPathName = Utils.getDBFilePathName(db.getName());
-        dbPathName = dbPathName.substring(0, dbPathName.length());
         File dbFile = new File(dbPathName);
         dbFile.mkdir();
         HashMap<String, Table> tables = db.getTables();
@@ -102,7 +101,6 @@ public class IOController {
                 if (index != columnNames.size() - 1) bw.write("\t");
             }
             HashMap<String, Column> columnsMap = table.getColumnsMap();
-            int maxRows = columnsMap.get("id").getValues().size();
 
             for (int index : primaryKeys) {
                 bw.write("\n");

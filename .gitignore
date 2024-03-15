@@ -3,5 +3,11 @@
 .DS_Store
 .idea
 target
+ideal_response.txt
 databases
+response.txt
+example-transcript.txt
+sheds.tab
+BNF.txt
+example-transcript.docx
 people.tab
