@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI with Maven
+name: Java Maven Build & Publish Artifact
 
 on:
   push:
@@ -15,7 +15,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build_test:
 
     runs-on: ubuntu-latest
 
@@ -27,9 +27,5 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Tests
-        run: $ cd ~/JAVA-CW-2023/cw-db && mvn clean compile test
+    - name: Build with Maven
+      run: cd ~/JAVA-CW-2023/cw-db && mvn --file pom.xml clean compile test
