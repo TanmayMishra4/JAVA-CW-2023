@@ -96,4 +96,13 @@ public class UseTest {
         response = dbServer.handleCommand(response);
         assert(response.contains("[ERROR]"));
     }
+
+    @Test
+    public void testCase1(){
+        String response = "use testDB;";
+        dbServer.handleCommand(response);
+        response = "update people set age = -21 where name == 'Bob';";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+    }
 }

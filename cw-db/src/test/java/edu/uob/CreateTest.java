@@ -112,4 +112,20 @@ public class CreateTest {
         response = dbServer.handleCommand(response);
         assert(response.contains("[ERROR]"));
     }
+
+    @Test
+    public void testEmptyCommand2(){
+        String randomName = generateRandomName();
+        String response = ";";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
+    }
+
+    @Test
+    public void testEmptyCommand3(){
+        String randomName = generateRandomName();
+        String response = " ;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
+    }
 }
