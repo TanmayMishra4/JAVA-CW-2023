@@ -105,4 +105,13 @@ public class UseTest {
         response = dbServer.handleCommand(response);
         assert(response.contains("[OK]"));
     }
+
+    @Test
+    public void testCase2(){
+        String response = "use testDB;";
+        dbServer.handleCommand(response);
+        response = "insert into people values('hello my name is space', 45, 'email@email.com');";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+    }
 }

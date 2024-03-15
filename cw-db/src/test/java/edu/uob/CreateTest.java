@@ -128,4 +128,20 @@ public class CreateTest {
         response = dbServer.handleCommand(response);
         assert(response.contains("[ERROR]"));
     }
+
+    @Test
+    public void testEmptyWrongCommandSpaces(){
+        String randomName = generateRandomName();
+        String response = " CRE TE Database wrongDB;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
+    }
+
+    @Test
+    public void testMultipleSemiColons(){
+        String randomName = generateRandomName();
+        String response = " CREATE Database wrongDB;;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
+    }
 }

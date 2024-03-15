@@ -35,18 +35,33 @@ public class SQLParser {
 
     public String handleCommand() {// TODO check only one semi colon is present
         response = "";
-        String lastToken = tokeniser.getLastToken();
-        if (lastToken.equals(";")) {
-            try {
-                checkCommandType();
-                return Utils.generateResponse(OK, response);
-            } catch (SQLQueryException e) {
-                return Utils.generateResponse(ERROR, e.toString());
-            } catch (Exception e) {
-                return Utils.generateResponse(ERROR, e.getMessage());
+        try{
+            if(checkSemiColon()){
+                try {
+                    checkCommandType();
+                    return Utils.generateResponse(OK, response);
+                } catch (SQLQueryException e) {
+                    return Utils.generateResponse(ERROR, e.toString());
+                } catch (Exception e) {
+                    return Utils.generateResponse(ERROR, e.getMessage());
+                }
             }
+            return Utils.generateResponse(ERROR, "error occurred because of number of semi colons");
         }
-        return Utils.generateResponse(ERROR, "Semicolon not found");
+        catch (Exception e){
+            return Utils.generateResponse(ERROR, e.getMessage());
+        }
+    }
+
+    private boolean checkSemiColon() throws SQLQueryException {
+        int countOfSemicolon = 0;
+        int size = tokeniser.getSize();
+        for(int index=size-1;index>=0;index--){
+            String currentToken = tokeniser.get(index);
+            if(currentToken.equals(";")) countOfSemicolon++;
+            else break;
+        }
+        return (countOfSemicolon == 1);
     }
 
     private void checkCommandType() throws SQLQueryException, DBException {
@@ -338,7 +353,7 @@ public class SQLParser {
             resultList.add(getValue());
             while (!tokeniser.getCurrentToken().equals(")")) {
                 String comma = tokeniser.getCurrentToken();
-                if (comma.equals(")")) break;
+                if (comma.equals(")")) break; // TODO add case to check semicolon to not got into infinite loop
                 if (!comma.equals(",")) throw new SQLQueryException("Values should be separated by ,(comma)");
                 tokeniser.next();
                 Value value = getValue();
