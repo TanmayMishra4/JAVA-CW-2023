@@ -103,7 +103,9 @@ public class Value implements AutoCloseable{
             else if(type1 == BOOLEAN && type2 == BOOLEAN){
                 return this.boolVal == other.boolVal;
             }
-            else if(type1 == NULL && type2 == NULL) return true;
+            else if((type1 == NULL && (type2 == STRING || type2 == NULL)) || (type2 == NULL && (type1 == STRING || type1 == NULL))){
+                return this.stringVal.equals("") && other.stringVal.equals("");
+            }
             else throw new ValueTypeInconsistent();
         }
         catch(Exception ignored){ throw new CannotCompareValuesException();}
