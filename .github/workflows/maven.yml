@@ -33,4 +33,4 @@ jobs:
     steps:
       - name: Tests
         working-directory: cw-db
-        run: mvn -f pom.xml clean compile test
+        run: ./mvnw clean compile test
