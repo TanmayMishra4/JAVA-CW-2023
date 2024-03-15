@@ -118,7 +118,8 @@ public class SQLParser {
             String whereToken = tokeniser.getCurrentToken();
             if (!whereToken.equalsIgnoreCase("WHERE")) throw new WhereKeywordMissingException();
             tokeniser.next();
-            List<Integer> valuesToDelete = checkCondition(tableName);
+            Condition condition = checkCondition(tableName);
+            List<Integer> valuesToDelete = condition.getResultValues();
             dbController.deleteValuesFromTable(tableName, valuesToDelete);
         } else {
             tokeniser.previous();
@@ -126,75 +127,48 @@ public class SQLParser {
         }
     }
 
-    private List<Integer> checkCondition(String tableName) throws SQLQueryException, DBException {
+    private Condition checkCondition(String tableName) throws SQLQueryException, DBException {
         Table table = dbController.getTable(tableName);
         int openingBrackets = 0;
-        Stack<Object> stack = new Stack<>();
+        Queue<String> queue = new LinkedList<>();
         int index = tokeniser.getPos();
         int size = tokeniser.getSize();
         while(index < size-1){
             String currentToken = tokeniser.getCurrentToken();
             if(currentToken.equals("(")) openingBrackets++;
             else if(currentToken.equals(")")){
+                if(openingBrackets == 0) throw new BracketMismatchException();
                 openingBrackets--;
-                Condition condition =  getCondition(table, stack);
-                stack.push(condition);
-            }
-//            else if(openingBrackets == 0 && stack.size() == 3){
-            else if(stack.size() == 3){
-                try {
-                    Condition condition = getCondition(table, stack);
-                    stack.push(condition);
-                }
-                catch(Exception ignored){}
-                stack.push(currentToken);
             }
             else{
-                stack.push(currentToken);
+                queue.add(currentToken);
             }
-
             index++;
             tokeniser.next();
         }
         if(openingBrackets != 0) throw new BracketMismatchException();
-        while(stack.size() >= 3){
-            int initialSize = stack.size();
-            Condition condition = getCondition(table, stack);
-            if(stack.size() == initialSize) throw new SQLQueryException("Invalid Condition");
-            stack.push(condition);
-        }
-        if(stack.size() != 1) throw new SQLQueryException("Invalid Condition");
-        try{
-            Condition condition = (Condition) stack.peek();
-            return condition.getResultValues();
-        }
-        catch(Exception e){throw new DBException("Could not solve Condition");}
+        if(queue.size() < 3) throw new SQLQueryException("Invalid Condition");
+        return checkConditionRecursive(table, queue);
     }
 
-    private Condition getCondition(Table table, Stack<Object> stack) throws SQLQueryException, DBException{
-        if(stack.size() < 3) throw new SQLQueryException("Invalid Condition Specified");
-        Object three = stack.pop();
-        Object two = stack.pop();
-        Object one =  stack.pop();
-        try {
-            if (one instanceof String) {
-                String columnName = checkColumnName((String) one);
-                SQLComparator sqlComparator = getSQLComparator((String) two);
-                Value value = Utils.getValueLiteral((String) three);
-                return new Condition(table, columnName, value, sqlComparator);
-            } else if (one instanceof Condition first) {
-                BoolOperator boolOperator = getBoolOperator((String) two);
-                Condition second = (Condition) three;
-                return new Condition(table, first, second, boolOperator);
-            }
-            else throw new DBException("temporary");
-        }
-        catch(Exception ignored){
-            stack.push(one);
-            stack.push(two);
-            stack.push(three);
-            throw new DBException("Cannot Solve Condition");
-        }
+    private Condition checkConditionRecursive(Table table, Queue<String> queue) throws SQLQueryException, DBException{
+        if(queue.size() < 3) throw new SQLQueryException("Cannot solve condition");
+        Condition condition = getCondition(table, queue);
+        if(queue.isEmpty()) return condition;
+        BoolOperator boolOperator = getBoolOperator(queue.poll());
+        return new Condition(table, condition, checkConditionRecursive(table, queue), boolOperator);
+    }
+
+    private Condition getCondition(Table table, Queue<String> queue) throws SQLQueryException, DBException{
+        if(queue.size() < 3) throw new SQLQueryException("Invalid Condition Specified");
+        String one = queue.poll();
+        String two = queue.poll();
+        String three =  queue.poll();
+
+        String columnName = checkColumnName(one);
+        SQLComparator sqlComparator = getSQLComparator(two);
+        Value value = Utils.getValueLiteral(three);
+        return new Condition(table, columnName, value, sqlComparator);
     }
 
     private BoolOperator getBoolOperator(String token) throws SQLQueryException{
@@ -247,7 +221,8 @@ public class SQLParser {
                 String whereToken = tokeniser.getCurrentToken();
                 if (!whereToken.equalsIgnoreCase("WHERE")) throw new WhereKeywordMissingException();
                 tokeniser.next();
-                List<Integer> resultSet = checkCondition(tableName);
+                Condition condition = checkCondition(tableName);
+                List<Integer> resultSet = condition.getResultValues();
                 dbController.update(tableName, nameValuePairList, resultSet);
             } catch (SQLQueryException e) {
                 tokeniser.setPos(initialPos);
@@ -309,7 +284,8 @@ public class SQLParser {
                 String whereToken = tokeniser.getCurrentToken();
                 if (!whereToken.equalsIgnoreCase("WHERE")) throw new WhereKeywordMissingException();
                 tokeniser.next();
-                List<Integer> filteredValues = checkCondition(tableName);
+                Condition condition = checkCondition(tableName);
+                List<Integer> filteredValues = condition.getResultValues();
                 this.response = dbController.select(tableName, wildAttributes, filteredValues);
             }
         }catch (Exception e) {
