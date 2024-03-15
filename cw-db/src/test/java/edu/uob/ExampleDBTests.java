@@ -13,7 +13,7 @@ import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class ExampleDBTests {
 
     private DBServer server;

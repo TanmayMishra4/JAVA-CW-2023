@@ -140,9 +140,13 @@ public class SQLParser {
                 Condition condition =  getCondition(table, stack);
                 stack.push(condition);
             }
-            else if(openingBrackets == 0 && stack.size() == 3){
-                Condition condition = getCondition(table, stack);
-                stack.push(condition);
+//            else if(openingBrackets == 0 && stack.size() == 3){
+            else if(stack.size() == 3){
+                try {
+                    Condition condition = getCondition(table, stack);
+                    stack.push(condition);
+                }
+                catch(Exception ignored){}
                 stack.push(currentToken);
             }
             else{
@@ -153,8 +157,10 @@ public class SQLParser {
             tokeniser.next();
         }
         if(openingBrackets != 0) throw new BracketMismatchException();
-        if(stack.size() == 3){
+        while(stack.size() >= 3){
+            int initialSize = stack.size();
             Condition condition = getCondition(table, stack);
+            if(stack.size() == initialSize) throw new SQLQueryException("Invalid Condition");
             stack.push(condition);
         }
         if(stack.size() != 1) throw new SQLQueryException("Invalid Condition");
@@ -170,18 +176,23 @@ public class SQLParser {
         Object three = stack.pop();
         Object two = stack.pop();
         Object one =  stack.pop();
-        if(one instanceof String){
-            String columnName = checkColumnName((String) one);
-            SQLComparator sqlComparator = getSQLComparator((String) two);
-            Value value = Utils.getValueLiteral((String) three);
-            return new Condition(table, columnName, value, sqlComparator);
+        try {
+            if (one instanceof String) {
+                String columnName = checkColumnName((String) one);
+                SQLComparator sqlComparator = getSQLComparator((String) two);
+                Value value = Utils.getValueLiteral((String) three);
+                return new Condition(table, columnName, value, sqlComparator);
+            } else if (one instanceof Condition first) {
+                BoolOperator boolOperator = getBoolOperator((String) two);
+                Condition second = (Condition) three;
+                return new Condition(table, first, second, boolOperator);
+            }
+            else throw new DBException("temporary");
         }
-        else if(one instanceof Condition first){
-            BoolOperator boolOperator = getBoolOperator((String) two);
-            Condition second = (Condition) three;
-            return new Condition(table, first, second, boolOperator);
-        }
-        else{
+        catch(Exception ignored){
+            stack.push(one);
+            stack.push(two);
+            stack.push(three);
             throw new DBException("Cannot Solve Condition");
         }
     }
@@ -370,12 +381,12 @@ public class SQLParser {
     }
 
     private Value getValue() throws SQLQueryException {
-        try (Value val = checkFloatLiteral()) {
+        try (Value val = checkIntegerLiteral()) {
             tokeniser.next();
             return val;
         } catch (Exception ignored) {}
 
-        try (Value val = checkIntegerLiteral()) {
+        try (Value val = checkFloatLiteral()) {
             tokeniser.next();
             return val;
         } catch (Exception ignored) {}
