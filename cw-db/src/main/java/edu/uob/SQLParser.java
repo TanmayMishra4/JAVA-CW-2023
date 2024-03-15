@@ -35,18 +35,33 @@ public class SQLParser {
 
     public String handleCommand() {// TODO check only one semi colon is present
         response = "";
-        String lastToken = tokeniser.getLastToken();
-        if (lastToken.equals(";")) {
-            try {
-                checkCommandType();
-                return Utils.generateResponse(OK, response);
-            } catch (SQLQueryException e) {
-                return Utils.generateResponse(ERROR, e.toString());
-            } catch (Exception e) {
-                return Utils.generateResponse(ERROR, e.getMessage());
+        try{
+            if(checkSemiColon()){
+                try {
+                    checkCommandType();
+                    return Utils.generateResponse(OK, response);
+                } catch (SQLQueryException e) {
+                    return Utils.generateResponse(ERROR, e.toString());
+                } catch (Exception e) {
+                    return Utils.generateResponse(ERROR, e.getMessage());
+                }
             }
+            return Utils.generateResponse(ERROR, "error occurred because of number of semi colons");
         }
-        return Utils.generateResponse(ERROR, "Semicolon not found");
+        catch (Exception e){
+            return Utils.generateResponse(ERROR, e.getMessage());
+        }
+    }
+
+    private boolean checkSemiColon() throws SQLQueryException {
+        int countOfSemicolon = 0;
+        int size = tokeniser.getSize();
+        for(int index=size-1;index>=0;index--){
+            String currentToken = tokeniser.get(index);
+            if(currentToken.equals(";")) countOfSemicolon++;
+            else break;
+        }
+        return (countOfSemicolon == 1);
     }
 
     private void checkCommandType() throws SQLQueryException, DBException {
@@ -103,7 +118,8 @@ public class SQLParser {
             String whereToken = tokeniser.getCurrentToken();
             if (!whereToken.equalsIgnoreCase("WHERE")) throw new WhereKeywordMissingException();
             tokeniser.next();
-            List<Integer> valuesToDelete = checkCondition(tableName);
+            Condition condition = checkCondition(tableName);
+            List<Integer> valuesToDelete = condition.getResultValues();
             dbController.deleteValuesFromTable(tableName, valuesToDelete);
         } else {
             tokeniser.previous();
@@ -111,64 +127,48 @@ public class SQLParser {
         }
     }
 
-    private List<Integer> checkCondition(String tableName) throws SQLQueryException, DBException {
+    private Condition checkCondition(String tableName) throws SQLQueryException, DBException {
         Table table = dbController.getTable(tableName);
         int openingBrackets = 0;
-        Stack<Object> stack = new Stack<>();
+        Queue<String> queue = new LinkedList<>();
         int index = tokeniser.getPos();
         int size = tokeniser.getSize();
         while(index < size-1){
             String currentToken = tokeniser.getCurrentToken();
             if(currentToken.equals("(")) openingBrackets++;
             else if(currentToken.equals(")")){
+                if(openingBrackets == 0) throw new BracketMismatchException();
                 openingBrackets--;
-                Condition condition =  getCondition(table, stack);
-                stack.push(condition);
-            }
-            else if(openingBrackets == 0 && stack.size() == 3){
-                Condition condition = getCondition(table, stack);
-                stack.push(condition);
-                stack.push(currentToken);
             }
             else{
-                stack.push(currentToken);
+                queue.add(currentToken);
             }
-
             index++;
             tokeniser.next();
         }
         if(openingBrackets != 0) throw new BracketMismatchException();
-        if(stack.size() == 3){
-            Condition condition = getCondition(table, stack);
-            stack.push(condition);
-        }
-        if(stack.size() != 1) throw new SQLQueryException("Invalid Condition");
-        try{
-            Condition condition = (Condition) stack.peek();
-            return condition.getResultValues();
-        }
-        catch(Exception e){throw new DBException("Could not solve Condition");}
+        if(queue.size() < 3) throw new SQLQueryException("Invalid Condition");
+        return checkConditionRecursive(table, queue);
     }
 
-    private Condition getCondition(Table table, Stack<Object> stack) throws SQLQueryException, DBException{
-        if(stack.size() < 3) throw new SQLQueryException("Invalid Condition Specified");
-        Object three = stack.pop();
-        Object two = stack.pop();
-        Object one =  stack.pop();
-        if(one instanceof String){
-            String columnName = checkColumnName((String) one);
-            SQLComparator sqlComparator = getSQLComparator((String) two);
-            Value value = Utils.getValueLiteral((String) three);
-            return new Condition(table, columnName, value, sqlComparator);
-        }
-        else if(one instanceof Condition first){
-            BoolOperator boolOperator = getBoolOperator((String) two);
-            Condition second = (Condition) three;
-            return new Condition(table, first, second, boolOperator);
-        }
-        else{
-            throw new DBException("Cannot Solve Condition");
-        }
+    private Condition checkConditionRecursive(Table table, Queue<String> queue) throws SQLQueryException, DBException{
+        if(queue.size() < 3) throw new SQLQueryException("Cannot solve condition");
+        Condition condition = getCondition(table, queue);
+        if(queue.isEmpty()) return condition;
+        BoolOperator boolOperator = getBoolOperator(queue.poll());
+        return new Condition(table, condition, checkConditionRecursive(table, queue), boolOperator);
+    }
+
+    private Condition getCondition(Table table, Queue<String> queue) throws SQLQueryException, DBException{
+        if(queue.size() < 3) throw new SQLQueryException("Invalid Condition Specified");
+        String one = queue.poll();
+        String two = queue.poll();
+        String three =  queue.poll();
+
+        String columnName = checkColumnName(one);
+        SQLComparator sqlComparator = getSQLComparator(two);
+        Value value = Utils.getValueLiteral(three);
+        return new Condition(table, columnName, value, sqlComparator);
     }
 
     private BoolOperator getBoolOperator(String token) throws SQLQueryException{
@@ -221,7 +221,8 @@ public class SQLParser {
                 String whereToken = tokeniser.getCurrentToken();
                 if (!whereToken.equalsIgnoreCase("WHERE")) throw new WhereKeywordMissingException();
                 tokeniser.next();
-                List<Integer> resultSet = checkCondition(tableName);
+                Condition condition = checkCondition(tableName);
+                List<Integer> resultSet = condition.getResultValues();
                 dbController.update(tableName, nameValuePairList, resultSet);
             } catch (SQLQueryException e) {
                 tokeniser.setPos(initialPos);
@@ -283,7 +284,8 @@ public class SQLParser {
                 String whereToken = tokeniser.getCurrentToken();
                 if (!whereToken.equalsIgnoreCase("WHERE")) throw new WhereKeywordMissingException();
                 tokeniser.next();
-                List<Integer> filteredValues = checkCondition(tableName);
+                Condition condition = checkCondition(tableName);
+                List<Integer> filteredValues = condition.getResultValues();
                 this.response = dbController.select(tableName, wildAttributes, filteredValues);
             }
         }catch (Exception e) {
@@ -338,7 +340,7 @@ public class SQLParser {
             resultList.add(getValue());
             while (!tokeniser.getCurrentToken().equals(")")) {
                 String comma = tokeniser.getCurrentToken();
-                if (comma.equals(")")) break;
+                if (comma.equals(")")) break; // TODO add case to check semicolon to not got into infinite loop
                 if (!comma.equals(",")) throw new SQLQueryException("Values should be separated by ,(comma)");
                 tokeniser.next();
                 Value value = getValue();
@@ -355,12 +357,12 @@ public class SQLParser {
     }
 
     private Value getValue() throws SQLQueryException {
-        try (Value val = checkFloatLiteral()) {
+        try (Value val = checkIntegerLiteral()) {
             tokeniser.next();
             return val;
         } catch (Exception ignored) {}
 
-        try (Value val = checkIntegerLiteral()) {
+        try (Value val = checkFloatLiteral()) {
             tokeniser.next();
             return val;
         } catch (Exception ignored) {}

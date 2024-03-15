@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.nio.file.Paths;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class DropDatabase {
     DBServer dbServer;
     @BeforeEach

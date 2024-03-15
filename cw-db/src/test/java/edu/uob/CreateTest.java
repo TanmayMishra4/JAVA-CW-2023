@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.nio.file.Paths;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class CreateTest {
     DBServer dbServer;
     @BeforeAll
@@ -109,6 +110,38 @@ public class CreateTest {
     public void testEmptyCommand(){
         String randomName = generateRandomName();
         String response = "";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
+    }
+
+    @Test
+    public void testEmptyCommand2(){
+        String randomName = generateRandomName();
+        String response = ";";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
+    }
+
+    @Test
+    public void testEmptyCommand3(){
+        String randomName = generateRandomName();
+        String response = " ;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
+    }
+
+    @Test
+    public void testEmptyWrongCommandSpaces(){
+        String randomName = generateRandomName();
+        String response = " CRE TE Database wrongDB;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
+    }
+
+    @Test
+    public void testMultipleSemiColons(){
+        String randomName = generateRandomName();
+        String response = " CREATE Database wrongDB;;";
         response = dbServer.handleCommand(response);
         assert(response.contains("[ERROR]"));
     }

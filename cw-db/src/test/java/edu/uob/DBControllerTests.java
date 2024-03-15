@@ -17,6 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class DBControllerTests {
     // TODO populate dummy databases for testing
     private DBController dbController;

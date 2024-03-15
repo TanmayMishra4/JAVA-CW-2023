@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.nio.file.Paths;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class UseTest {
     DBServer dbServer;
     String generateRandomName() {
@@ -95,5 +96,23 @@ public class UseTest {
         String response = "  Use   " + randomName + "             ";
         response = dbServer.handleCommand(response);
         assert(response.contains("[ERROR]"));
+    }
+
+    @Test
+    public void testCase1(){
+        String response = "use testDB;";
+        dbServer.handleCommand(response);
+        response = "update people set age = -21 where name == 'Bob';";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+    }
+
+    @Test
+    public void testCase2(){
+        String response = "use testDB;";
+        dbServer.handleCommand(response);
+        response = "insert into people values('hello my name is space', 45, 'email@email.com');";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
     }
 }

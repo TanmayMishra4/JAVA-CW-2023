@@ -46,7 +46,7 @@ public class Table {
     }
 
     private void addDefaultValueToColumn(String columnName) throws DBException {
-        Column column = columnsMap.get(columnName);
+        Column column = getColumn(columnName);
         for (int primaryKey : primaryKeys) {
             column.addValue(new Value(new NULLObject()), primaryKey);
         }
@@ -58,7 +58,7 @@ public class Table {
         try {
             Value primaryKeyLiteral = pkgen.getPrimaryKey();
             int primaryKeyValue = primaryKeyLiteral.getIntVal();
-            columnsMap.get("id").addValue(primaryKeyLiteral, primaryKeyValue);
+            getColumn("id").addValue(primaryKeyLiteral, primaryKeyValue);
             if (!primaryKeys.add(primaryKeyValue))
                 throw new DuplicatePrimaryKeyException(primaryKeyValue);
 
@@ -66,7 +66,7 @@ public class Table {
                 String columnValue = rowOfValues[index];
                 Value value = Utils.getValue(columnValue);
                 String columnName = columnNames.get(index + 1);
-                Column column = columnsMap.get(columnName);
+                Column column = getColumn(columnName);
                 column.addValue(value, primaryKeyValue);
             }
         } catch (SQLQueryException d) {
@@ -84,7 +84,7 @@ public class Table {
                 String columnValue = rowOfValues[index];
                 Value value = Utils.getValue(columnValue);
                 String columnName = columnNames.get(index);
-                Column column = columnsMap.get(columnName);
+                Column column = getColumn(columnName);
                 column.addValue(value, primaryKeyValue);
             }
             primaryKeys.add(primaryKeyValue);
@@ -161,7 +161,7 @@ public class Table {
     private void extractRow(List<String> wildAttributes, int index, StringBuilder sb) throws Exception {
         int size = wildAttributes.size();
         for (int colIndex = 0; colIndex < size; colIndex++) {
-            Column column = columnsMap.get(wildAttributes.get(colIndex));
+            Column column = getColumn(wildAttributes.get(colIndex));
             Value value = column.getValue(index);
             sb.append(value.getStringVal());
             if (colIndex == size - 1) sb.append("\n");
@@ -171,14 +171,14 @@ public class Table {
 
     public List<Integer> filter(String columnName, SQLComparator sqlComparator, Value value) throws DBException {
         if (!hasColumn(columnName)) throw new ColumnNotFoundException();
-        return columnsMap.get(columnName).filter(sqlComparator, value);
+        return getColumn(columnName).filter(sqlComparator, value);
     }
 
     public void update(List<NameValuePair> nameValuePairList, List<Integer> resultSet) throws Exception {
         for (NameValuePair pair : nameValuePairList) {
             String columnName = pair.getColumnName();
             if (!hasColumn(columnName)) throw new ColumnNotFoundException();
-            Column column = columnsMap.get(columnName);
+            Column column = getColumn(columnName);
             Value updatedValue = pair.getValue();
             column.update(updatedValue, resultSet);
         }
@@ -192,7 +192,7 @@ public class Table {
         List<Column> columnList = new ArrayList<>();
         try {
             for (String columnName : columnNames) { // Done this way to get columns in order
-                columnList.add(columnsMap.get(columnName));
+                columnList.add(getColumn(columnName));
             }
             return columnList;
         } catch (Exception ignored) {
@@ -202,7 +202,11 @@ public class Table {
 
     public Column getColumn(String columnName) throws DBException {
         try {
-            return columnsMap.get(columnName);
+            for(String storedColName : columnNames){
+                if(columnName.equalsIgnoreCase(storedColName))
+                    return columnsMap.get(storedColName);
+            }
+            throw new ColumnNotFoundException();
         } catch (Exception e) {
             throw new ColumnNotFoundException();
         }
