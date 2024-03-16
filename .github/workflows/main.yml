@@ -21,6 +21,7 @@ jobs:
         cache: maven
     - name: Run Maven
       run: mvn -B package --file cw-db/pom.xml
-
-    - name: JUNIT Test report
-      uses: cpdeethree/test-reporter@v1.0.3
+    - name: run tests
+    - run: mvn clean compile test
+    # - name: JUNIT Test report
+    #   uses: cpdeethree/test-reporter@v1.0.3
