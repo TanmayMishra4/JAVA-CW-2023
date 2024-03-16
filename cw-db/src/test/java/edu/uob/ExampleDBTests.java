@@ -37,7 +37,6 @@ public class ExampleDBTests {
         File[] fileList = file.listFiles();
         if(fileList == null) return;
         for(File internalDirectory : file.listFiles()){
-            if(internalDirectory.getName().equalsIgnoreCase("testDB")) continue;
             File[] internalFileList = internalDirectory.listFiles();
             if(internalFileList == null) continue;
             for(File f : internalDirectory.listFiles()) f.delete();
