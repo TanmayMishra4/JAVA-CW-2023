@@ -183,26 +183,6 @@ public class SQLParser {
         throw new InvalidComparatorException();
     }
 
-//    private SQLComparator checkComparator() throws SQLQueryException {
-//        String currentToken = tokeniser.getCurrentToken();
-//        tokeniser.next();
-//        if (comparatorSymbols.containsKey(currentToken.toUpperCase()))
-//            return comparatorSymbols.get(currentToken.toUpperCase());
-//
-//        tokeniser.previous();
-//        throw new InvalidComparatorException();
-//    }
-
-//    private BoolOperator checkBoolOperator() throws SQLQueryException {
-//        String currentToken = tokeniser.getCurrentToken();
-//        tokeniser.next();
-//        if (boolOperatorSymbols.containsKey(currentToken.toUpperCase()))
-//            return boolOperatorSymbols.get(currentToken.toUpperCase());
-//
-//        tokeniser.previous();
-//        throw new NotBoolOperatorException();
-//    }
-
     private void checkUpdate() throws SQLQueryException, DBException {
         String updateToken = tokeniser.getCurrentToken();
         tokeniser.next();
@@ -357,32 +337,37 @@ public class SQLParser {
     }
 
     private Value getValue() throws SQLQueryException {
-        try (Value val = checkIntegerLiteral()) {
+        Value val;
+        try {
+            val = checkIntegerLiteral();
             tokeniser.next();
             return val;
         } catch (Exception ignored) {}
 
-        try (Value val = checkFloatLiteral()) {
+        try {
+            val = checkFloatLiteral();
             tokeniser.next();
             return val;
         } catch (Exception ignored) {}
 
-        try (Value val = checkNullLiteral()) {
+        try {
+            val = checkNullLiteral();
             tokeniser.next();
             return val;
         } catch (Exception ignored) {}
 
-        try (Value val = checkBooleanLiteral()) {
+        try {
+            val = checkBooleanLiteral();
             tokeniser.next();
             return val;
         } catch (Exception ignored) {}
 
-        try (Value val = checkStringLiteral()) {
+        try {
+            val = checkStringLiteral();
             tokeniser.next();
             return val;
         } catch (Exception ignored) {}
 
-        tokeniser.previous();
         throw new IllegalValueTypeException();
     }
 

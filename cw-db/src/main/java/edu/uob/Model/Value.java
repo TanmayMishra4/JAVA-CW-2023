@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import static edu.uob.AllEnums.ValueType.*;
 
-public class Value implements AutoCloseable{
+public class Value{
     public String getStringVal() {
         return stringVal;
     }
@@ -76,11 +76,6 @@ public class Value implements AutoCloseable{
 
     public ValueType getValueType() {
         return valueType;
-    }
-
-    @Override
-    public void close() throws Exception {
-
     }
 
     public boolean equals(Value other) throws DBException{
