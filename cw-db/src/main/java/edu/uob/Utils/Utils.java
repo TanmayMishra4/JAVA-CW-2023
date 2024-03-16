@@ -45,11 +45,12 @@ public class Utils {
     }
 
     public static Value getValue(String token) throws IllegalValueTypeException {
-        try{
+        try {
             return getValueLiteral(token);
         }catch(Exception ignored){}
-
-        try(Value val = getStringFromDB(token)){
+        Value val;
+        try {
+            val = getStringFromDB(token);
             return val;
         } catch (Exception ignored) {}
 
@@ -61,24 +62,30 @@ public class Utils {
     }
 
     public static Value getValueLiteral(String token) throws IllegalValueTypeException {
-        try(Value val = getBooleanLiteral(token)){
+        Value val;
+        try {
+            val = getBooleanLiteral(token);
             return val;
         } catch (Exception ignored) {}
 
-        try(Value val = getIntegerLiteral(token)){
+        try {
+            val = getIntegerLiteral(token);
             return val;
         } catch (Exception ignored) {}
 
-        try(Value val = getFloatLiteral(token)){
+        try {
+            val = getFloatLiteral(token);
             return val;
         } catch (Exception ignored) {}
 
-        try(Value val = getNullLiteral(token)){
+        try {
+            val = getNullLiteral(token);
             return val;
         }
         catch(Exception ignored){}
 
-        try(Value val = getStringLiteral(token)){
+        try {
+            val = getStringLiteral(token);
             return val;
         } catch (Exception ignored) {}
 
@@ -86,20 +93,20 @@ public class Utils {
     }
 
     public static Value getIntegerLiteral(String token) throws Exception{
-        Integer val;
+        int val;
         val = Integer.parseInt(token);
         return new Value(val);
     }
     public static Value getFloatLiteral(String token) throws Exception{
-        Double val;
+        double val;
         val = Double.parseDouble(token);
         return new Value(val);
     }
 
     public static Value getBooleanLiteral(String token) throws Exception{
-        Boolean val;
-        if(token.equalsIgnoreCase("TRUE")) val = Boolean.valueOf("true");
-        else if(token.equalsIgnoreCase("FALSE")) val = Boolean.valueOf("false");
+        boolean val;
+        if(token.equalsIgnoreCase("TRUE")) val = Boolean.parseBoolean("true");
+        else if(token.equalsIgnoreCase("FALSE")) val = Boolean.parseBoolean("false");
         else{
             throw new Exception("Not a Boolean Literal");
         }
