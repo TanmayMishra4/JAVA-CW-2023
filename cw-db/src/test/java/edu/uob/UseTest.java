@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.nio.file.Paths;
 
+import static java.io.File.*;
+
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class UseTest {
     DBServer dbServer;
@@ -43,7 +45,7 @@ public class UseTest {
     }
 
     public void cleanFolder(String name){
-        File file = new File(Paths.get("databases/"+name).toAbsolutePath().toString());
+        File file = new File(Paths.get("databases"+ separatorChar+name).toAbsolutePath().toString());
         File[] fileList = file.listFiles();
         if(fileList == null) return;
         for(File internalDirectory : file.listFiles()){
