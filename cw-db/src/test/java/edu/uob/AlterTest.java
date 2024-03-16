@@ -34,7 +34,6 @@ public class AlterTest {
         File[] fileList = file.listFiles();
         if (fileList == null) return;
         for (File internalDirectory : fileList) {
-            if (internalDirectory.getName().equalsIgnoreCase("testDB")) continue;
             File[] internalFileList = internalDirectory.listFiles();
             if (internalFileList == null) continue;
             for (File f : internalFileList) f.delete();

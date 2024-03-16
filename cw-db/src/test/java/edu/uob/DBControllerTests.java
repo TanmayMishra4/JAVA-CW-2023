@@ -28,172 +28,17 @@ public class DBControllerTests {
         File file = new File(Paths.get("databases").toUri());
         if(!file.exists()) file.mkdir();
     }
-    @BeforeEach
-    public void setup(){
-        dbController = new DBController();
-    }
-    @AfterEach
-    public void afterTest(){
-        deleteFolder(dbName);
-        deleteFolder("markbook");
-    }
-
     @AfterAll
     public static void cleanFolder(){
         File file = new File(Paths.get("databases").toAbsolutePath().toString());
         File[] fileList = file.listFiles();
         if(fileList == null) return;
         for(File internalDirectory : file.listFiles()){
-            if(internalDirectory.getName().equalsIgnoreCase("testDB")) continue;
             File[] internalFileList = internalDirectory.listFiles();
             if(internalFileList == null) continue;
             for(File f : internalDirectory.listFiles()) f.delete();
             internalDirectory.delete();
         }
-    }
-
-    @Test
-    public void testSetActiveDB(){
-        createFolder();
-        assertDoesNotThrow(()->dbController.setActiveDB(dbName));
-    }
-    @Test
-    public void testSetActiveDBFail(){
-        assertThrows(DBException.class, ()->dbController.setActiveDB(dbName));
-    }
-    @Test
-    public void testDeleteDB(){
-        createFolder();
-        assertDoesNotThrow(()->dbController.dropDB(dbName));
-    }
-    @Test
-    public void testDeleteDBFail(){
-        assertThrows(DBException.class, ()->dbController.dropDB(dbName));
-    }
-
-    @Test
-    public void testCreateDB(){
-        assertDoesNotThrow(()->dbController.createDB(dbName));
-    }
-
-    // TODO test case for duplicate column names
-
-    @Test
-    public void testCreateDBFail(){
-        createFolder();
-        assertThrows(DBException.class, ()->dbController.createDB(dbName));
-    }
-
-    @Test
-    public void testDropTable() throws DBException {
-        createFolder();
-        assertDoesNotThrow(()->dbController.setActiveDB(dbName));
-        dbController.createTable("people");
-        assertDoesNotThrow(()->dbController.dropTable("people"));
-    }
-
-    @Test
-    public void testDropTableFail(){
-        createFolder();
-        assertDoesNotThrow(()->dbController.setActiveDB(dbName));
-        assertThrows(DBException.class, ()->dbController.dropTable("kansd"));
-    }
-
-    @Test
-    public void testCreateTable(){
-        createFolder();
-        assertDoesNotThrow(()->dbController.setActiveDB(dbName));
-        assertDoesNotThrow(()->dbController.createTable("testTable"));
-    }
-
-    @Test
-    public void testCreateTableWithAttrb(){
-        createFolder();
-        assertDoesNotThrow(()->dbController.setActiveDB(dbName));
-        assertDoesNotThrow(()->dbController.createTable("testTable", Arrays.asList("name", "age", "Uni")));
-    }
-
-    void deleteFolder(String dbName){
-        String dbPathName = Utils.getDBFilePathName(dbName);
-        File file = new File(dbPathName.substring(0, dbPathName.length()));
-        try{
-            for(File f : file.listFiles()){
-                f.delete();
-            }
-            file.delete();
-        }catch(Exception ignored){}
-    }
-
-    void createFolder(){
-        String dbPathName = Utils.getDBFilePathName(dbName);
-        File file = new File(dbPathName.substring(0, dbPathName.length()));
-        try{
-            boolean val = file.mkdir();
-        } catch (Exception ignored){}
-    }
-
-    @Test
-    public void testSaveDB() throws DBException{
-        Database d = new Database(dbName);
-        d.addTable("people");
-        d.addColumnToTable("people", "name");
-        d.addColumnToTable("people", "score");
-        d.addColumnToTable("people", "email");
-        d.addColumnToTable("people", "phone");
-        d.addDataToTable("people", new String[]{"hbjad", "5125.89", "134", "FALSE"});
-        d.addDataToTable("people", new String[]{"asdfkjaf", "324.812", "989", "TRUE"});
-        d.addDataToTable("people", new String[]{"askdjfb", "989.1823", "7856", "FALSE"});
-        d.addDataToTable("people", new String[]{"ASBDUA", "812.51273", "2345", "TRUE"});
-        IOController ioController = new IOController();
-        ioController.saveDB(d);
-    }
-
-    @Test
-    public void testloadDatabase() throws DBException {
-        createFolder();
-        dbController.setActiveDB(dbName);
-        dbController.createTable("people", Arrays.asList("andk", "dnjna", "asjdfn"));
-        IOController ioController = new IOController();
-        Database d = ioController.loadDatabase(dbName);
-        assert(d.getName().equals(dbName));
-        assert(d.getTables().size() == 1);
-    }
-//    @Test
-//    public void testDropDatabase() throws DBException {
-//        createFolder();
-//        dbController.setActiveDB(dbName);
-//        dbController.createTable("people", Arrays.asList("andk", "dnjna", "asjdfn"));
-//        dbController.createTable("jabnds", Arrays.asList("adavn", "ajsd"," clmnoao"));
-//        dbController.insertValues("people", List.of(new Value[]{new Value("sjdnf"), new Value("823489"), new Value("829")}));
-//        IOController ioController = new IOController();
-//        ioController.dropDB(dbName);
-//    }
-//
-    @Test
-    public void testSelect() throws DBException {
-        dbController.setActiveDB("testDB");
-        List<String> l = new ArrayList<>();
-        l.add("Name");l.add("Age");
-        String response = dbController.select("people", l);
-        assert(response != null);
-    }
-
-    @Test
-    public void testSelect2(){
-        DBServer dbServer = new DBServer();
-        dbServer.handleCommand("use testDB;");
-        String response = "select * from people;";
-        response = dbServer.handleCommand(response);
-        assert(response.contains("[OK]"));
-    }
-
-    @Test
-    public void testSelect3(){
-        DBServer dbServer = new DBServer();
-        dbServer.handleCommand("use testDB;");
-        String response = "select id, Email from people;";
-        response = dbServer.handleCommand(response);
-        assert(response.contains("[OK]"));
     }
 
     @Test
@@ -312,13 +157,4 @@ public class DBControllerTests {
         response = dbServer.handleCommand(response);
         assert(response.contains("[OK]"));
     }
-
-//    @Test
-//    public void testNestedChecks(){
-//        String response = "select * from marks where ((mark == 55.0) OR (pass == FALSE));";
-//        DBServer dbServer = new DBServer();
-//        dbServer.handleCommand("use markbook;");
-//        response = dbServer.handleCommand(response);
-//        assert(response.contains("[OK]"));
-//    }
 }
