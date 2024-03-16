@@ -20,6 +20,6 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Run Maven
-      run: mvn -B package --file cw-db/pom.xml; mvn clean compile test
+      run: mvn -B package --file cw-db/pom.xml; mvn clean compile test --file cw-db/pom.xml
     # - name: JUNIT Test report
     #   uses: cpdeethree/test-reporter@v1.0.3
