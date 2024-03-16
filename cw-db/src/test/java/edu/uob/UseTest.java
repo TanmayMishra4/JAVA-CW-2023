@@ -147,7 +147,7 @@ public class UseTest {
         dbServer.handleCommand(response);
         response = "insert into people values('hello my name is space', 45, 'email@email.com');";
         response = dbServer.handleCommand(response);
-        assert(response.contains("[ERROR]"));
+        assert(response.contains("[OK]"));
         cleanFolder("testDB");
     }
 }
