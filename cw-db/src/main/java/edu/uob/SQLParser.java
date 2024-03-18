@@ -81,30 +81,24 @@ public class SQLParser {
     }
 
     private void checkJoin() throws SQLQueryException, DBException {
-        int initialIndex = tokeniser.getPos();
         String currentToken = tokeniser.getCurrentToken();
         if (currentToken.equalsIgnoreCase("JOIN")) {
-            try {
-                tokeniser.next();
-                String tableName1 = checkTableName().toLowerCase();
-                String andToken = tokeniser.getCurrentToken();
-                if (!andToken.equalsIgnoreCase("AND")) throw new ANDKeywordMissingException();
-                tokeniser.next();
-                String tableName2 = checkTableName().toLowerCase();
-                String onToken = tokeniser.getCurrentToken();
-                if(!onToken.equalsIgnoreCase("ON")) throw new ONKeywordMissingException();
-                tokeniser.next();
-                if (!onToken.equalsIgnoreCase("ON")) throw new ONKeywordMissingException();
-                String attributeName1 = checkAttributeName();
-                andToken = tokeniser.getCurrentToken();
-                if (!andToken.equalsIgnoreCase("AND")) throw new ANDKeywordMissingException();
-                tokeniser.next();
-                String attributeName2 = checkAttributeName();
-                this.response = dbController.joinTables(tableName1, tableName2, attributeName1, attributeName2);
-            } catch (SQLQueryException e) {
-                tokeniser.setPos(initialIndex);
-                throw e;
-            }
+            tokeniser.next();
+            String tableName1 = checkTableName().toLowerCase();
+            String andToken = tokeniser.getCurrentToken();
+            if (!andToken.equalsIgnoreCase("AND")) throw new ANDKeywordMissingException();
+            tokeniser.next();
+            String tableName2 = checkTableName().toLowerCase();
+            String onToken = tokeniser.getCurrentToken();
+            if(!onToken.equalsIgnoreCase("ON")) throw new ONKeywordMissingException();
+            tokeniser.next();
+            if (!onToken.equalsIgnoreCase("ON")) throw new ONKeywordMissingException();
+            String attributeName1 = checkAttributeName();
+            andToken = tokeniser.getCurrentToken();
+            if (!andToken.equalsIgnoreCase("AND")) throw new ANDKeywordMissingException();
+            tokeniser.next();
+            String attributeName2 = checkAttributeName();
+            this.response = dbController.joinTables(tableName1, tableName2, attributeName1, attributeName2);
         }
     }
 
@@ -121,12 +115,10 @@ public class SQLParser {
             Condition condition = checkCondition(tableName);
             List<Integer> valuesToDelete = condition.getResultValues();
             dbController.deleteValuesFromTable(tableName, valuesToDelete);
-        } else {
-            tokeniser.previous();
-            tokeniser.previous();
         }
-    }
+        else throw new KeywordMissingException("DELETE or FROM");
 
+    }
     private Condition checkCondition(String tableName) throws SQLQueryException, DBException {
         Table table = dbController.getTable(tableName);
         int openingBrackets = 0;
@@ -140,9 +132,7 @@ public class SQLParser {
                 if(openingBrackets == 0) throw new BracketMismatchException();
                 openingBrackets--;
             }
-            else{
-                queue.add(currentToken);
-            }
+            else queue.add(currentToken);
             index++;
             tokeniser.next();
         }
@@ -187,30 +177,21 @@ public class SQLParser {
         String updateToken = tokeniser.getCurrentToken();
         tokeniser.next();
         if (updateToken.equalsIgnoreCase("UPDATE")) {
-            int initialPos = tokeniser.getPos();
-            try {
-                String tableName = checkTableName().toLowerCase();
-                String setToken = tokeniser.getCurrentToken();
-                tokeniser.next();
-                if (!setToken.equalsIgnoreCase("SET")) {
-                    tokeniser.previous();
-                    throw new KeywordMissingException("SET");
-                }
-                List<NameValuePair> nameValuePairList = checkNameValueList();
-                initialPos = tokeniser.getPos();
-                String whereToken = tokeniser.getCurrentToken();
-                if (!whereToken.equalsIgnoreCase("WHERE")) throw new WhereKeywordMissingException();
-                tokeniser.next();
-                Condition condition = checkCondition(tableName);
-                List<Integer> resultSet = condition.getResultValues();
-                dbController.update(tableName, nameValuePairList, resultSet);
-            } catch (SQLQueryException e) {
-                tokeniser.setPos(initialPos);
-                throw e;
+            String tableName = checkTableName().toLowerCase();
+            String setToken = tokeniser.getCurrentToken();
+            tokeniser.next();
+            if (!setToken.equalsIgnoreCase("SET")) {
+                tokeniser.previous();
+                throw new KeywordMissingException("SET");
             }
-        } else {
-            tokeniser.previous();
-        }
+            List<NameValuePair> nameValuePairList = checkNameValueList();
+            String whereToken = tokeniser.getCurrentToken();
+            if (!whereToken.equalsIgnoreCase("WHERE")) throw new WhereKeywordMissingException();
+            tokeniser.next();
+            Condition condition = checkCondition(tableName);
+            List<Integer> resultSet = condition.getResultValues();
+            dbController.update(tableName, nameValuePairList, resultSet);
+        } else throw new KeywordMissingException("UPDATE");
     }
 
     private List<NameValuePair> checkNameValueList() throws SQLQueryException {
@@ -228,7 +209,6 @@ public class SQLParser {
                 nameValuePair = checkNameValue();
             }
         } catch (SQLQueryException e) {
-            tokeniser.previous();
             if (nameValueList.isEmpty()) throw new EmptyListException("NameValueList");
         }
         return nameValueList;
@@ -239,10 +219,8 @@ public class SQLParser {
         String equalToken = tokeniser.getCurrentToken();
         tokeniser.next();
         Value value;
-        if (!equalToken.equals("=")) {
-            tokeniser.previous();
-            throw new EqualsMissingException();
-        }
+        if (!equalToken.equals("=")) throw new EqualsMissingException();
+
         value = Utils.getValueLiteral(tokeniser.getCurrentToken());
         tokeniser.next();
         return new NameValuePair(attributeName, value);
@@ -278,9 +256,7 @@ public class SQLParser {
         if (starToken.equals("*")) {
             tokeniser.next();
             return new ArrayList<>(List.of("*"));
-        } else {
-            return checkAttributeList();
-        }
+        } else return checkAttributeList();
     }
 
     private void checkInsert() throws SQLQueryException, DBException {
@@ -289,27 +265,19 @@ public class SQLParser {
         currentToken = currentToken + " " + tokeniser.getCurrentToken();
         tokeniser.next();
         if (currentToken.equalsIgnoreCase("INSERT INTO")) {
-            int initialIndex2 = tokeniser.getPos();
-            try {
-                String tableName = checkTableName().toLowerCase();
-                String valuesToken = tokeniser.getCurrentToken();
-                tokeniser.next();
-                if (!valuesToken.equalsIgnoreCase("VALUES"))
-                    throw new SQLQueryException("Illegal Query keyword VALUES not found");
-                String openingBracket = tokeniser.getCurrentToken();
-                tokeniser.next();
-                String closingBracket = tokeniser.get(tokeniser.getSize() - 2);
-                if (!openingBracket.equals("(") && !closingBracket.equals(")"))
-                    throw new BracketMismatchException();
-                List<Value> valueList = checkValueList();
-                dbController.insertValues(tableName, valueList);
-            } catch (SQLQueryException e) {
-                tokeniser.setPos(initialIndex2);
-                throw e;
-            }
-        } else {
-            throw new DBException("Could not parse Query");
-        }
+            String tableName = checkTableName().toLowerCase();
+            String valuesToken = tokeniser.getCurrentToken();
+            tokeniser.next();
+            if (!valuesToken.equalsIgnoreCase("VALUES"))
+                throw new SQLQueryException("Illegal Query keyword VALUES not found");
+            String openingBracket = tokeniser.getCurrentToken();
+            tokeniser.next();
+            String closingBracket = tokeniser.get(tokeniser.getSize() - 2);
+            if (!openingBracket.equals("(") && !closingBracket.equals(")"))
+                throw new BracketMismatchException();
+            List<Value> valueList = checkValueList();
+            dbController.insertValues(tableName, valueList);
+        } else throw new KeywordMissingException("INSERT INTO");
     }
 
     private List<Value> checkValueList() throws SQLQueryException {
@@ -400,20 +368,13 @@ public class SQLParser {
         String currentToken = tokeniser.getCurrentToken();
         tokeniser.next();
         if (currentToken.equalsIgnoreCase("ALTER")) {
-            try {
-                tokeniser.next();
-                String tableName = checkTableName().toLowerCase();
-                AlterationType alterationType = checkAlterationType();
-                String attributeName = checkAttributeName();
-                dbController.alterTable(tableName, alterationType, attributeName);
-            } catch (SQLQueryException e) {
-                tokeniser.previous();
-                tokeniser.previous();
-                throw e;
-            }
-        } else {
-            tokeniser.previous();
+            tokeniser.next();
+            String tableName = checkTableName().toLowerCase();
+            AlterationType alterationType = checkAlterationType();
+            String attributeName = checkAttributeName();
+            dbController.alterTable(tableName, alterationType, attributeName);
         }
+        else throw new KeywordMissingException("ALTER");
     }
 
     private AlterationType checkAlterationType() throws SQLQueryException {
@@ -422,10 +383,8 @@ public class SQLParser {
         AlterationType result;
         if (currentToken.equalsIgnoreCase("ADD")) result = ADD;
         else if (currentToken.equalsIgnoreCase("DROP")) result = DROP;
-        else {
-            tokeniser.previous();
-            throw new SQLQueryException("Invalid AlterationType specified");
-        }
+        else throw new SQLQueryException("Invalid AlterationType specified");
+
         return result;
     }
 
@@ -438,14 +397,12 @@ public class SQLParser {
             if (operationType.equalsIgnoreCase("DATABASE")) {
                 String dbName = checkDatabaseName().toLowerCase();
                 dbController.dropDB(dbName);
-                return;
             } else if (operationType.equalsIgnoreCase("TABLE")) {
                 String tableName = checkTableName().toLowerCase();
                 dbController.dropTable(tableName);
-                return;
-            } else tokeniser.previous();
+            } else throw new SQLQueryException("Invalid DROP command, should include either DATABASE or TABLE");
         }
-        tokeniser.previous();
+        else throw new KeywordMissingException("DROP");
     }
 
     private String checkTableName() throws SQLQueryException {
@@ -491,7 +448,6 @@ public class SQLParser {
     }
 
     private List<String> checkAttributeList() throws SQLQueryException {
-        // TODO to be completed
         List<String> attributeList = new ArrayList<>();
         int initialIndex = tokeniser.getPos();
         String attributeName = checkAttributeName();
@@ -544,9 +500,8 @@ public class SQLParser {
         if (currentToken.equalsIgnoreCase("USE")) {
             String dbName = checkDatabaseName().toLowerCase();
             dbController.setActiveDB(dbName);
-            return;
         }
-        tokeniser.previous();
+        else throw new KeywordMissingException("USE");
     }
 
     private String checkDatabaseName() throws SQLQueryException {
