@@ -130,4 +130,24 @@ public class InsertTest {
         response = dbServer.handleCommand(response);
         assert(response.contains("[ERROR]"));
     }
+
+    @Test
+    public void testInsertWithSpacesInString(){ // TODO take column name from table column list
+        String randomName = generateRandomName();
+        String response = "CREATE DATABASE "+randomName+";";
+        dbServer.handleCommand(response);
+        response = "use "+randomName+";";
+        dbServer.handleCommand(response);
+        String randomTableName = generateRandomName();
+        response = "CREATE TABLE "+randomTableName+"(mark, name, pass);";
+        dbServer.handleCommand(response);
+        String name = generateRandomName();
+        response = "Insert into "+randomTableName.toUpperCase()+" values (30, 'sjksfi akjdnk ', TRUE);";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        response = dbServer.handleCommand("Select NaMe from "+randomTableName+";");
+        String[] lines = response.split("\n");
+        assert(lines.length == 3);
+
+    }
 }

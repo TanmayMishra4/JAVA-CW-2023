@@ -144,4 +144,15 @@ public class CreateTest {
         response = dbServer.handleCommand(response);
         assert(response.contains("[ERROR]"));
     }
+
+    @Test
+    public void testCreateWithSameDBAndTableName(){
+        String randomName = generateRandomName();
+        String response = " CREATE Database testdb;";
+        response = dbServer.handleCommand(response);
+        dbServer.handleCommand("use testdb;");
+        response = "CREATE TABLE testdb;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+    }
 }
