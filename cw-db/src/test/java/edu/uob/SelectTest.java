@@ -1,5 +1,6 @@
 package edu.uob;
 
+import edu.uob.AllEnums.ResponseType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -325,6 +326,33 @@ public class SelectTest {
         response = dbServer.handleCommand(response);
         assert(response.contains("[ERROR]"));
 
+    }
+
+    @Test
+    public void testSelectAfterDroppingTable(){ // TODO not working
+        String randomName = generateRandomName();
+        String response = "CREATE DATABASE "+randomName+";";
+        dbServer.handleCommand(response);
+        String randomTableName = generateRandomName();
+        dbServer.handleCommand("use "+randomName+";");
+        response = "CREATE TABLE "+randomTableName.toLowerCase() + "(name, mark, age, pass, other);";
+        dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('John', 86.23, 12, TRUE, NULL);";
+        dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('Alice', 50.23, 80, FALSE, NULL);";
+        dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('Bob', 12.23, 125, FALSE, NULL);";
+        dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('WhoCares', 90.23, 84, TRUE, NULL);";
+        dbServer.handleCommand(response);
+        dbServer.handleCommand("DROP TABLE "+randomTableName.toUpperCase()+";");
+        response = "Select * from "+randomTableName.toUpperCase()+";";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
+        dbServer.handleCommand("DROP DATABASE "+randomName+";");
+        response = "Select * from "+randomTableName.toUpperCase()+";";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
     }
 }
 

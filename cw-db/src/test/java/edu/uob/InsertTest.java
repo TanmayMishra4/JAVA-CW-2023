@@ -114,4 +114,20 @@ public class InsertTest {
         response = dbServer.handleCommand(response);
         assert(response.contains(name+"\t86.23\tTRUE\t21"));
     }
+
+    @Test
+    public void testInsertWithoutColumns(){
+        String randomName = generateRandomName();
+        String response = "CREATE DATABASE "+randomName+";";
+        dbServer.handleCommand(response);
+        response = "use "+randomName+";";
+        dbServer.handleCommand(response);
+        String randomTableName = generateRandomName();
+        response = "CREATE TABLE "+randomTableName+";";
+        dbServer.handleCommand(response);
+        String name = generateRandomName();
+        response = "Insert into "+randomTableName.toUpperCase()+" values (30, 'sjksfi', TRUE);";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
+    }
 }

@@ -1,7 +1,5 @@
 package edu.uob;
 
-import edu.uob.Controller.IOController;
-import edu.uob.Model.Database;
 import edu.uob.Utils.Utils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
