@@ -23,6 +23,7 @@ public class JoinTest {
     public void setup(){
         if(dbServer == null)
             dbServer = new DBServer();
+        cleanFolder("markbook");
     }
 
     @BeforeAll
@@ -83,7 +84,7 @@ public class JoinTest {
 
     @Test
     public void testJoinNonExistentTable(){
-        dbServer.handleCommand("CREATE DATABASE markbook" + ";");
+        dbServer.handleCommand("CREATE DATABASE slanconc" + ";");
         dbServer.handleCommand("use markbook"  + ";");
         dbServer.handleCommand("CREATE TABLE marks" + "(name, mark, pass);");
         dbServer.handleCommand("INSERT INTO marks" + " VALUES ('Simon', 65, TRUE);"); // test for insert into table when columns not present
@@ -121,8 +122,8 @@ public class JoinTest {
 
     @Test
     public void testSelfJoin(){
-        dbServer.handleCommand("CREATE DATABASE markbook" + ";");
-        dbServer.handleCommand("use markbook"  + ";");
+        dbServer.handleCommand("CREATE DATABASE aidhvi" + ";");
+        dbServer.handleCommand("use aidhvi"  + ";");
         dbServer.handleCommand("CREATE TABLE marks" + "(name, mark, pass);");
         dbServer.handleCommand("INSERT INTO marks" + " VALUES ('Simon', 65, TRUE);"); // test for insert into table when columns not present
         dbServer.handleCommand("INSERT INTO marks" + " VALUES ('Sion', 55, TRUE);");
@@ -146,8 +147,8 @@ public class JoinTest {
 
     @Test
     public void testJoinDifferentCaseColNames(){
-        dbServer.handleCommand("CREATE DATABASE markbook" + ";");
-        dbServer.handleCommand("use markbook"  + ";");
+        dbServer.handleCommand("CREATE DATABASE kjsdnvs" + ";");
+        dbServer.handleCommand("use kjsdnvs"  + ";");
         dbServer.handleCommand("CREATE TABLE marks" + "(name, mark, pass);");
         dbServer.handleCommand("INSERT INTO marks" + " VALUES ('Simon', 65, TRUE);"); // test for insert into table when columns not present
         dbServer.handleCommand("INSERT INTO marks" + " VALUES ('Sion', 55, TRUE);");
