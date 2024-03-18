@@ -1,10 +1,12 @@
 package edu.uob;
 
+import edu.uob.AllEnums.ResponseType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.print.attribute.HashPrintServiceAttributeSet;
 import java.io.File;
 import java.nio.file.Paths;
 
@@ -154,5 +156,31 @@ public class CreateTest {
         response = "CREATE TABLE testdb;";
         response = dbServer.handleCommand(response);
         assert(response.contains("[OK]"));
+    }
+
+    @Test
+    public void testCreateWithSameDBAndTableName2(){
+        String randomName = generateRandomName().toUpperCase();
+        String response = " CREATE Database "+randomName+";";
+        response = dbServer.handleCommand(response);
+        response = dbServer.handleCommand("use "+randomName.toLowerCase()+";");
+        assert(response.contains("[OK]"));
+    }
+
+    @Test
+    public void testCreateDifferentCaseTableName(){
+        String randomName = generateRandomName().toUpperCase();
+        String response = " CREATE Database "+randomName+";";
+        response = dbServer.handleCommand(response);
+        response = dbServer.handleCommand("use "+randomName.toLowerCase()+";");
+        assert(response.contains("[OK]"));
+        randomName = generateRandomName();
+        response = "CREATE TABLE "+randomName.toUpperCase()+";";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        response = "select * from "+randomName.toLowerCase()+";";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+
     }
 }
