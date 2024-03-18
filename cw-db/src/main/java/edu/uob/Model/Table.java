@@ -151,7 +151,7 @@ public class Table {
     private void extractColNames(List<String> wildAttributes, StringBuilder sb) throws Exception {
         int size = wildAttributes.size();
         for (int index = 0; index < size; index++) {
-            String columnName = wildAttributes.get(index);
+            String columnName = getColumn(wildAttributes.get(index)).getName();
             sb.append(columnName);
             if (index == size - 1) sb.append("\n");
             else sb.append("\t");
