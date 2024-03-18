@@ -143,4 +143,29 @@ public class JoinTest {
         assert(lines[3].equals("1\tSion\t55\tTRUE\tSion\t55\tTRUE"));
         assert(lines[4].equals("2\tRob\t35\tFALSE\tRob\t35\tFALSE"));
     }
+
+    @Test
+    public void testJoinDifferentCaseColNames(){
+        dbServer.handleCommand("CREATE DATABASE markbook" + ";");
+        dbServer.handleCommand("use markbook"  + ";");
+        dbServer.handleCommand("CREATE TABLE marks" + "(name, mark, pass);");
+        dbServer.handleCommand("INSERT INTO marks" + " VALUES ('Simon', 65, TRUE);"); // test for insert into table when columns not present
+        dbServer.handleCommand("INSERT INTO marks" + " VALUES ('Sion', 55, TRUE);");
+        dbServer.handleCommand("INSERT INTO marks" + " VALUES ('Rob', 35, FALSE);");
+        dbServer.handleCommand("INSERT INTO marks" + " VALUES ('Chris', 20, FALSE);");
+        dbServer.handleCommand("CREATE TABLE coursework" + "(task, submission);");
+        dbServer.handleCommand("INSERT INTO coursework" + " VALUES ('OXO', 2);"); // test for insert into table when columns not present
+        dbServer.handleCommand("INSERT INTO coursework" + " VALUES ('DB', 0);");
+        dbServer.handleCommand("INSERT INTO coursework" + " VALUES ('OXO', 3);");
+        dbServer.handleCommand("INSERT INTO coursework" + " VALUES ('STAG', 1);");
+        String response = "JOIN coursework AND marks ON SUbmissION AND ID;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        String[] lines = response.split("\n");
+        assert(lines.length == 6);
+        assert(lines[1].equals("id\tcoursework.task\tmarks.name\tmarks.mark\tmarks.pass"));
+        assert(lines[2].equals("0\tOXO\tSimon\t65\tTRUE"));
+        assert(lines[3].equals("1\tDB\tSion\t55\tTRUE"));
+        assert(lines[4].equals("2\tOXO\tRob\t35\tFALSE"));
+    }
 }

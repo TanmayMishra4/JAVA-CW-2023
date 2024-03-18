@@ -354,5 +354,31 @@ public class SelectTest {
         response = dbServer.handleCommand(response);
         assert(response.contains("[ERROR]"));
     }
+
+    @Test
+    public void testSelectDifferentCaseColName(){ // TODO not working
+        String randomName = generateRandomName();
+        String response = "CREATE DATABASE "+randomName+";";
+        dbServer.handleCommand(response);
+        String randomTableName = generateRandomName();
+        dbServer.handleCommand("use "+randomName+";");
+        response = "CREATE TABLE "+randomTableName.toLowerCase() + "(name, mark, age, pass, other);";
+        dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('John', 86.23, 12, TRUE, NULL);";
+        dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('Alice', 50.23, 80, FALSE, NULL);";
+        dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('Bob', 12.23, 125, FALSE, NULL);";
+        dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('WhoCares', 90.23, 84, TRUE, NULL);";
+        dbServer.handleCommand(response);
+        response = "Select NAme from "+randomTableName.toUpperCase()+";";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        String[] lines = response.split("\n");
+        assert(lines[1].equals("name"));
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
+    }
 }
 
