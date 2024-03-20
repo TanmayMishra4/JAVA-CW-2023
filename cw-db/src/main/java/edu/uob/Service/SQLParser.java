@@ -1,4 +1,4 @@
-package edu.uob;
+package edu.uob.Service;
 
 import edu.uob.AllEnums.AlterationType;
 import edu.uob.AllEnums.BoolOperator;
@@ -7,7 +7,6 @@ import edu.uob.AllExceptions.DBExceptions.DBException;
 import edu.uob.AllExceptions.QueryExceptions.*;
 import edu.uob.Controller.DBController;
 import edu.uob.Model.*;
-import edu.uob.Service.Tokeniser;
 import edu.uob.Utils.Utils;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -25,7 +24,7 @@ public class SQLParser {
     private static final HashMap<String, SQLComparator> comparatorSymbols = new HashMap<>();
     private static final HashMap<String, BoolOperator> boolOperatorSymbols = new HashMap<>();
 
-    SQLParser(String command, DBController dbController) {
+    public SQLParser(String command, DBController dbController) {
         response = "";
         SQLParser.dbController = dbController;
         Utils.populateBoolOperatorMap(boolOperatorSymbols);
@@ -33,7 +32,7 @@ public class SQLParser {
         this.tokeniser = new Tokeniser(command);
     }
 
-    public String handleCommand() {// TODO check only one semi colon is present
+    public String handleCommand() {
         response = "";
         try{
             if(checkSemiColon()){
@@ -100,6 +99,7 @@ public class SQLParser {
             String attributeName2 = checkAttributeName();
             this.response = dbController.joinTables(tableName1, tableName2, attributeName1, attributeName2);
         }
+        else throw new KeywordMissingException("JOIN");
     }
 
     private void checkDelete() throws SQLQueryException, DBException {
@@ -117,8 +117,8 @@ public class SQLParser {
             dbController.deleteValuesFromTable(tableName, valuesToDelete);
         }
         else throw new KeywordMissingException("DELETE or FROM");
-
     }
+
     private Condition checkCondition(String tableName) throws SQLQueryException, DBException {
         Table table = dbController.getTable(tableName);
         int openingBrackets = 0;
@@ -288,7 +288,8 @@ public class SQLParser {
             resultList.add(getValue());
             while (!tokeniser.getCurrentToken().equals(")")) {
                 String comma = tokeniser.getCurrentToken();
-                if (comma.equals(")")) break; // TODO add case to check semicolon to not got into infinite loop
+                if(comma.equals(";")) throw new SQLQueryException("Invalid Query");
+                if (comma.equals(")")) break;
                 if (!comma.equals(",")) throw new SQLQueryException("Values should be separated by ,(comma)");
                 tokeniser.next();
                 Value value = getValue();
@@ -417,7 +418,6 @@ public class SQLParser {
     }
 
     private boolean checkCreateTable() throws SQLQueryException, DBException {
-        // TODO check for Bounds on tokens, if out of bounds raise and exception
         String currentToken = tokeniser.getCurrentToken();
         tokeniser.next();
         String tokenAhead = tokeniser.getCurrentToken();
@@ -440,7 +440,6 @@ public class SQLParser {
                 tokeniser.previous();
                 return false;
             }
-            // TODO check for ")" closing bracket
         }
         tokeniser.previous();
         tokeniser.previous();
@@ -505,7 +504,6 @@ public class SQLParser {
     }
 
     private String checkDatabaseName() throws SQLQueryException {
-        // TODO to be completed
         String currentToken = tokeniser.getCurrentToken();
         tokeniser.next();
         Pattern pattern = Pattern.compile("^[A-Za-z0-9]+$");

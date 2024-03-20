@@ -91,31 +91,40 @@ public class IOController {
             file.delete();
             file.createNewFile();
             file.setReadable(true);file.setWritable(true);
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            List<String> columnNames = table.getColumnNames();
-            List<Integer> primaryKeys = new ArrayList<>(table.getPrimaryKeys());
-            primaryKeys.sort(Integer::compareTo);
-            for (int index = 0; index < columnNames.size(); index++) {
-                String columnName = columnNames.get(index);
-                bw.write(columnName);
-                if (index != columnNames.size() - 1) bw.write("\t");
-            }
-            HashMap<String, Column> columnsMap = table.getColumnsMap();
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            List<String> columnNames = writeColumnNames(writer, table);
+            writeValues(table, writer, columnNames);
 
-            for (int index : primaryKeys) {
-                bw.write("\n");
-                for (int indexCol = 0; indexCol < columnNames.size(); indexCol++) {
-                    String columnName = columnNames.get(indexCol);
-                    Column column = columnsMap.get(columnName);
-                    Value val = column.getValue(index);
-                    bw.write(val.getStringVal());
-                    if (indexCol != columnNames.size() - 1) bw.write("\t");
-                }
-            }
-            bw.flush();
-            bw.close();
         } catch (Exception e) {
             throw new DBException("Exception during storing table");
         }
+    }
+
+    private List<String> writeColumnNames(BufferedWriter writer, Table table) throws IOException {
+        List<String> columnNames = table.getColumnNames();
+        for (int index = 0; index < columnNames.size(); index++) {
+            String columnName = columnNames.get(index);
+            writer.write(columnName);
+            if (index != columnNames.size() - 1) writer.write("\t");
+        }
+        return columnNames;
+    }
+
+    private void writeValues(Table table, BufferedWriter writer, List<String> columnNames) throws IOException, DBException {
+        HashMap<String, Column> columnsMap = table.getColumnsMap();
+        List<Integer> primaryKeys = new ArrayList<>(table.getPrimaryKeys());
+        primaryKeys.sort(Integer::compareTo);
+        for (int index : primaryKeys) {
+            writer.write("\n");
+            for (int indexCol = 0; indexCol < columnNames.size(); indexCol++) {
+                String columnName = columnNames.get(indexCol);
+                Column column = columnsMap.get(columnName);
+                Value val = column.getValue(index);
+                writer.write(val.getStringVal());
+                if (indexCol != columnNames.size() - 1) writer.write("\t");
+            }
+        }
+        writer.flush();
+        writer.close();
     }
 }

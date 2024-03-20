@@ -1,12 +1,9 @@
 package edu.uob;
 
-import edu.uob.AllEnums.ResponseType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import javax.print.attribute.HashPrintServiceAttributeSet;
 import java.io.File;
 import java.nio.file.Paths;
 
@@ -181,6 +178,5 @@ public class CreateTest {
         response = "select * from "+randomName.toLowerCase()+";";
         response = dbServer.handleCommand(response);
         assert(response.contains("[OK]"));
-
     }
 }

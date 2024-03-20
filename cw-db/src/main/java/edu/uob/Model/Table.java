@@ -35,7 +35,7 @@ public class Table {
         columnsMap.put(primaryKey, new Column(primaryKey));
     }
 
-    public void addColumn(String columnName) throws DBException { //TODO figure out a way to compare columns with ignore case
+    public void addColumn(String columnName) throws DBException {
         if (columnName.equalsIgnoreCase(primaryKey)) return;
         if (columnsMap.containsKey(primaryKey) && columnName.equalsIgnoreCase(primaryKey))
             throw new DBException("Cannot add column id");
@@ -78,7 +78,7 @@ public class Table {
 
     public void loadDataRows(String[] rowOfValues) throws DBException {
         if (rowOfValues.length != columnNames.size()) throw new NumberOfColumnMismatchException();
-        try {// TODO refactor this method to be the same as above
+        try {
             int primaryKeyValue = Integer.parseInt(rowOfValues[0]);
             for (int index = 0; index < rowOfValues.length; index++) {
                 String columnValue = rowOfValues[index];
@@ -112,7 +112,6 @@ public class Table {
     }
 
     public void removeRowsWithIndex(List<Integer> indexesToDelete) throws DBException {
-        // TODO to be implemented
         for (Column column : columnsMap.values()) {
             column.deleteValuesWithIndex(indexesToDelete);
         }

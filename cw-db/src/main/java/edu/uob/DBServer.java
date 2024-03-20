@@ -1,6 +1,7 @@
 package edu.uob;
 
 import edu.uob.Controller.DBController;
+import edu.uob.Service.SQLParser;
 
 import java.io.*;
 import java.net.ServerSocket;
