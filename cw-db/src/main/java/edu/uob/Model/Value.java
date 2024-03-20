@@ -121,14 +121,12 @@ public class Value{
     private boolean like(Value value) throws DBException{
         if(value.valueType != this.valueType) throw new ValueTypeInconsistent();
         if(value.valueType != STRING) throw new CannotCompareValuesException();
-        // TODO to be implemented
         Pattern pattern = Pattern.compile(".*"+value.toString()+".*");
         Matcher match = pattern.matcher(this.toString());
         return match.find();
     }
 
     private boolean greater(Value other) throws DBException{
-        // TODO check if greater and lesses functions sshoudl be ijplemented for STRING
         ValueType type1 = this.valueType;
         ValueType type2 = other.valueType;
         try{

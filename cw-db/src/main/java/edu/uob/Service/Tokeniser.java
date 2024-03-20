@@ -1,11 +1,11 @@
 package edu.uob.Service;
 
+import edu.uob.AllExceptions.DBExceptions.DBException;
 import edu.uob.AllExceptions.QueryExceptions.SQLQueryException;
 import edu.uob.AllExceptions.QueryExceptions.TokeniserOutOfBoundsException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-// TODO check for semicolons and tab characters
 
 public class Tokeniser {
 	int pos;
@@ -15,7 +15,8 @@ public class Tokeniser {
 		return pos;
 	}
 
-	public void setPos(int pos) {
+	public void setPos(int pos) throws SQLQueryException {
+		if(this.pos >= tokens.size()) throw new TokeniserOutOfBoundsException();
 		this.pos = pos;
 	}
 
@@ -43,10 +44,10 @@ public class Tokeniser {
 			throw new TokeniserOutOfBoundsException();
 		}
 	}
-	public void next(){
+	public void next() throws SQLQueryException{
 		setPos(pos+1);
 	}
-	public void previous(){
+	public void previous() throws SQLQueryException{
 		setPos(pos-1);
 	}
 	public String getLastToken(){
@@ -55,18 +56,13 @@ public class Tokeniser {
 
 	public Tokeniser(String query) {
 		pos = 0;
-		tokens = new ArrayList<String>();
+		tokens = new ArrayList<>();
 		query = query.trim();
-		// Split the query on single quotes (to separate out query characters from string literals)
 		String[] fragments = query.split("'");
-		for (int i=0; i<fragments.length; i++) {
-			// Every odd fragment is a string literal, so just append it without any alterations
-			if (i%2 != 0) tokens.add("'" + fragments[i] + "'");
-				// If it's not a string literal, it must be query characters (which need further processing)
+		for (int index=0; index<fragments.length; index++) {
+			if (index%2 != 0) tokens.add("'" + fragments[index] + "'");
 			else {
-				// Tokenise the fragments into an array of strings
-				String[] nextBatchOfTokens = tokenise(fragments[i]);
-				// Then add these to the "result" array list (needs a bit of conversion)
+				String[] nextBatchOfTokens = tokenise(fragments[index]);
 				tokens.addAll(Arrays.asList(nextBatchOfTokens));
 			}
 		}
@@ -74,17 +70,11 @@ public class Tokeniser {
 	}
 
 	String[] tokenise(String input) {
-		for(int i=0; i<specialCharacters.length ;i++) {
-			input = input.replace(specialCharacters[i], " " + specialCharacters[i] + " ");
+		for(int index=0; index<specialCharacters.length ;index++) {
+			input = input.replace(specialCharacters[index], " " + specialCharacters[index] + " ");
 		}
-		// Remove all double spaces (the previous replacements may had added some)
-		// This is "blind" replacement - replacing if they exist, doing nothing if they don't
 		while (input.contains("  ")) input = input.replaceAll("  ", " ");
-		// Again, remove any whitespace from the beginning and end that might have been introduced
 		input = input.trim();
-		// Finally split on the space char (since there will now ALWAYS be a space between tokens)
 		return input.split(" ");
 	}
-
-
 }

@@ -101,32 +101,6 @@ public class DBController {
         ioController.saveDB(activeDB);
     }
 
-//    public List<Integer> filter(String tableName, String attributeName, SQLComparator sqlComparator, Value value) throws DBException{
-//        tableName = tableName.toLowerCase();
-//        if(!activeDB.hasTable(tableName)) throw new TableDoesNotExistException();
-//        Table table = activeDB.getTables().get(tableName);
-//        return table.filter(attributeName, sqlComparator, value);
-//    }
-//
-//    public List<Integer> filter(String tableName, List<Integer> condition1Values, BoolOperator operator, List<Integer> condition2Values) throws DBException{
-//        tableName = tableName.toLowerCase();
-//        if(!activeDB.hasTable(tableName)) throw new TableDoesNotExistException();
-//        HashSet<Integer> firstSet =  new HashSet<>(condition1Values);
-//        HashSet<Integer> secondSet =  new HashSet<>(condition1Values);
-//        HashSet<Integer> resultSet;
-//        if(operator == AND){
-//            resultSet = new HashSet<>();
-//            for(Integer val :  firstSet){
-//                if(secondSet.contains(val)) resultSet.add(val);
-//            }
-//        }
-//        else{
-//            resultSet = new HashSet<>(secondSet);
-//            resultSet.addAll(firstSet);
-//        }
-//        return new ArrayList<>(resultSet);
-//    }
-
     public void deleteValuesFromTable(String tableName, List<Integer> indexesToDelete) throws DBException {
         tableName = tableName.toLowerCase();
         activeDB.deleteFromTable(tableName, indexesToDelete);
@@ -153,5 +127,4 @@ public class DBController {
         if(!activeDB.hasTable(tableName)) throw new TableDoesNotExistException();
         return activeDB.getTables().get(tableName);
     }
-    // TODO check if column name is same as table name
 }

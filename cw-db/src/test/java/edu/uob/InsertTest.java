@@ -1,6 +1,5 @@
 package edu.uob;
 
-import edu.uob.Model.NULLObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +61,25 @@ public class InsertTest {
         response = "Select  * from "+randomTableName+" ;";
         response = dbServer.handleCommand(response);
         assert(response.contains(name+"\t86.23\tTRUE\t21"));
+    }
+
+    @Test
+    public void testInsert2(){
+        String randomName = generateRandomName();
+        String response = "CREATE DATABASE "+randomName+";";
+        dbServer.handleCommand(response);
+        response = "use "+randomName+";";
+        dbServer.handleCommand(response);
+        String randomTableName = generateRandomName();
+        response = "CREATE TABLE "+randomTableName+" (name, mark, pass, age, other);";
+        dbServer.handleCommand(response);
+        String name = generateRandomName();
+        double mark = 86.23;
+        boolean pass = true;
+        int age = 21;
+        response = "Insert into "+randomTableName+" values ('"+name+"',"+mark+","+pass+","+age+","+"NULL;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[ERROR]"));
     }
 
     @Test

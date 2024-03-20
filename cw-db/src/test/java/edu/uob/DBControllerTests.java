@@ -1,21 +1,10 @@
 package edu.uob;
 
-import edu.uob.AllExceptions.DBExceptions.DBException;
 import edu.uob.Controller.DBController;
-import edu.uob.Controller.IOController;
-import edu.uob.Model.Database;
-import edu.uob.Model.Value;
-import edu.uob.Utils.Utils;
 import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class DBControllerTests {
