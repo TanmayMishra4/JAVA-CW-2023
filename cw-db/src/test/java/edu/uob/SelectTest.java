@@ -294,6 +294,9 @@ public class SelectTest {
         assert(lines.length == 4);
         assert(lines[2].equals("TRUE\t86.23\t12"));
         assert(lines[3].equals("TRUE\t90.23\t84"));
+        response = "Select pass, mark, age from "+randomTableName.toUpperCase()+" where pass == TRUE or (name like and mark > 50);";
+        response = dbServer.handleCommand(response);
+        System.out.println(response);
     }
 
     @Test
@@ -378,6 +381,33 @@ public class SelectTest {
         assert(lines[1].equals("name"));
         response = dbServer.handleCommand(response);
         assert(response.contains("[ERROR]"));
+    }
+
+    @Test
+    public void testSelectEqualsOperator(){
+        String randomName = generateRandomName();
+        String response = "CREATE DATABASE "+randomName+";";
+        dbServer.handleCommand(response);
+        String randomTableName = generateRandomName();
+        response = dbServer.handleCommand("use "+randomName+";");
+        response = "CREATE TABLE "+randomTableName.toLowerCase() + "(name, mark, age, pass, other);";
+        response = dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('John', 86.23, 12, TRUE, NULL);";
+        response = dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('Alice', 50.23, 80, FALSE, NULL);";
+        response = dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('Bob', 12.23, 125, FALSE, NULL);";
+        response = dbServer.handleCommand(response);
+        response = "Insert into "+randomTableName+" values ('WhoCares', 90.23, 84, TRUE, NULL);";
+        response = dbServer.handleCommand(response);
+        response = "Select pass, mark, age from "+randomTableName.toUpperCase()+" where mark >= 50.23;";
+        response = dbServer.handleCommand(response);
+        assert(response.contains("[OK]"));
+        String[] lines = response.split("\n");
+        assert(lines.length == 5);
+        assert(lines[2].equals("TRUE\t86.23\t12"));
+        assert(lines[3].equals("FALSE\t50.23\t80"));
+        assert(lines[4].equals("TRUE\t90.23\t84"));
     }
 }
 

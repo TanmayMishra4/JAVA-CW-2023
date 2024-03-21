@@ -26,6 +26,7 @@ public class Tokeniser {
 
 	String[] specialCharacters = {"(", ")", ",", ";", "==", ">", "<", ">=", "<=", "!="};
 	ArrayList<String> tokens;
+	String[] symbols = {"==", ">", "<", ">=", "<=", "!=", "=", "!"};
 
 	public String getCurrentToken() throws SQLQueryException {
 		try {
@@ -57,6 +58,7 @@ public class Tokeniser {
 	public Tokeniser(String query) {
 		pos = 0;
 		tokens = new ArrayList<>();
+		ArrayList<String> tempList = new ArrayList<>();
 		query = query.trim();
 		String[] fragments = query.split("'");
 		for (int index=0; index<fragments.length; index++) {
@@ -66,7 +68,30 @@ public class Tokeniser {
 				tokens.addAll(Arrays.asList(nextBatchOfTokens));
 			}
 		}
+		tokens = collectSymbols(tokens);
 		size = tokens.size();
+	}
+
+	private ArrayList<String> collectSymbols(ArrayList<String> tokens) {
+		ArrayList<String> res = new ArrayList<>();
+		int size = tokens.size();
+		for(int index=0;index<size;index++){
+			if(isSymbol(tokens.get(index)) && index+1 < size && isSymbol(tokens.get(index+1))){
+				res.add(tokens.get(index)+tokens.get(index+1));
+				index++;
+			}
+			else{
+				res.add(tokens.get(index));
+			}
+		}
+		return res;
+	}
+
+	private boolean isSymbol(String input){
+		for(String symbol : symbols){
+			if(input.equals(symbol)) return true;
+		}
+		return false;
 	}
 
 	String[] tokenise(String input) {
