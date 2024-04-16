@@ -6,6 +6,8 @@ import edu.uob.AllExceptions.QueryExceptions.TokeniserOutOfBoundsException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Tokeniser {
 	int pos;
@@ -55,7 +57,7 @@ public class Tokeniser {
 		return tokens.get(size-1);
 	}
 
-	public Tokeniser(String query) {
+	public Tokeniser(String query) throws SQLQueryException {
 		pos = 0;
 		tokens = new ArrayList<>();
 		ArrayList<String> tempList = new ArrayList<>();
@@ -94,12 +96,15 @@ public class Tokeniser {
 		return false;
 	}
 
-	String[] tokenise(String input) {
+	String[] tokenise(String input) throws SQLQueryException{
 		for(int index=0; index<specialCharacters.length ;index++) {
 			input = input.replace(specialCharacters[index], " " + specialCharacters[index] + " ");
 		}
 		while (input.contains("  ")) input = input.replaceAll("  ", " ");
 		input = input.trim();
+		Pattern pattern = Pattern.compile("[<>=!]\s+[<>=!]]");
+		Matcher matcher = pattern.matcher(input);
+		if(matcher.find()) throw new SQLQueryException("Space between operators");
 		return input.split(" ");
 	}
 }
