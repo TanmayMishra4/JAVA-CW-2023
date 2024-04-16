@@ -1,5 +1,6 @@
 package edu.uob.Model;
 
+import edu.uob.GameEngine;
 import edu.uob.GameEntity;
 
 import java.util.ArrayList;
@@ -58,14 +59,16 @@ public class Location extends GameEntity {
         private ArrayList<GameCharacter> gameGameCharacters;
         private ArrayList<Artefact> artefacts;
         private ArrayList<Furniture> furniture;
+        private GameEngine gameEngine;
 
 
-        public LocationBuilder(String name, String description){
+        public LocationBuilder(String name, String description, GameEngine gameEngine){
             this.name = name;
             this.description = description;
             toLocations = new ArrayList<>();
             artefacts = new ArrayList<>();
             furniture = new ArrayList<>();
+            this.gameEngine = gameEngine;
             gameGameCharacters = new ArrayList<>();
         }
 
@@ -91,10 +94,11 @@ public class Location extends GameEntity {
 
         public Location build(){
             Location location = new Location(name, description);
-            toLocations.forEach(location::addToLocation);
-            furniture.forEach(location::addFurniture);
-            artefacts.forEach(location::addArtefact);
-            gameGameCharacters.forEach(location::addGameCharacter);
+            gameEngine.addEntity(location);
+            toLocations.forEach((e) -> {location.addToLocation(e);gameEngine.addEntity(e);});
+            furniture.forEach((e) -> {location.addFurniture(e);gameEngine.addEntity(e);});
+            artefacts.forEach((e) -> {location.addArtefact(e);gameEngine.addEntity(e);});
+            gameGameCharacters.forEach((e) -> {location.addGameCharacter(e);gameEngine.addEntity(e);});
             return location;
         }
     }

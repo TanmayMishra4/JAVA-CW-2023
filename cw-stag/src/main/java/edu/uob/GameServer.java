@@ -5,13 +5,18 @@ import com.alexmerz.graphviz.Parser;
 import com.alexmerz.graphviz.objects.Edge;
 import com.alexmerz.graphviz.objects.Graph;
 import edu.uob.Model.*;
-
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public final class GameServer {
 
@@ -39,12 +44,52 @@ public final class GameServer {
             parseEntityFile(entitiesFile);
             parseActionsFile(actionsFile);
         }
-        catch (Exception ignored){}
+        catch (Exception exception){
+            System.out.println(exception.getMessage());
+        }
     }
 
-    private void parseActionsFile(File actionsFile) {
-
+    private void parseActionsFile(File actionsFile) throws Exception {
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document document = builder.parse(actionsFile);
+        Element root = document.getDocumentElement();
+        NodeList actions = root.getChildNodes();
+        for(int index=1;index<actions.getLength();index+=2){
+            Element curElement = (Element) actions.item(index);
+            // narration too pls
+            HashSet<String> triggers = extractTriggers((Element) curElement.getElementsByTagName("triggers").item(0));
+            String narration = curElement.getElementsByTagName("narration").item(0).getTextContent();
+            HashSet<GameEntity> subjects = extractEntities((Element) curElement.getElementsByTagName("subjects"));
+            HashSet<GameEntity> consumed = extractEntities((Element) curElement.getElementsByTagName("consumed"));
+            HashSet<GameEntity> produced = extractEntities((Element) curElement.getElementsByTagName("produced"));
+            GameAction gameAction = new GameAction.GameActionBuilder(narration, triggers, subjects)
+                    .setConsumed(consumed)
+                    .setProduced(produced)
+                    .build();
+            gameEngine.addAction(gameAction);
+        }
     }
+
+    private HashSet<String> extractTriggers(Element triggers) {
+        HashSet<String> result = new HashSet<>();
+        NodeList phrases = triggers.getElementsByTagName("keyphrase");
+        for(int index=0;index<phrases.getLength();index++){
+            String phrase = phrases.item(index).getTextContent();
+            result.add(phrase);
+        }
+        return result;
+    }
+
+    private HashSet<GameEntity> extractEntities(Element consumed) throws Exception{
+        NodeList entities = consumed.getElementsByTagName("entity");
+        HashSet<GameEntity> result = new HashSet<>();
+        for(int index=0;index<entities.getLength();index++){
+            String entityName = entities.item(index).getTextContent();
+            result.add(gameEngine.getEntityByName(entityName));
+        }
+        return result;
+    }
+
 
     private void parseEntityFile(File entitiesFile) throws FileNotFoundException, ParseException {
         ArrayList<Graph> sections = getSections(entitiesFile);
@@ -58,7 +103,7 @@ public final class GameServer {
             ArrayList<Furniture> furniture = extractFurniture(location.getSubgraphs());
             ArrayList<GameCharacter> gameCharacters = extractGameChars(location.getSubgraphs());
 
-            Location currentLocation = new Location.LocationBuilder(name, description)
+            Location currentLocation = new Location.LocationBuilder(name, description, gameEngine)
                     .setGameCharacters(gameCharacters)
                     .setArtefacts(artefacts)
                     .setFurniture(furniture)
