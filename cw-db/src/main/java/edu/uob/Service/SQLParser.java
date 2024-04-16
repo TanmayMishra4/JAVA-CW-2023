@@ -20,7 +20,7 @@ import static edu.uob.AllEnums.ResponseType.OK;
 public class SQLParser {
     private static DBController dbController;
     private String response;
-    private final Tokeniser tokeniser;
+    private Tokeniser tokeniser;
     private static final HashMap<String, SQLComparator> comparatorSymbols = new HashMap<>();
     private static final HashMap<String, BoolOperator> boolOperatorSymbols = new HashMap<>();
 
@@ -29,7 +29,12 @@ public class SQLParser {
         SQLParser.dbController = dbController;
         Utils.populateBoolOperatorMap(boolOperatorSymbols);
         Utils.populateComparatorMap(comparatorSymbols);
-        this.tokeniser = new Tokeniser(command);
+        try{
+            this.tokeniser = new Tokeniser(command);
+        }
+        catch (Exception e) {
+            Utils.generateResponse(ERROR, e.getMessage());
+        }
     }
 
     public String handleCommand() {
