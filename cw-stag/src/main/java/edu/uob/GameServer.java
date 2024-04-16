@@ -1,18 +1,27 @@
 package edu.uob;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import com.alexmerz.graphviz.ParseException;
+import com.alexmerz.graphviz.Parser;
+import com.alexmerz.graphviz.objects.Edge;
+import com.alexmerz.graphviz.objects.Graph;
+import edu.uob.Model.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public final class GameServer {
 
     private static final char END_OF_TRANSMISSION = 4;
+    static GameEngine gameEngine;
 
     public static void main(String[] args) throws IOException {
         File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
@@ -30,6 +39,150 @@ public final class GameServer {
     */
     public GameServer(File entitiesFile, File actionsFile) {
         // TODO implement your server logic here
+        gameEngine = new GameEngine();
+        try {
+            parseEntityFile(entitiesFile);
+            parseActionsFile(actionsFile);
+        }
+        catch (Exception exception){
+            System.out.println(exception.getMessage());
+        }
+    }
+
+    private void parseActionsFile(File actionsFile) throws Exception {
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document document = builder.parse(actionsFile);
+        Element root = document.getDocumentElement();
+        NodeList actions = root.getChildNodes();
+        for(int index=1;index<actions.getLength();index+=2){
+            Element curElement = (Element) actions.item(index);
+            // narration too pls
+            HashSet<String> triggers = extractTriggers((Element) curElement.getElementsByTagName("triggers").item(0));
+            String narration = curElement.getElementsByTagName("narration").item(0).getTextContent();
+            HashSet<GameEntity> subjects = extractEntities((Element) curElement.getElementsByTagName("subjects"));
+            HashSet<GameEntity> consumed = extractEntities((Element) curElement.getElementsByTagName("consumed"));
+            HashSet<GameEntity> produced = extractEntities((Element) curElement.getElementsByTagName("produced"));
+            GameAction gameAction = new GameAction.GameActionBuilder(narration, triggers, subjects)
+                    .setConsumed(consumed)
+                    .setProduced(produced)
+                    .build();
+            gameEngine.addAction(gameAction);
+        }
+    }
+
+    private HashSet<String> extractTriggers(Element triggers) {
+        HashSet<String> result = new HashSet<>();
+        NodeList phrases = triggers.getElementsByTagName("keyphrase");
+        for(int index=0;index<phrases.getLength();index++){
+            String phrase = phrases.item(index).getTextContent();
+            result.add(phrase);
+        }
+        return result;
+    }
+
+    private HashSet<GameEntity> extractEntities(Element consumed) throws Exception{
+        NodeList entities = consumed.getElementsByTagName("entity");
+        HashSet<GameEntity> result = new HashSet<>();
+        for(int index=0;index<entities.getLength();index++){
+            String entityName = entities.item(index).getTextContent();
+            result.add(gameEngine.getEntityByName(entityName));
+        }
+        return result;
+    }
+
+
+    private void parseEntityFile(File entitiesFile) throws FileNotFoundException, ParseException {
+        ArrayList<Graph> sections = getSections(entitiesFile);
+        ArrayList<Graph> locations = sections.get(0).getSubgraphs();
+        HashMap<String, Location> allLocations = new HashMap<String, Location>();
+        for(Graph location : locations){
+            var locationDetails = location.getNodes(false);
+            String name = locationDetails.get(0).getId().getId();
+            String description = locationDetails.get(0).getAttribute("description");
+            ArrayList<Artefact> artefacts = extractArtefacts(location.getSubgraphs());
+            ArrayList<Furniture> furniture = extractFurniture(location.getSubgraphs());
+            ArrayList<GameCharacter> gameCharacters = extractGameChars(location.getSubgraphs());
+
+            Location currentLocation = new Location.LocationBuilder(name, description, gameEngine)
+                    .setGameCharacters(gameCharacters)
+                    .setArtefacts(artefacts)
+                    .setFurniture(furniture)
+                    .build();
+            allLocations.put(currentLocation.getName(), currentLocation);
+        }
+        ArrayList<Edge> paths = sections.get(1).getEdges();
+        connectLocations(paths, allLocations);
+        gameEngine.addLocations(allLocations);
+    }
+
+    private void connectLocations(ArrayList<Edge> paths, HashMap<String, Location> allLocations) {
+        for(Edge path : paths){
+            String source = path.getSource().getNode().getId().getId();
+            String destination = path.getTarget().getNode().getId().getId();
+            Location sourceLocation = allLocations.get(source);
+            Location destinationLocation = allLocations.get(destination);
+            sourceLocation.addToLocation(destinationLocation);
+        }
+    }
+
+    private ArrayList<Graph> getSections(File entitiesFile) throws ParseException, FileNotFoundException {
+        Parser parser = new Parser();
+        FileReader reader = new FileReader(entitiesFile);
+        parser.parse(reader);
+        Graph wholeDocument = parser.getGraphs().get(0);
+        ArrayList<Graph> sections = wholeDocument.getSubgraphs();
+        return sections;
+    }
+
+    private ArrayList<GameCharacter> extractGameChars(ArrayList<Graph> locationDetails) {
+        ArrayList<GameCharacter> gameCharacters = new ArrayList<>();
+        for(Graph subgraph : locationDetails){
+            if(subgraph.getId().getId().equals("characters")){
+                var nodeList = subgraph.getNodes(false);
+                for(var node : nodeList){
+                    String name = node.getId().getId();
+                    String description =  node.getAttribute("description");
+                    GameCharacter  gameCharacter = new GameCharacter(name, description);
+                    gameCharacters.add(gameCharacter);
+                }
+                break;
+            }
+        }
+        return gameCharacters;
+    }
+
+    private ArrayList<Furniture> extractFurniture(ArrayList<Graph> locationDetails) {
+        ArrayList<Furniture> furniture = new ArrayList<>();
+        for(Graph subgraph : locationDetails){
+            if(subgraph.getId().getId().equals("furniture")){
+                var nodeList = subgraph.getNodes(false);
+                for(var node : nodeList){
+                    String name = node.getId().getId();
+                    String description =  node.getAttribute("description");
+                    Furniture  currentFurniture = new Furniture(name, description);
+                    furniture.add(currentFurniture);
+                }
+                break;
+            }
+        }
+        return furniture;
+    }
+
+    private ArrayList<Artefact> extractArtefacts(ArrayList<Graph> locationDetails) {
+        ArrayList<Artefact> artefacts = new ArrayList<>();
+        for(Graph subgraph : locationDetails){
+            if(subgraph.getId().getId().equals("artefacts")){
+                var nodeList = subgraph.getNodes(false);
+                for(var node : nodeList){
+                    String name = node.getId().getId();
+                    String description =  node.getAttribute("description");
+                    Artefact  artefact = new Artefact(name, description);
+                    artefacts.add(artefact);
+                }
+                break;
+            }
+        }
+        return artefacts;
     }
 
     /**
