@@ -86,6 +86,7 @@ public class CommandParser {
                 action = matchCorrectAction(associatedActions, player, subjects);
             }
         }
+        if(action == null) throw new Exception("Proper Action not specified");
         return action;
     }
 
@@ -130,6 +131,9 @@ public class CommandParser {
                 break;
             case "drop":
                 genericCMD = new DropCMD(player, commands, gameEngine);
+                break;
+            case "health":
+                genericCMD = new HealthCMD(commands, gameEngine, player);
                 break;
             default : return false;
         }

@@ -23,6 +23,7 @@ public final class GameServer {
 
     private static final char END_OF_TRANSMISSION = 4;
     static GameEngine gameEngine;
+    // TODO handle wrong spelled commands like llok
 
     public static void main(String[] args) throws IOException {
         File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
