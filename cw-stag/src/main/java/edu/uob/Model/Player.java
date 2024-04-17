@@ -44,4 +44,15 @@ public class Player extends GameEntity {
     public boolean equals(Player another){
         return this.getName().equals(another.getName());
     }
+
+    public void addToInventory(GameEntity artefact) {
+        inventory.add(artefact);
+    }
+
+    public void dropArtefact(GameEntity artefact) throws Exception{
+        if(inventory.contains(artefact)){
+            inventory.remove(artefact);
+        }
+        else throw new Exception("Player does not have "+artefact.getName());
+    }
 }

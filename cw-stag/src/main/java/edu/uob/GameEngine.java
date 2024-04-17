@@ -1,5 +1,6 @@
 package edu.uob;
 
+import edu.uob.Model.Artefact;
 import edu.uob.Model.Health;
 import edu.uob.Model.Location;
 import edu.uob.Model.Player;
@@ -69,5 +70,25 @@ public class GameEngine {
         if(currentLocation.containsDestination(destinationName)){
             player.setCurrentLocation(locations.get(destinationName));
         }
+        else{
+            throw new Exception("Player cannot access "+destinationName+" from "+currentLocation.getName());
+        }
+    }
+
+    public boolean hasEntity(String token) {
+        return allEntityMap.containsKey(token);
+    }
+
+    public void pickArtefact(Player player, GameEntity artefact) throws Exception{
+        Location currentLocation = player.getCurrentLocation();
+        if(!currentLocation.hasArtefact(artefact)) throw new Exception("Artefact"+ artefact.getName() +" not present at players location");
+        currentLocation.removeArtefact(artefact);
+        player.addToInventory(artefact);
+    }
+
+    public void dropArtefact(Player player, GameEntity artefact) throws Exception{
+        Location currentLocation  = player.getCurrentLocation();
+        player.dropArtefact(artefact);
+        currentLocation.addArtefact((Artefact) artefact);
     }
 }

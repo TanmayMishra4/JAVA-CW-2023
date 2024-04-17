@@ -1,7 +1,6 @@
 package edu.uob;
 
 import edu.uob.Model.EntityType;
-import edu.uob.Model.Player;
 
 public abstract class GameEntity
 {
@@ -33,5 +32,10 @@ public abstract class GameEntity
 
     public boolean equals(GameEntity another){
         return this.getName().equals(another.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return getName().hashCode();
     }
 }
