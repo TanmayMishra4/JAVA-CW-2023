@@ -37,10 +37,16 @@ public class CommandParser {
         if(executeBasicCMD(player, command)){
             return;
         }
-        executeAdvancedCMD(player, command);
+        else if(executeAdvancedCMD(player, command)){
+            return;
+        }
+        else{
+            response = "Invalid Command : "+command;
+        }
     }
 
-    private void executeAdvancedCMD(Player player, ArrayList<String> command) {
+    private boolean executeAdvancedCMD(Player player, ArrayList<String> command) {
+        return false;
     }
 
     private boolean executeBasicCMD(Player player, ArrayList<String> commands) throws Exception{

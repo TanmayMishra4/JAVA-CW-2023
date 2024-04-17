@@ -57,6 +57,14 @@ public class Location extends GameEntity {
         return toLocations.containsKey(destinationName);
     }
 
+    public boolean hasArtefact(GameEntity artefact) {
+        return artefacts.containsKey(artefact.getName());
+    }
+
+    public void removeArtefact(GameEntity artefact) {
+        artefacts.remove(artefact.getName());
+    }
+
     public static class LocationBuilder {
         private String name, description;
         private ArrayList<Location> toLocations;

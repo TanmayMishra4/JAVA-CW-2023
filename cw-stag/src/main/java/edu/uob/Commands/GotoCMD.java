@@ -15,5 +15,6 @@ public class GotoCMD extends GenericCMD{
 
     private void execute(String destinationName) throws Exception{
         getGameEngine().movePlayer(getPlayer(), destinationName);
+        setResponse("You are now in "+destinationName);
     }
 }

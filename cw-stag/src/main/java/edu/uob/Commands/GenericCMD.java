@@ -26,6 +26,7 @@ public class GenericCMD {
 
     GenericCMD(List<String> commands, GameEngine gameEngine, Player player){
         this.commands = commands;
+        response = "";
         this.gameEngine = gameEngine;
         this.player = player;
     }
