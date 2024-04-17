@@ -95,14 +95,14 @@ public class CommandParser {
     }
 
     private GameAction matchCorrectAction(HashSet<GameAction> associatedActions, Player player, HashSet<GameEntity> subjects) throws Exception{
-        GameEntity currentLocation = player.getCurrentLocation();
+//        GameEntity currentLocation = player.getCurrentLocation();
         for(GameAction action : associatedActions){
             HashSet<GameEntity> avblSubjects = player.getAvailableSubjects();
-            if(isSuperSet(avblSubjects, subjects) && isSuperSet(action.getSubjects(), subjects)){
+            if(isSuperSet(avblSubjects, subjects) && isSuperSet(avblSubjects, action.getSubjects())){
                 return action;
             }
         }
-        throw new Exception("No matching action found satisfying codnitions");
+        throw new Exception("No matching action found or cant satisfy conditions for the command");
     }
 
     private boolean isSuperSet(HashSet<GameEntity> avblSubjects, HashSet<GameEntity> subjects) {
