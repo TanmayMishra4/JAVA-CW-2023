@@ -99,7 +99,7 @@ public class GameEngine {
         return this.actions;
     }
 
-    public void performAction(Player player, GameAction action, HashSet<GameEntity> entitySet) {
+    public void performAction(Player player, GameAction action, HashSet<GameEntity> entitySet) throws Exception{
         for(GameEntity entity : entitySet){
             player.performAction(action, entity);
         }

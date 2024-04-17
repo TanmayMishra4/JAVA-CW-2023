@@ -95,7 +95,6 @@ public class CommandParser {
     }
 
     private GameAction matchCorrectAction(HashSet<GameAction> associatedActions, Player player, HashSet<GameEntity> subjects) throws Exception{
-//        GameEntity currentLocation = player.getCurrentLocation();
         for(GameAction action : associatedActions){
             HashSet<GameEntity> avblSubjects = player.getAvailableSubjects();
             if(isSuperSet(avblSubjects, subjects) && isSuperSet(avblSubjects, action.getSubjects())){

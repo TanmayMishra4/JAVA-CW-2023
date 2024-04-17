@@ -67,7 +67,7 @@ public class Player extends GameCharacter {
         return avblSubjects;
     }
 
-    public void performAction(GameAction action, GameEntity entity) {
+    public void performAction(GameAction action, GameEntity entity) throws Exception{
         HashSet<GameEntity> consumed = action.getConsumed();
         HashSet<GameEntity> produced = action.getProduced();
         consumeEntities(consumed);
@@ -101,7 +101,7 @@ public class Player extends GameCharacter {
         currentLocation.addPathTo((Location) entity);
     }
 
-    private void consumeEntities(HashSet<GameEntity> entities) {
+    private void consumeEntities(HashSet<GameEntity> entities) throws Exception{
         for(GameEntity entity : entities){
             // TODO implement these
             if(entity.getEntityType() == EntityType.LOCATION) consumeLocation(entity);
@@ -118,8 +118,11 @@ public class Player extends GameCharacter {
         storeRoom.addEntity(entity);
     }
 
-    private void decreaseHealth() {
-        if(this.health == 1) playerDead();
+    private void decreaseHealth() throws Exception{
+        if(this.health == 1) {
+            playerDead();
+            throw new Exception("you died and lost all of your items, you must return to the start of the game");
+        }
         this.health--;
     }
 
