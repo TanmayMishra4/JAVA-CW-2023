@@ -1,20 +1,29 @@
 package edu.uob;
 
 import edu.uob.Model.EntityType;
+import edu.uob.Model.Location;
 
 public abstract class GameEntity
 {
     private String name;
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    private Location location;
     private EntityType entityType;
     private String description;
 
-    public GameEntity(String name, String description, EntityType entityType)
-    {
+    public GameEntity(String name, String description, EntityType entityType) {
         this.entityType =  entityType;
         this.name = name;
         this.description = description;
     }
-
 
     public EntityType getEntityType(){
         return entityType;

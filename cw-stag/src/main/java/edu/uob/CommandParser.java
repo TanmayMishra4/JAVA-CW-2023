@@ -2,27 +2,41 @@ package edu.uob;
 
 import edu.uob.Commands.*;
 import edu.uob.Model.Player;
+import edu.uob.Utils.ClassContainer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
 
 public class CommandParser {
 
     private String command;
     private GameEngine gameEngine;
     private String response;
+    private String playerName;
+
+    private ArrayList<String> tokenizedCMD;
 
     public CommandParser(String command, GameEngine gameEngine) throws Exception{
         this.command = command;
         response = "";
+        ClassContainer classContainer = ClassContainer.getInstance();
+        classContainer.setGameEngine(gameEngine);
         this.gameEngine = gameEngine;
         String[] separatedCommand = command.split(":");
         if(separatedCommand.length == 0) throw new Exception("Invalid command, does not include ':' character");
-        String playerName = separatedCommand[0];
+        playerName = separatedCommand[0];
         String remainingCmd = separatedCommand[1].toLowerCase().trim();
-        ArrayList<String> tokenizedCMD = tokenize(remainingCmd);
-        executeCommand(playerName, tokenizedCMD);
+        tokenizedCMD = tokenize(remainingCmd);
+//        executeCommand(playerName, tokenizedCMD);
+    }
+
+    public String getPlayerName(){
+        return playerName;
+    }
+
+    public ArrayList<String> getTokenizedCMD(){
+        return tokenizedCMD;
     }
 
     private ArrayList<String> tokenize(String remainingCmd) {
@@ -32,7 +46,7 @@ public class CommandParser {
         return new ArrayList<>(Arrays.asList(remainingCmd.split(" ")));
     }
 
-    private void executeCommand(String playerName, ArrayList<String> command) throws Exception{
+    public void executeCommand(String playerName, ArrayList<String> command) throws Exception{
         Player player = gameEngine.getPlayerByName(playerName);
         if(executeBasicCMD(player, command)){
             return;
@@ -45,8 +59,56 @@ public class CommandParser {
         }
     }
 
-    private boolean executeAdvancedCMD(Player player, ArrayList<String> command) {
-        return false;
+    private boolean executeAdvancedCMD(Player player, ArrayList<String> command) throws Exception{
+        // TODO what to do when subjects avbl to player but the entity to be consumed is absent?
+        HashSet<GameEntity> entitySet = extractEntities(player, command);
+        GameAction action = extractActionOperation(player, command, entitySet);
+        gameEngine.performAction(player, action, entitySet);
+        return true;
+    }
+
+    private HashSet<GameEntity> extractEntities(Player player, ArrayList<String> command) throws Exception {
+        HashSet<GameEntity> entities = new HashSet<>();
+        for(String word : command){
+            if(gameEngine.hasEntity(word)){
+                entities.add(gameEngine.getEntityByName(word));
+            }
+        }
+        return entities;
+    }
+
+    private GameAction extractActionOperation(Player player, ArrayList<String> command, HashSet<GameEntity> subjects) throws Exception{
+        GameAction action = null;
+        for(String word : command){
+            if(isAction(word)){
+                if(action != null) throw new Exception("Multiple Actions in single command not allowed");
+                HashSet<GameAction> associatedActions = gameEngine.getActions().get(word);
+                action = matchCorrectAction(associatedActions, player, subjects);
+            }
+        }
+        return action;
+    }
+
+    private GameAction matchCorrectAction(HashSet<GameAction> associatedActions, Player player, HashSet<GameEntity> subjects) throws Exception{
+        GameEntity currentLocation = player.getCurrentLocation();
+        for(GameAction action : associatedActions){
+            HashSet<GameEntity> avblSubjects = player.getAvailableSubjects();
+            if(isSuperSet(avblSubjects, subjects) && isSuperSet(action.getSubjects(), subjects)){
+                return action;
+            }
+        }
+        throw new Exception("No matching action found satisfying codnitions");
+    }
+
+    private boolean isSuperSet(HashSet<GameEntity> avblSubjects, HashSet<GameEntity> subjects) {
+        for(GameEntity subject : subjects){
+            if(!avblSubjects.contains(subject)) return false;
+        }
+        return true;
+    }
+
+    private boolean isAction(String word) {
+        return gameEngine.getActions().containsKey(word);
     }
 
     private boolean executeBasicCMD(Player player, ArrayList<String> commands) throws Exception{

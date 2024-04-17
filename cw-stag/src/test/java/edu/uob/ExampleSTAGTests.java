@@ -62,7 +62,22 @@ class ExampleSTAGTests {
       String response = sendCommandToServer("simon: look");
       response = response.toLowerCase();
       assertTrue(response.contains("key"), "Failed attempt to use 'goto' command to move to the forest - there is no key in the current location");
+      response = sendCommandToServer("simon: chop tree");
+      response = response.toLowerCase();
+      assertTrue(response.contains("you cut down the tree with the axe"));
+      response = sendCommandToServer("simon: look");
+      response = response.toLowerCase();
+      assertTrue(response.contains("log"));
   }
+
+    @Test
+    void testChopTree()
+    {
+        sendCommandToServer("simon: goto forest");
+        String response = sendCommandToServer("simon: look");
+        response = response.toLowerCase();
+        assertTrue(response.contains("key"), "Failed attempt to use 'goto' command to move to the forest - there is no key in the current location");
+    }
 
   // Add more unit tests or integration tests here.
 

@@ -9,11 +9,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class GameEngine {
-    HashMap<String, Player> players;
-    Location startingLocation;
-    HashMap<String, GameEntity> allEntityMap;
-    HashMap<String, Location> locations;
-    HashMap<String, HashSet<GameAction>> actions;
+    private HashMap<String, Player> players;
+    private Location startingLocation;
+    private HashMap<String, GameEntity> allEntityMap;
+    private HashMap<String, Location> locations;
+    private HashMap<String, HashSet<GameAction>> actions; // maps trigger word to actions
 
     GameEngine(){
         players = new HashMap<>();
@@ -45,7 +45,7 @@ public class GameEngine {
 
     public Player getPlayerByName(String playerName) {
         if(players.containsKey(playerName)) return players.get(playerName);
-        Player player = new Player(playerName, "PlayerName = "+playerName, startingLocation);
+        Player player = new Player(playerName, "PlayerName = "+playerName, startingLocation, locations.get("storeroom"));
         addPlayer(player);
         return player;
     }
@@ -90,5 +90,15 @@ public class GameEngine {
         Location currentLocation  = player.getCurrentLocation();
         player.dropArtefact(artefact);
         currentLocation.addArtefact((Artefact) artefact);
+    }
+
+    public HashMap<String, HashSet<GameAction>> getActions() {
+        return this.actions;
+    }
+
+    public void performAction(Player player, GameAction action, HashSet<GameEntity> entitySet) {
+        for(GameEntity entity : entitySet){
+            player.performAction(action, entity);
+        }
     }
 }
