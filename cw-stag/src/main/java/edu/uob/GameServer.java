@@ -59,9 +59,9 @@ public final class GameServer {
             // narration too pls
             HashSet<String> triggers = extractTriggers((Element) curElement.getElementsByTagName("triggers").item(0));
             String narration = curElement.getElementsByTagName("narration").item(0).getTextContent();
-            HashSet<GameEntity> subjects = extractEntities((Element) curElement.getElementsByTagName("subjects"));
-            HashSet<GameEntity> consumed = extractEntities((Element) curElement.getElementsByTagName("consumed"));
-            HashSet<GameEntity> produced = extractEntities((Element) curElement.getElementsByTagName("produced"));
+            HashSet<GameEntity> subjects = extractEntities((Element) curElement.getElementsByTagName("subjects").item(0));
+            HashSet<GameEntity> consumed = extractEntities((Element) curElement.getElementsByTagName("consumed").item(0));
+            HashSet<GameEntity> produced = extractEntities((Element) curElement.getElementsByTagName("produced").item(0));
             GameAction gameAction = new GameAction.GameActionBuilder(narration, triggers, subjects)
                     .setConsumed(consumed)
                     .setProduced(produced)
@@ -94,6 +94,7 @@ public final class GameServer {
     private void parseEntityFile(File entitiesFile) throws FileNotFoundException, ParseException {
         ArrayList<Graph> sections = getSections(entitiesFile);
         ArrayList<Graph> locations = sections.get(0).getSubgraphs();
+        Location startingLocation = null;
         HashMap<String, Location> allLocations = new HashMap<String, Location>();
         for(Graph location : locations){
             var locationDetails = location.getNodes(false);
@@ -109,9 +110,13 @@ public final class GameServer {
                     .setFurniture(furniture)
                     .build();
             allLocations.put(currentLocation.getName(), currentLocation);
+            if(startingLocation == null){
+                startingLocation = currentLocation;
+            }
         }
         ArrayList<Edge> paths = sections.get(1).getEdges();
         connectLocations(paths, allLocations);
+        gameEngine.setStartingLocation(startingLocation);
         gameEngine.addLocations(allLocations);
     }
 
@@ -193,7 +198,14 @@ public final class GameServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
-        return "";
+        CommandParser cmdParser;
+        try {
+           cmdParser = new CommandParser(command, gameEngine);
+        }
+        catch(Exception exception){
+            return exception.getMessage();
+        }
+        return cmdParser.getResponse();
     }
 
     /**

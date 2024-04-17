@@ -46,11 +46,15 @@ public class Location extends GameEntity {
     }
 
     public Location(String name, String description) {
-        super(name, description);
+        super(name, description, EntityType.LOCATION);
         toLocations = new HashMap<>();
         furniture = new HashMap<>();
         artefacts = new HashMap<>();
         gameCharacters = new HashMap<>();
+    }
+
+    public boolean containsDestination(String destinationName) {
+        return toLocations.containsKey(destinationName);
     }
 
     public static class LocationBuilder {
