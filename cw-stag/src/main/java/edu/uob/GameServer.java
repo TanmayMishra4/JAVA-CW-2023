@@ -5,6 +5,7 @@ import com.alexmerz.graphviz.Parser;
 import com.alexmerz.graphviz.objects.Edge;
 import com.alexmerz.graphviz.objects.Graph;
 import edu.uob.Model.*;
+import edu.uob.Utils.ClassContainer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -110,6 +111,9 @@ public final class GameServer {
                     .setFurniture(furniture)
                     .build();
             allLocations.put(currentLocation.getName(), currentLocation);
+            artefacts.forEach((e) -> e.setLocation(currentLocation));
+            furniture.forEach((e) -> e.setLocation(currentLocation));
+            gameCharacters.forEach((e) -> e.setLocation(currentLocation));
             if(startingLocation == null){
                 startingLocation = currentLocation;
             }
@@ -200,7 +204,12 @@ public final class GameServer {
         // TODO implement your server logic here
         CommandParser cmdParser;
         try {
-           cmdParser = new CommandParser(command, gameEngine);
+            ClassContainer classContainer = ClassContainer.getInstance();
+            cmdParser = new CommandParser(command, gameEngine);
+            classContainer.setCommandParser(cmdParser);
+            String playerName = cmdParser.getPlayerName();
+            ArrayList<String> tokenizedCMD = cmdParser.getTokenizedCMD();
+            cmdParser.executeCommand(playerName, tokenizedCMD);
         }
         catch(Exception exception){
             return exception.getMessage();

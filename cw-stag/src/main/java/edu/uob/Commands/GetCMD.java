@@ -8,6 +8,8 @@ import edu.uob.Model.Player;
 import java.util.List;
 
 public class GetCMD extends GenericCMD{
+    // TODO deal with decorative commands in simple commands
+
     public GetCMD(Player player, List<String> commands, GameEngine gameEngine) throws Exception {
         super(commands, gameEngine, player);
         GameEntity artefact = null;

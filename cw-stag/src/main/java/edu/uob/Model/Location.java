@@ -5,6 +5,7 @@ import edu.uob.GameEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class Location extends GameEntity {
 
@@ -19,6 +20,14 @@ public class Location extends GameEntity {
 
     public void addToLocation(Location location) {
         this.toLocations.put(location.getName(), location);
+    }
+
+    public void removeEntity(GameEntity entity){
+        switch(entity.getEntityType()){
+            case ARTEFACT -> artefacts.remove(entity.getName());
+            case FURNITURE -> furniture.remove(entity.getName());
+            case CHARACTER -> gameCharacters.remove(entity.getName());
+        }
     }
 
     public HashMap<String, GameCharacter> getGameCharacters() {
@@ -63,6 +72,34 @@ public class Location extends GameEntity {
 
     public void removeArtefact(GameEntity artefact) {
         artefacts.remove(artefact.getName());
+    }
+
+    public HashSet<GameEntity> getAvailableSubjects() {
+        HashSet<GameEntity> avblSubjects = new HashSet<>();
+        avblSubjects.add(this);
+        avblSubjects.addAll(furniture.values());
+        avblSubjects.addAll(artefacts.values());
+        avblSubjects.addAll(toLocations.values());
+        avblSubjects.addAll(gameCharacters.values());
+        return avblSubjects;
+    }
+
+    public void addEntity(GameEntity entity) {
+        switch(entity.getEntityType()){
+            case ARTEFACT -> artefacts.put(entity.getName(), (Artefact) entity);
+            case FURNITURE -> furniture.put(entity.getName(), (Furniture) entity);
+            case CHARACTER -> gameCharacters.put(entity.getName(), (GameCharacter)entity);
+        }
+    }
+
+    public void removePathTo(Location entity) {
+        if(!toLocations.containsKey(entity.getName())) return;
+        toLocations.remove(entity.getName());
+    }
+
+    public void addPathTo(Location entity) {
+        if(toLocations.containsKey(entity.getName())) return;
+        toLocations.put(entity.getName(), entity);
     }
 
     public static class LocationBuilder {
