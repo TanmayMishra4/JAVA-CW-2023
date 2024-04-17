@@ -7,7 +7,7 @@ import edu.uob.Utils.ClassContainer;
 
 import java.util.HashSet;
 
-public class Player extends GameEntity {
+public class Player extends GameCharacter {
     private Location currentLocation;
     private HashSet<GameEntity> inventory;
     private int health;

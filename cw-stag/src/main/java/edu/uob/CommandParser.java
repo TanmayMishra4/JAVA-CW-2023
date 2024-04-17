@@ -70,14 +70,18 @@ public class CommandParser {
     private HashSet<GameEntity> extractEntities(Player player, ArrayList<String> command) throws Exception {
         HashSet<GameEntity> entities = new HashSet<>();
         for(String word : command){
-            if(gameEngine.hasEntity(word)){
+            if(isEntity(word)){
                 entities.add(gameEngine.getEntityByName(word));
             }
         }
         return entities;
     }
 
-    private GameAction extractActionOperation(Player player, ArrayList<String> command, HashSet<GameEntity> subjects) throws Exception{
+    public boolean isEntity(String word){
+        return gameEngine.hasEntity(word);
+    }
+
+    public GameAction extractActionOperation(Player player, ArrayList<String> command, HashSet<GameEntity> subjects) throws Exception{
         GameAction action = null;
         for(String word : command){
             if(isAction(word)){
@@ -108,35 +112,21 @@ public class CommandParser {
         return true;
     }
 
-    private boolean isAction(String word) {
+    public boolean isAction(String word) {
         return gameEngine.getActions().containsKey(word);
     }
 
     private boolean executeBasicCMD(Player player, ArrayList<String> commands) throws Exception{
         String firstCommand = commands.get(0);
         GenericCMD genericCMD;
-        switch(firstCommand){
-            case "look":
-                genericCMD = new LookCMD(player, commands, gameEngine);
-                break;
-            case "goto":
-                genericCMD = new GotoCMD(player, commands, gameEngine);
-                break;
-            case "get":
-                genericCMD = new GetCMD(player, commands, gameEngine);
-                break;
-            case "inventory":
-            case "inv":
-                genericCMD = new InventoryCMD(player, commands, gameEngine);
-                break;
-            case "drop":
-                genericCMD = new DropCMD(player, commands, gameEngine);
-                break;
-            case "health":
-                genericCMD = new HealthCMD(commands, gameEngine, player);
-                break;
-            default : return false;
-        }
+        if(commands.contains("look")) genericCMD = new LookCMD(player, commands, gameEngine);
+        else if(commands.contains("goto")) genericCMD = new GotoCMD(player, commands, gameEngine);
+        else if(commands.contains("get")) genericCMD = new GetCMD(player, commands, gameEngine);
+        else if(commands.contains("inventory") || commands.contains("inv")) genericCMD = new InventoryCMD(player, commands, gameEngine);
+        else if(commands.contains("drop")) genericCMD = new DropCMD(player, commands, gameEngine);
+        else if(commands.contains("health")) genericCMD = new HealthCMD(commands, gameEngine, player);
+        else return false;
+
         response = genericCMD.getResponse();
         return true;
     }

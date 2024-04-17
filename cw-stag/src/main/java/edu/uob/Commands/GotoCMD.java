@@ -1,16 +1,34 @@
 package edu.uob.Commands;
 
+import edu.uob.CommandParser;
 import edu.uob.GameEngine;
 import edu.uob.Model.Player;
+import edu.uob.Utils.ClassContainer;
 
 import java.util.List;
 
 public class GotoCMD extends GenericCMD{
     public GotoCMD(Player player, List<String> commands, GameEngine gameEngine) throws Exception{
         super(commands, gameEngine, player);
-        if(commands.size() != 2) throw new Exception("Goto CMD has more than or less than 2 args");
-        String destinationName = commands.get(1);
-        execute(destinationName);
+        CommandParser cmdParser = ClassContainer.getInstance().getCmdParser();
+        boolean destNameFound = false;
+//        if(commands.size() != 2) throw new Exception("Goto CMD has more than or less than 2 args");
+        for(String name : commands){
+            if(cmdParser.isEntity(name)){
+                if(gameEngine.hasDestinationName(name)){
+                    if(destNameFound) throw new Exception("Two destination names not allowed in goto command");
+                    destNameFound = true;
+                    execute(name);
+                    break;
+                }
+                else{
+                    throw new Exception("Entity name other than location not allowed in goto command");
+                }
+            }
+            if(cmdParser.isAction(name)){
+                throw new Exception("Action not allowed in goto command");
+            }
+        }
     }
 
     private void execute(String destinationName) throws Exception{

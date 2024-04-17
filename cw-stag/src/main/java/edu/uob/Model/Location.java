@@ -102,6 +102,10 @@ public class Location extends GameEntity {
         toLocations.put(entity.getName(), entity);
     }
 
+    public void removeCharacter(Player player) {
+        gameCharacters.remove(player.getName());
+    }
+
     public static class LocationBuilder {
         private String name, description;
         private ArrayList<Location> toLocations;
