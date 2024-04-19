@@ -7,7 +7,7 @@ import edu.uob.Utils.ClassContainer;
 
 import java.util.HashSet;
 
-public class Player extends GameEntity {
+public class Player extends GameCharacter {
     private Location currentLocation;
     private HashSet<GameEntity> inventory;
     private int health;
@@ -67,7 +67,7 @@ public class Player extends GameEntity {
         return avblSubjects;
     }
 
-    public void performAction(GameAction action, GameEntity entity) {
+    public void performAction(GameAction action, GameEntity entity) throws Exception{
         HashSet<GameEntity> consumed = action.getConsumed();
         HashSet<GameEntity> produced = action.getProduced();
         consumeEntities(consumed);
@@ -101,7 +101,7 @@ public class Player extends GameEntity {
         currentLocation.addPathTo((Location) entity);
     }
 
-    private void consumeEntities(HashSet<GameEntity> entities) {
+    private void consumeEntities(HashSet<GameEntity> entities) throws Exception{
         for(GameEntity entity : entities){
             // TODO implement these
             if(entity.getEntityType() == EntityType.LOCATION) consumeLocation(entity);
@@ -113,13 +113,24 @@ public class Player extends GameEntity {
     }
 
     private void consumeEntity(GameEntity entity) {
+         // TODO if this feature works or not
         Location currentLocation = entity.getLocation();
-        currentLocation.removeEntity(entity);
+        if(entity.getEntityType() == EntityType.ARTEFACT)
+            this.consumeArtefact(entity);
+        else
+            currentLocation.removeEntity(entity);
         storeRoom.addEntity(entity);
     }
 
-    private void decreaseHealth() {
-        if(this.health == 1) playerDead();
+    private void consumeArtefact(GameEntity entity) {
+        inventory.remove(entity);
+    }
+
+    private void decreaseHealth() throws Exception{
+        if(this.health == 1) {
+            playerDead();
+            throw new Exception("you died and lost all of your items, you must return to the start of the game");
+        }
         this.health--;
     }
 

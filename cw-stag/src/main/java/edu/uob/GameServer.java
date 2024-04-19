@@ -23,10 +23,11 @@ public final class GameServer {
 
     private static final char END_OF_TRANSMISSION = 4;
     static GameEngine gameEngine;
+    // TODO handle wrong spelled commands like llok
 
     public static void main(String[] args) throws IOException {
-        File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
-        File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
+        File entitiesFile = Paths.get("config" + File.separator + "extended-entities.dot").toAbsolutePath().toFile();
+        File actionsFile = Paths.get("config" + File.separator + "extended-actions.xml").toAbsolutePath().toFile();
         GameServer server = new GameServer(entitiesFile, actionsFile);
         server.blockingListenOn(8888);
     }
@@ -57,7 +58,6 @@ public final class GameServer {
         NodeList actions = root.getChildNodes();
         for(int index=1;index<actions.getLength();index+=2){
             Element curElement = (Element) actions.item(index);
-            // narration too pls
             HashSet<String> triggers = extractTriggers((Element) curElement.getElementsByTagName("triggers").item(0));
             String narration = curElement.getElementsByTagName("narration").item(0).getTextContent();
             HashSet<GameEntity> subjects = extractEntities((Element) curElement.getElementsByTagName("subjects").item(0));

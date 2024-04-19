@@ -51,6 +51,7 @@ public class GameEngine {
     }
 
     public void addPlayer(Player player) {
+        startingLocation.addGameCharacter(player);
         players.put(player.getName(), player);
     }
 
@@ -68,7 +69,9 @@ public class GameEngine {
             throw new Exception("Location "+destinationName+" does not exist");
         }
         if(currentLocation.containsDestination(destinationName)){
+            currentLocation.removeCharacter(player);
             player.setCurrentLocation(locations.get(destinationName));
+            locations.get(destinationName).addGameCharacter(player);
         }
         else{
             throw new Exception("Player cannot access "+destinationName+" from "+currentLocation.getName());
@@ -96,9 +99,13 @@ public class GameEngine {
         return this.actions;
     }
 
-    public void performAction(Player player, GameAction action, HashSet<GameEntity> entitySet) {
+    public void performAction(Player player, GameAction action, HashSet<GameEntity> entitySet) throws Exception{
         for(GameEntity entity : entitySet){
             player.performAction(action, entity);
         }
+    }
+
+    public boolean hasDestinationName(String name) {
+        return locations.containsKey(name);
     }
 }

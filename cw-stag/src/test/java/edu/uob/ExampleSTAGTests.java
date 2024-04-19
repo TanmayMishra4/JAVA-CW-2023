@@ -79,6 +79,16 @@ class ExampleSTAGTests {
         assertTrue(response.contains("key"), "Failed attempt to use 'goto' command to move to the forest - there is no key in the current location");
     }
 
+    @Test
+    void testFight()
+    {
+        sendCommandToServer("simon: goto forest");
+        String response = sendCommandToServer("simon: fight with elf");
+        response = sendCommandToServer("health");
+        response = response.toLowerCase();
+        assertTrue(response.contains("2"), "Failed attempt to use 'goto' command to move to the forest - there is no key in the current location");
+    }
+
   // Add more unit tests or integration tests here.
 
 }
