@@ -58,7 +58,6 @@ public final class GameServer {
         NodeList actions = root.getChildNodes();
         for(int index=1;index<actions.getLength();index+=2){
             Element curElement = (Element) actions.item(index);
-            // narration too pls
             HashSet<String> triggers = extractTriggers((Element) curElement.getElementsByTagName("triggers").item(0));
             String narration = curElement.getElementsByTagName("narration").item(0).getTextContent();
             HashSet<GameEntity> subjects = extractEntities((Element) curElement.getElementsByTagName("subjects").item(0));

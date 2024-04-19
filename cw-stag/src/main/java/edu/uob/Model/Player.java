@@ -113,9 +113,17 @@ public class Player extends GameCharacter {
     }
 
     private void consumeEntity(GameEntity entity) {
+         // TODO if this feature works or not
         Location currentLocation = entity.getLocation();
-        currentLocation.removeEntity(entity);
+        if(entity.getEntityType() == EntityType.ARTEFACT)
+            this.consumeArtefact(entity);
+        else
+            currentLocation.removeEntity(entity);
         storeRoom.addEntity(entity);
+    }
+
+    private void consumeArtefact(GameEntity entity) {
+        inventory.remove(entity);
     }
 
     private void decreaseHealth() throws Exception{
