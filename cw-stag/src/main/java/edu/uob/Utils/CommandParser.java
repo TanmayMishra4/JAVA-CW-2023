@@ -44,6 +44,7 @@ public class CommandParser {
 
     private ArrayList<String> tokenize(String remainingCmd) {
         // TODO look for a more robust way to code this
+        remainingCmd = remainingCmd.replaceAll("[^A-Za-z0-9]", " ");
         remainingCmd = remainingCmd.replaceAll("\\s+", " ");
         remainingCmd = remainingCmd.replaceAll("\\t", " ");
         return new ArrayList<>(Arrays.asList(remainingCmd.split(" ")));

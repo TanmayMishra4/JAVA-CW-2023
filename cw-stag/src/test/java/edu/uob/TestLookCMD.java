@@ -10,7 +10,7 @@ import java.time.Duration;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class testLookCMD {
+public class TestLookCMD {
 
     GameServer server;
 

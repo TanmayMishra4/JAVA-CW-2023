@@ -7,10 +7,9 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class testGotoCMD {
+public class TestGotoCMD {
     GameServer server;
 
     @BeforeEach
@@ -70,7 +69,8 @@ public class testGotoCMD {
     void testGotoCMDSimpleMultipleDest(){
         String response = "simon: GOtO FORest, cellar";
         response = sendCommandToServer(response);
-        assertTrue(response.contains("Player cannot access cellar from cabin"), "Failed attempt to use 'look' command");
+        assertFalse(response.contains("cellar"), "Failed attempt to use 'look' command");
+        assertFalse(response.contains("forest"), "Failed attempt to use 'look' command");
     }
 
     @Test
