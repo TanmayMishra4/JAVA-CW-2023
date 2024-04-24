@@ -1,7 +1,6 @@
 package edu.uob.Model;
 
 import edu.uob.GameEngine;
-import edu.uob.GameEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;

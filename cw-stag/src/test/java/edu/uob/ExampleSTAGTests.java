@@ -17,8 +17,8 @@ class ExampleSTAGTests {
   // Create a new server _before_ every @Test
   @BeforeEach
   void setup() {
-      File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
-      File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
+      File entitiesFile = Paths.get("config" + File.separator + "extended-entities.dot").toAbsolutePath().toFile();
+      File actionsFile = Paths.get("config" + File.separator + "extended-actions.xml").toAbsolutePath().toFile();
       server = new GameServer(entitiesFile, actionsFile);
   }
 
@@ -55,20 +55,14 @@ class ExampleSTAGTests {
   }
 
   // Test that we can goto a different location (we won't get very far if we can't move around the game !)
-  @Test
-  void testGoto()
-  {
-      sendCommandToServer("simon: goto forest");
-      String response = sendCommandToServer("simon: look");
-      response = response.toLowerCase();
-      assertTrue(response.contains("key"), "Failed attempt to use 'goto' command to move to the forest - there is no key in the current location");
-      response = sendCommandToServer("simon: chop tree");
-      response = response.toLowerCase();
-      assertTrue(response.contains("you cut down the tree with the axe"));
-      response = sendCommandToServer("simon: look");
-      response = response.toLowerCase();
-      assertTrue(response.contains("log"));
-  }
+    @Test
+    void testGoto()
+    {
+        sendCommandToServer("simon: goto forest");
+        String response = sendCommandToServer("simon: look");
+        response = response.toLowerCase();
+        assertTrue(response.contains("key"), "Failed attempt to use 'goto' command to move to the forest - there is no key in the current location");
+    }
 
     @Test
     void testChopTree()
@@ -83,8 +77,12 @@ class ExampleSTAGTests {
     void testFight()
     {
         sendCommandToServer("simon: goto forest");
-        String response = sendCommandToServer("simon: fight with elf");
-        response = sendCommandToServer("health");
+        sendCommandToServer("simon: get key");
+        sendCommandToServer("simon: goto cabin");
+        sendCommandToServer("simon: open trapdoor");
+        sendCommandToServer("simon: goto cellar");
+        sendCommandToServer("simon: fight with elf");
+        String response = sendCommandToServer("simon: health");
         response = response.toLowerCase();
         assertTrue(response.contains("2"), "Failed attempt to use 'goto' command to move to the forest - there is no key in the current location");
     }

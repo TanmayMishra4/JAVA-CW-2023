@@ -1,6 +1,9 @@
-package edu.uob;
+package edu.uob.Utils;
 
 import edu.uob.Commands.*;
+import edu.uob.GameEngine;
+import edu.uob.Model.GameAction;
+import edu.uob.Model.GameEntity;
 import edu.uob.Model.Player;
 import edu.uob.Utils.ClassContainer;
 

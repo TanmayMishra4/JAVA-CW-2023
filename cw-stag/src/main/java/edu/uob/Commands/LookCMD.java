@@ -1,8 +1,8 @@
 package edu.uob.Commands;
 
-import edu.uob.CommandParser;
+import edu.uob.Utils.CommandParser;
 import edu.uob.GameEngine;
-import edu.uob.GameEntity;
+import edu.uob.Model.GameEntity;
 import edu.uob.Model.Location;
 import edu.uob.Model.Player;
 import edu.uob.Utils.ClassContainer;
