@@ -6,6 +6,7 @@ import com.alexmerz.graphviz.objects.Edge;
 import com.alexmerz.graphviz.objects.Graph;
 import edu.uob.Model.*;
 import edu.uob.Utils.ClassContainer;
+import edu.uob.Utils.CommandParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

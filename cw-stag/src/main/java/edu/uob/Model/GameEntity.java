@@ -1,7 +1,4 @@
-package edu.uob;
-
-import edu.uob.Model.EntityType;
-import edu.uob.Model.Location;
+package edu.uob.Model;
 
 public abstract class GameEntity
 {

@@ -1,8 +1,6 @@
 package edu.uob.Model;
 
-import edu.uob.CommandParser;
-import edu.uob.GameAction;
-import edu.uob.GameEntity;
+import edu.uob.Utils.CommandParser;
 import edu.uob.Utils.ClassContainer;
 
 import java.util.HashSet;

@@ -1,9 +1,6 @@
 package edu.uob;
 
-import edu.uob.Model.Artefact;
-import edu.uob.Model.Health;
-import edu.uob.Model.Location;
-import edu.uob.Model.Player;
+import edu.uob.Model.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,7 +81,7 @@ public class GameEngine {
 
     public void pickArtefact(Player player, GameEntity artefact) throws Exception{
         Location currentLocation = player.getCurrentLocation();
-        if(!currentLocation.hasArtefact(artefact)) throw new Exception("Artefact"+ artefact.getName() +" not present at players location");
+        if(!currentLocation.hasArtefact(artefact)) throw new Exception("Artefact "+ artefact.getName() +" not present at players location");
         currentLocation.removeArtefact(artefact);
         player.addToInventory(artefact);
     }
