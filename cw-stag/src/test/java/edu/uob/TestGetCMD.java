@@ -54,4 +54,18 @@ public class TestGetCMD {
         response = sendCommandToServer(response);
         assertTrue(response.contains("No entity"), "Failed attempt to use 'look' command");
     }
+
+    @Test
+    void testGetCMDInvalidEntity(){
+        String response = "get computer";
+        response = sendCommandToServer(response);
+        assertTrue(response.contains("No entity"), "Failed attempt to use 'look' command");
+    }
+
+    @Test
+    void testGetCMDInvalidEntity2(){
+        String response = "get key from forest";
+        response = sendCommandToServer(response);
+        assertTrue(response.contains("not allowed"), "Failed attempt to use 'look' command");
+    }
 }
