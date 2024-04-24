@@ -9,7 +9,7 @@ import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class testInventoryCMD {
+public class TestInventoryCMD {
 
     GameServer server;
 
