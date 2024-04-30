@@ -83,7 +83,7 @@ public class TestExtendedConfigFile {
     }
 
     @Test
-    void testUnlockShortenedCMD2(){ // TODO check if trapdoor should still be visible after unlock CMD or should be replaced with cellar
+    void testUnlockShortenedCMD2(){
         String response = "goto forest";
         sendCommandToServer(response);
         sendCommandToServer("get key");
@@ -101,5 +101,17 @@ public class TestExtendedConfigFile {
         assertFalse(response.contains("unlock with key"));
         response = sendCommandToServer("look");
         assertFalse(response.contains("cellar"));
+    }
+
+    @Test
+    void testChopCMD(){
+        String response = "get axe";
+        response = sendCommandToServer(response);
+        sendCommandToServer("goto forest");
+        response = sendCommandToServer("chop tree");
+        assertTrue(response.contains("cut down the tree"));
+        response = sendCommandToServer("look");
+        assertFalse(response.contains("tree"));
+        assertTrue(response.contains("log"));
     }
 }
