@@ -11,10 +11,10 @@
         </subjects>
         <consumed>
             <entity>key</entity>
+            <entity>forest</entity>
         </consumed>
         <produced>
             <entity>cellar</entity>
-            <entity>forest</entity>
         </produced>
         <narration>You unlock the door and see steps leading down into a cellar</narration>
     </action>
