@@ -68,8 +68,8 @@ public class Player extends GameCharacter {
     public void performAction(GameAction action, GameEntity entity) throws Exception{
         HashSet<GameEntity> consumed = action.getConsumed();
         HashSet<GameEntity> produced = action.getProduced();
-        consumeEntities(consumed);
-        produceEntities(produced);
+//        consumeEntities(consumed);
+//        produceEntities(produced);
         CommandParser cmdParser = ClassContainer.getInstance().getCmdParser();
         cmdParser.setResponse(action.getNarration());
     }
@@ -85,7 +85,7 @@ public class Player extends GameCharacter {
         }
     }
 
-    private void increaseHealth() {
+    public void increaseHealth() {
         this.health = Math.max(3, this.health+1);
     }
 
@@ -95,7 +95,7 @@ public class Player extends GameCharacter {
         currentLocation.addEntity(entity);
     }
 
-    private void produceLocation(GameEntity entity) {
+    public void produceLocation(GameEntity entity) {
         currentLocation.addPathTo((Location) entity);
     }
 
@@ -124,7 +124,7 @@ public class Player extends GameCharacter {
         inventory.remove(entity);
     }
 
-    private void decreaseHealth() throws Exception{
+    public void decreaseHealth() throws Exception{
         if(this.health == 1) {
             playerDead();
             throw new Exception("you died and lost all of your items, you must return to the start of the game");
@@ -141,7 +141,7 @@ public class Player extends GameCharacter {
         classContainer.getCmdParser().setResponse("you died and lost all of your items, you must return to the start of the game");
     }
 
-    private void consumeLocation(GameEntity entity) {
+    public void consumeLocation(GameEntity entity) {
         currentLocation.removePathTo((Location) entity);
     }
 }
