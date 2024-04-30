@@ -99,6 +99,48 @@ public class GameEngine {
     public void performAction(Player player, GameAction action, HashSet<GameEntity> entitySet) throws Exception{
         for(GameEntity entity : entitySet){
             player.performAction(action, entity);
+            HashSet<GameEntity> consumedEntities = action.getConsumed();
+            HashSet<GameEntity> producedEntities = action.getProduced();
+            consumeEntities(consumedEntities, player);
+            produceEntities(producedEntities, player);
+        }
+    }
+
+    private void consumeEntities(HashSet<GameEntity> consumedEntities, Player player) throws Exception {
+        // TODO check if these entities exist or not
+        for(GameEntity entity : consumedEntities){
+            if(!allEntityMap.containsKey(entity.getName())) throw new Exception("entity does not exist");
+            if(entity.getEntityType() == EntityType.LOCATION){
+                player.consumeLocation(entity);
+            }
+            else if(entity.getEntityType() == EntityType.HEALTH){
+                player.decreaseHealth();
+            }
+            else{
+                Location currentLocation = entity.getLocation();
+                Location storeRoom = locations.get("storeroom");
+                currentLocation.removeEntity(entity);
+                storeRoom.addEntity(entity);
+            }
+        }
+    }
+
+    private void produceEntities(HashSet<GameEntity> consumedEntities, Player player) throws Exception {
+        // TODO check if these entities exist or not
+        for(GameEntity entity : consumedEntities){
+            if(!allEntityMap.containsKey(entity.getName())) throw new Exception("entity does not exist");
+            if(entity.getEntityType() == EntityType.LOCATION){
+                player.produceLocation(entity);
+            }
+            else if(entity.getEntityType() == EntityType.HEALTH){
+                player.increaseHealth();
+            }
+            else{
+                Location entityLocation = entity.getLocation();
+                Location currentLocation = player.getCurrentLocation();
+                entityLocation.removeEntity(entity);
+                currentLocation.addEntity(entity);
+            }
         }
     }
 
