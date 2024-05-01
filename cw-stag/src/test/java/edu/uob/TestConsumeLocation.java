@@ -37,4 +37,11 @@ public class TestConsumeLocation {
         assertFalse(response.contains("forest"));
     }
 
+    @Test
+    void testProduceLocation(){
+        String response = "drink potion";
+        sendCommandToServer(response);
+        response = sendCommandToServer("look");
+        assertTrue(response.contains("riverbank"));
+    }
 }

@@ -50,6 +50,7 @@
         </consumed>
         <produced>
             <entity>health</entity>
+            <entity>riverbank</entity>
         </produced>
         <narration>You drink the potion and your health improves</narration>
     </action>
