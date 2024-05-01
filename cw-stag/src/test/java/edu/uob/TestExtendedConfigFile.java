@@ -2,6 +2,7 @@ package edu.uob;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -120,5 +121,38 @@ public class TestExtendedConfigFile {
         response = sendCommandToServer("look");
         assertFalse(response.contains("tree"));
         assertTrue(response.contains("log"));
+    }
+
+    @Test
+    void testDeadPlayer(){
+        String response = "goto forest";
+        response = sendCommandToServer(response);
+        response = sendCommandToServer("get key");
+        response = sendCommandToServer("goto cabin");
+        response = sendCommandToServer("open trapdoor");
+        response = sendCommandToServer("goto cellar");
+        response = sendCommandToServer("fight elf");
+        response = sendCommandToServer("fight elf");
+        response = sendCommandToServer("health");
+        assertTrue(response.contains("1"));
+        response = sendCommandToServer("fight elf");
+        assertTrue(response.contains("died"));
+        response = sendCommandToServer("look");
+        assertTrue(response.contains("cabin"));
+        response = sendCommandToServer("health");
+        assertTrue(response.contains("3"));
+        response = sendCommandToServer("inv");
+        assertFalse(response.contains("key"));
+        response = sendCommandToServer("goto cellar");
+        response = sendCommandToServer("look");
+        assertTrue(response.contains("key"));
+    }
+
+    @Test
+    void testIncreaseHealth(){
+        String response = "drink potion";
+        response = sendCommandToServer(response);
+        response = sendCommandToServer("health");
+        assertTrue(response.contains("4"));
     }
 }
