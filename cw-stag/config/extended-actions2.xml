@@ -28,6 +28,7 @@
         <subjects>
             <entity>tree</entity>
             <entity>axe</entity>
+            <entity>coin</entity>
         </subjects>
         <consumed>
             <entity>tree</entity>
@@ -63,6 +64,7 @@
         </triggers>
         <subjects>
             <entity>elf</entity>
+            <entity>gold</entity>
         </subjects>
         <consumed>
             <entity>health</entity>
