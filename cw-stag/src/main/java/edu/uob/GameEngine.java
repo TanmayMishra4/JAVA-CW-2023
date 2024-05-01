@@ -97,6 +97,8 @@ public class GameEngine {
     }
 
     public void performAction(Player player, GameAction action, HashSet<GameEntity> entitySet) throws Exception{
+        HashSet<GameEntity> actionSubjects = action.getSubjects();
+        if(!checkAllEntitiesInCMD(actionSubjects, entitySet)) throw new Exception("Could not match command");
         for(GameEntity entity : entitySet){
             player.performAction(action, entity);
             HashSet<GameEntity> consumedEntities = action.getConsumed();
@@ -104,6 +106,13 @@ public class GameEngine {
             consumeEntities(consumedEntities, player);
             produceEntities(producedEntities, player);
         }
+    }
+
+    private boolean checkAllEntitiesInCMD(HashSet<GameEntity> actionSubjects, HashSet<GameEntity> entitySet) {
+        for(GameEntity entity : entitySet){
+            if(!actionSubjects.contains(entity)) return false;
+        }
+        return true;
     }
 
     private void consumeEntities(HashSet<GameEntity> consumedEntities, Player player) throws Exception {

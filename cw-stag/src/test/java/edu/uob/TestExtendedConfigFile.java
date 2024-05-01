@@ -47,6 +47,13 @@ public class TestExtendedConfigFile {
     }
 
     @Test
+    void testDrinkCommand3(){ // TODO extraneous entities
+        String response = sendCommandToServer("get axe");
+        response = sendCommandToServer("drink potion with axe");
+        assertFalse(response.contains("drink the potion"), "Failed attempt to use 'look' command");
+    }
+
+    @Test
     void testUnlockCMD(){
         String response = "goto forest";
         sendCommandToServer(response);
