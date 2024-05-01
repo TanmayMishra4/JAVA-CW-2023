@@ -99,12 +99,15 @@ public class CommandParser {
     }
 
     private GameAction matchCorrectAction(HashSet<GameAction> associatedActions, Player player, HashSet<GameEntity> subjects) throws Exception{
+        GameAction resultAction = null;
         for(GameAction action : associatedActions){
             HashSet<GameEntity> avblSubjects = player.getAvailableSubjects();
             if(isSuperSet(avblSubjects, subjects) && isSuperSet(avblSubjects, action.getSubjects())){
-                return action;
+                if(resultAction == null) resultAction = action;
+                else throw new Exception("Multiple Actions match the command");
             }
         }
+        if(resultAction != null) return resultAction;
         throw new Exception("No matching action found or cant satisfy conditions for the command");
     }
 

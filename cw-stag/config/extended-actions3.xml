@@ -7,6 +7,7 @@
         </triggers>
         <subjects>
             <entity>trapdoor</entity>
+            <entity>axe</entity>
             <entity>key</entity>
         </subjects>
         <consumed>
@@ -15,6 +16,24 @@
         </consumed>
         <produced>
             <entity>cellar</entity>
+        </produced>
+        <narration>You unlock the door and see steps leading down into a cellar</narration>
+    </action>
+
+    <action>
+        <triggers>
+            <keyphrase>open</keyphrase>
+        </triggers>
+        <subjects>
+            <entity>trapdoor</entity>
+            <entity>key</entity>
+        </subjects>
+        <consumed>
+            <entity>key</entity>
+            <entity>forest</entity>
+        </consumed>
+        <produced>
+            <entity>riverbank</entity>
         </produced>
         <narration>You unlock the door and see steps leading down into a cellar</narration>
     </action>
