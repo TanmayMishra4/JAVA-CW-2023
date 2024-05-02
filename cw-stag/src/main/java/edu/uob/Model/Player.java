@@ -111,4 +111,11 @@ public class Player extends GameCharacter {
     public void consumeLocation(GameEntity entity) {
         currentLocation.removePathTo((Location) entity);
     }
+
+    public boolean hasEntities(HashSet<GameEntity> producedEntities) {
+        for(GameEntity entity : producedEntities){
+            if(inventory.contains(entity)) return true;
+        }
+        return false;
+    }
 }

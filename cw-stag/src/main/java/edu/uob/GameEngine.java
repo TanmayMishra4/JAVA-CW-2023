@@ -99,12 +99,23 @@ public class GameEngine {
     public void performAction(Player player, GameAction action, HashSet<GameEntity> entitySet) throws Exception{
         HashSet<GameEntity> actionSubjects = action.getSubjects();
         if(!checkAllEntitiesInCMD(actionSubjects, entitySet)) throw new Exception("Could not match command");
+        HashSet<GameEntity> consumedEntities = action.getConsumed();
+        HashSet<GameEntity> producedEntities = action.getProduced();
+        // to check if consumed and produced entities are not in another player's inventory
+        checkEntityAvbl(producedEntities, consumedEntities, player);
         for(GameEntity entity : entitySet){
             player.performAction(action, entity);
-            HashSet<GameEntity> consumedEntities = action.getConsumed();
-            HashSet<GameEntity> producedEntities = action.getProduced();
-            consumeEntities(consumedEntities, player);
-            produceEntities(producedEntities, player);
+        }
+        consumeEntities(consumedEntities, player);
+        produceEntities(producedEntities, player);
+    }
+
+    private void checkEntityAvbl(HashSet<GameEntity> producedEntities, HashSet<GameEntity> consumedEntities, Player player) throws Exception {
+        for(Player otherPlayer : players.values()){
+            if(otherPlayer.getName().equals(player.getName())) continue;
+            if(otherPlayer.hasEntities(producedEntities) || otherPlayer.hasEntities(consumedEntities)){
+                throw new Exception("Consumed or produced entity in another player's inv");
+            }
         }
     }
 
