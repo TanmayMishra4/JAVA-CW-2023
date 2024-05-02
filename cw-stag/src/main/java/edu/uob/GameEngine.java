@@ -129,6 +129,8 @@ public class GameEngine {
                 Location currentLocation = entity.getLocation();
                 Location storeRoom = locations.get("storeroom");
                 currentLocation.removeEntity(entity);
+                // TODO remove the consumed entity from the player inventory as well if the player has it
+                player.removeFromInventory(entity);
                 storeRoom.addEntity(entity);
             }
         }
