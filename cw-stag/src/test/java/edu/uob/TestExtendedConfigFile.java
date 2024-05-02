@@ -37,7 +37,7 @@ public class TestExtendedConfigFile {
         assertFalse(response.contains("potion"));
         response = "health";
         response = sendCommandToServer(response);
-        assertTrue(response.contains("4"));
+        assertTrue(response.contains("3"));
     }
 
     @Test
@@ -149,10 +149,54 @@ public class TestExtendedConfigFile {
     }
 
     @Test
+    void testInceaseHealthOfPlayer(){
+        String response = "goto forest";
+        response = sendCommandToServer(response);
+        response = sendCommandToServer("get key");
+        response = sendCommandToServer("goto cabin");
+        response = sendCommandToServer("open trapdoor");
+        response = sendCommandToServer("goto cellar");
+        response = sendCommandToServer("fight elf");
+        response = sendCommandToServer("fight elf");
+        response = sendCommandToServer("health");
+        assertTrue(response.contains("1"));
+        response = sendCommandToServer("goto cabin");
+        response = sendCommandToServer("drink potion");
+        assertTrue(response.contains("drink the potion"));
+        response = sendCommandToServer("health");
+        assertTrue(response.contains("2"));
+    }
+
+    @Test
+    void testDoubleDrinkPotion(){
+        String response = "goto forest";
+        response = sendCommandToServer(response);
+        response = sendCommandToServer("get key");
+        response = sendCommandToServer("goto cabin");
+        response = sendCommandToServer("open trapdoor");
+        response = sendCommandToServer("goto cellar");
+        response = sendCommandToServer("fight elf");
+        response = sendCommandToServer("fight elf");
+        response = sendCommandToServer("health");
+        assertTrue(response.contains("1"));
+        response = sendCommandToServer("goto cabin");
+        response = sendCommandToServer("drink potion");
+        assertTrue(response.contains("drink the potion"));
+        response = sendCommandToServer("health");
+        assertTrue(response.contains("2"));
+        response = sendCommandToServer("look");
+        assertFalse(response.contains("potion"));
+        response = sendCommandToServer("drink potion");
+        assertFalse(response.contains("drink the potion"));
+        response = sendCommandToServer("health");
+        assertTrue(response.contains("2"));
+    }
+
+    @Test
     void testIncreaseHealth(){
         String response = "drink potion";
         response = sendCommandToServer(response);
         response = sendCommandToServer("health");
-        assertTrue(response.contains("4"));
+        assertTrue(response.contains("3"));
     }
 }

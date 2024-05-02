@@ -86,7 +86,7 @@ public class Player extends GameCharacter {
     }
 
     public void increaseHealth() {
-        this.health = Math.max(3, this.health+1);
+        this.health = Math.min(3, this.health+1);
     }
 
     private void produceEntity(GameEntity entity) {
