@@ -55,4 +55,39 @@ public class TestConsumeAndProduce {
         response = sendCommandToServer("simon: look");
         assertFalse(response.contains("potion"));
     }
+
+    @Test
+    void testProduceEntityNotWithAnotherPerson(){
+        String response = "simon: goto forest";
+        response = sendCommandToServer(response);
+        response = sendCommandToServer("simon: get key");
+        response = sendCommandToServer("luke: get potion");
+        response = sendCommandToServer("simon: goto cabin");
+        response = sendCommandToServer("simon: get coin");
+        response = sendCommandToServer("simon: open trapdoor");
+        response = sendCommandToServer("simon: goto cellar");
+        response = sendCommandToServer("simon: pay elf");
+        assertTrue(response.contains("pay the elf"));
+        response = sendCommandToServer("simon: inv");
+        assertFalse(response.contains("coin"));
+        response = sendCommandToServer("simon: look");
+        assertTrue(response.contains("horn") && response.contains("shovel"));
+    }
+
+    @Test
+    void testProduceEntityWithAnotherPerson(){
+        String response = "simon: goto forest";
+        response = sendCommandToServer(response);
+        response = sendCommandToServer("simon: get key");
+        response = sendCommandToServer("luke: get potion");
+        response = sendCommandToServer("simon: goto cabin");
+        response = sendCommandToServer("simon: get coin");
+        response = sendCommandToServer("simon: open trapdoor");
+        response = sendCommandToServer("simon: goto cellar");
+        response = sendCommandToServer("luke: goto forest");
+        response = sendCommandToServer("luke: goto riverbank");
+        response = sendCommandToServer("luke: get horn");
+        response = sendCommandToServer("simon: pay elf");
+        assertFalse(response.contains("pay the elf"));
+    }
 }
