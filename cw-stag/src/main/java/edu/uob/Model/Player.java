@@ -68,22 +68,10 @@ public class Player extends GameCharacter {
     public void performAction(GameAction action, GameEntity entity) throws Exception{
         HashSet<GameEntity> consumed = action.getConsumed();
         HashSet<GameEntity> produced = action.getProduced();
-//        consumeEntities(consumed);
-//        produceEntities(produced);
         CommandParser cmdParser = ClassContainer.getInstance().getCmdParser();
         cmdParser.setResponse(action.getNarration());
     }
 
-    private void produceEntities(HashSet<GameEntity> entities) {
-        for(GameEntity entity : entities){
-            // TODO implement these
-            if(entity.getEntityType() == EntityType.LOCATION) produceLocation(entity);
-            else if(entity.getEntityType() == EntityType.ARTEFACT) produceEntity(entity);
-            else if(entity.getEntityType() == EntityType.FURNITURE) produceEntity(entity);
-            else if(entity.getEntityType() == EntityType.CHARACTER) produceEntity(entity);
-            else if(entity.getEntityType() == EntityType.HEALTH) increaseHealth();
-        }
-    }
 
     public void increaseHealth() {
         this.health = Math.min(3, this.health+1);
@@ -99,28 +87,7 @@ public class Player extends GameCharacter {
         currentLocation.addPathTo((Location) entity);
     }
 
-    private void consumeEntities(HashSet<GameEntity> entities) throws Exception{
-        for(GameEntity entity : entities){
-            // TODO implement these
-            if(entity.getEntityType() == EntityType.LOCATION) consumeLocation(entity);
-            else if(entity.getEntityType() == EntityType.ARTEFACT) consumeEntity(entity);
-            else if(entity.getEntityType() == EntityType.FURNITURE) consumeEntity(entity);
-            else if(entity.getEntityType() == EntityType.CHARACTER) consumeEntity(entity);
-            else if(entity.getEntityType() == EntityType.HEALTH) decreaseHealth();
-        }
-    }
-
-    private void consumeEntity(GameEntity entity) {
-         // TODO if this feature works or not
-        Location currentLocation = entity.getLocation();
-        if(entity.getEntityType() == EntityType.ARTEFACT)
-            this.consumeArtefact(entity);
-        else
-            currentLocation.removeEntity(entity);
-        storeRoom.addEntity(entity);
-    }
-
-    private void consumeArtefact(GameEntity entity) {
+    public void removeFromInventory(GameEntity entity) {
         inventory.remove(entity);
     }
 

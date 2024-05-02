@@ -129,12 +129,17 @@ public class TestExtendedConfigFile {
         response = sendCommandToServer(response);
         response = sendCommandToServer("get key");
         response = sendCommandToServer("goto cabin");
+        response = sendCommandToServer("get potion");
         response = sendCommandToServer("open trapdoor");
+        response = sendCommandToServer("inv");
+        assertFalse(response.contains("key"));
         response = sendCommandToServer("goto cellar");
         response = sendCommandToServer("fight elf");
         response = sendCommandToServer("fight elf");
         response = sendCommandToServer("health");
         assertTrue(response.contains("1"));
+        response = sendCommandToServer("inv");
+        assertTrue(response.contains("potion"));
         response = sendCommandToServer("fight elf");
         assertTrue(response.contains("died"));
         response = sendCommandToServer("look");
@@ -145,7 +150,7 @@ public class TestExtendedConfigFile {
         assertFalse(response.contains("key"));
         response = sendCommandToServer("goto cellar");
         response = sendCommandToServer("look");
-        assertTrue(response.contains("key"));
+        assertTrue(response.contains("potion"));
     }
 
     @Test
@@ -198,5 +203,16 @@ public class TestExtendedConfigFile {
         response = sendCommandToServer(response);
         response = sendCommandToServer("health");
         assertTrue(response.contains("3"));
+    }
+
+    @Test
+    void testConsumedArtefactsKey(){
+        String response = "goto forest";
+        response = sendCommandToServer(response);
+        response = sendCommandToServer("get key");
+        response = sendCommandToServer("goto cabin");
+        response = sendCommandToServer("unlock with key");
+        response = sendCommandToServer("inv");
+        assertFalse(response.contains("key"));
     }
 }
