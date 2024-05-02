@@ -83,6 +83,7 @@
             <entity>coin</entity>
         </consumed>
         <produced>
+            <entity>horn</entity>
             <entity>shovel</entity>
         </produced>
         <narration>You pay the elf your silver coin and he produces a shovel</narration>
