@@ -23,7 +23,7 @@ public class HealthCMD extends GenericCMD{
             if(cmdParser.isEntity(name)){
                 throw new Exception("Entity name not allowed in health command");
             }
-            if(cmdParser.isAction(name)){
+            if(cmdParser.isAction(name) || UtilityClass.checkIfNormalActionWord(name, "health")){
                 throw new Exception("Action not allowed in health command");
             }
         }

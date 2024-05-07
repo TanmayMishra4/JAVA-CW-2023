@@ -6,6 +6,7 @@ import edu.uob.Model.GameEntity;
 import edu.uob.Model.EntityType;
 import edu.uob.Model.Player;
 import edu.uob.Utils.ClassContainer;
+import edu.uob.Utils.UtilityClass;
 
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class DropCMD extends GenericCMD{
                     throw new Exception("Cannot drop " + token);
                 }
             }
-            else if(cmdParser.isAction(token)) throw new Exception("Action words not allowed in drop cmd");
+            else if(cmdParser.isAction(token) || UtilityClass.checkIfNormalActionWord(token, "drop")) throw new Exception("Action words not allowed in drop cmd");
             else if(gameEngine.hasEntity(token) && artefact != null) throw new Exception("Multiple entities not allowed in drop command");
         }
         if(artefact != null) gameEngine.dropArtefact(player, artefact);

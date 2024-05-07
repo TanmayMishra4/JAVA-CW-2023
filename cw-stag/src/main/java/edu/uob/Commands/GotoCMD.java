@@ -26,7 +26,7 @@ public class GotoCMD extends GenericCMD{
                     throw new Exception("Entity name other than location not allowed in goto command");
                 }
             }
-            if(cmdParser.isAction(name)){
+            if(cmdParser.isAction(name) || UtilityClass.checkIfNormalActionWord(name, "goto")){
                 throw new Exception("Action not allowed in goto command");
             }
         }

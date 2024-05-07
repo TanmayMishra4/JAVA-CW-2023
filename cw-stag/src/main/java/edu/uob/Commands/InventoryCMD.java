@@ -19,7 +19,7 @@ public class InventoryCMD extends GenericCMD{
             if(cmdParser.isEntity(name)){
                 throw new Exception("Entity name other than location not allowed in inv command");
             }
-            if(cmdParser.isAction(name)){
+            if(cmdParser.isAction(name) || UtilityClass.checkIfNormalActionWord(name, "inv", "inventory")){
                 throw new Exception("Action not allowed in inv command");
             }
         }
