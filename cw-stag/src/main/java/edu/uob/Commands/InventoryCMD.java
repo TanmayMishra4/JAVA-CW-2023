@@ -5,6 +5,7 @@ import edu.uob.GameEngine;
 import edu.uob.Model.GameEntity;
 import edu.uob.Model.Player;
 import edu.uob.Utils.ClassContainer;
+import edu.uob.Utils.UtilityClass;
 
 import java.util.List;
 

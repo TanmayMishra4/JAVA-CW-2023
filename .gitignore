@@ -11,3 +11,6 @@ sheds.tab
 BNF.txt
 example-transcript.docx
 people.tab
+config/complex-actions2.xml
+config/complex-entities2.dot
+src/test/java/edu/uob/ComplexSTAGTests.java

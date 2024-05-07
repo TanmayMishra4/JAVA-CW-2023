@@ -6,6 +6,7 @@ import edu.uob.Model.GameEntity;
 import edu.uob.Model.Location;
 import edu.uob.Model.Player;
 import edu.uob.Utils.ClassContainer;
+import edu.uob.Utils.UtilityClass;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class LookCMD extends GenericCMD{
         super(commands, gameEngine, player);
         CommandParser cmdParser = ClassContainer.getInstance().getCmdParser();
         for(String word : commands){
-            if(cmdParser.isAction(word)) throw new Exception("Another action word not allowed in command");
+            if(cmdParser.isAction(word) || UtilityClass.checkIfNormalActionWord(word, "look")) throw new Exception("Another action word not allowed in command");
             else if(cmdParser.isEntity(word)) throw new Exception("Entity not allowed in look command");
         }
         execute(player);

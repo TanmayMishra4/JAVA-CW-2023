@@ -99,13 +99,16 @@ public class Player extends GameCharacter {
         this.health--;
     }
 
-    private void playerDead() {// TODO to be implemented
+    private void playerDead() throws Exception {// TODO to be implemented
         health = 3;
         inventory.forEach((e) -> currentLocation.addArtefact((Artefact) e));
         inventory.clear();
         ClassContainer classContainer = ClassContainer.getInstance();
-        currentLocation = classContainer.getGameEngine().getStartingLocation();
+        Location startingLocation = classContainer.getGameEngine().getStartingLocation();
+        currentLocation.removeGameCharacter(this);
         classContainer.getCmdParser().setResponse("you died and lost all of your items, you must return to the start of the game");
+        startingLocation.addGameCharacter(this);
+        currentLocation = startingLocation;
     }
 
     public void consumeLocation(GameEntity entity) {

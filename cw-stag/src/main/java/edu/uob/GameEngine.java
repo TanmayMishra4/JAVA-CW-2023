@@ -31,6 +31,11 @@ public class GameEngine {
         }
     }
 
+    public Location getLocation(String name) throws Exception{
+        if(!locations.containsKey(name)) throw new Exception("Location with name" +name+ " does not exist");
+        return locations.get(name);
+    }
+
     public void addEntity(GameEntity entity) {
         allEntityMap.put(entity.getName(), entity);
     }
@@ -143,6 +148,7 @@ public class GameEngine {
                 // TODO remove the consumed entity from the player inventory as well if the player has it
                 player.removeFromInventory(entity);
                 storeRoom.addEntity(entity);
+                entity.setLocation(storeRoom);
             }
         }
     }
@@ -162,6 +168,7 @@ public class GameEngine {
                 Location currentLocation = player.getCurrentLocation();
                 entityLocation.removeEntity(entity);
                 currentLocation.addEntity(entity);
+                entity.setLocation(currentLocation);
             }
         }
     }
