@@ -29,6 +29,10 @@ public class Location extends GameEntity {
         }
     }
 
+    public void removeGameCharacter(Player player){
+        gameCharacters.remove(player.getName());
+    }
+
     public HashMap<String, GameCharacter> getGameCharacters() {
         return gameCharacters;
     }
