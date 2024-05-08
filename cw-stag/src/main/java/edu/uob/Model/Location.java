@@ -90,7 +90,6 @@ public class Location extends GameEntity {
         avblSubjects.add(this);
         avblSubjects.addAll(furniture.values());
         avblSubjects.addAll(artefacts.values());
-        avblSubjects.addAll(toLocations.values());
         avblSubjects.addAll(gameCharacters.values());
         return avblSubjects;
     }
