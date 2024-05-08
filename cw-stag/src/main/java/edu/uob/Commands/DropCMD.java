@@ -24,8 +24,10 @@ public class DropCMD extends GenericCMD{
                     throw new Exception("Cannot drop " + token);
                 }
             }
-            else if(cmdParser.isAction(token) || UtilityClass.checkIfNormalActionWord(token, "drop")) throw new Exception("Action words not allowed in drop cmd");
-            else if(gameEngine.hasEntity(token) && artefact != null) throw new Exception("Multiple entities not allowed in drop command");
+            else if(cmdParser.isAction(token) || UtilityClass.checkIfNormalActionWord(token, "drop"))
+                throw new Exception("Action words not allowed in drop cmd");
+            else if(gameEngine.hasEntity(token) && artefact != null && !artefact.getName().equalsIgnoreCase(token))
+                throw new Exception("Multiple entities not allowed in drop command");
         }
         if(artefact != null) gameEngine.dropArtefact(player, artefact);
         else throw new Exception("No entity specified to be dropped");
