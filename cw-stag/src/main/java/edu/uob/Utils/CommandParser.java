@@ -6,6 +6,7 @@ import edu.uob.Model.GameAction;
 import edu.uob.Model.GameEntity;
 import edu.uob.Model.Player;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -86,11 +87,14 @@ public class CommandParser {
 
     public GameAction extractActionOperation(Player player, ArrayList<String> command, HashSet<GameEntity> subjects) throws Exception{
         GameAction action = null;
-        for(String word : command){
-            if(isAction(word)){
+        for(int i=0;i<command.size();i++){
+            String word = command.get(i);
+            int[] it = new int[]{0};
+            HashSet<GameAction> associatedActions = isAction(i, command, it);
+            if(associatedActions != null){
                 if(action != null) throw new Exception("Multiple Actions in single command not allowed");
-                HashSet<GameAction> associatedActions = gameEngine.getActions().get(word);
                 action = matchCorrectAction(associatedActions, player, subjects);
+                i += (it[0] - 1);
             }
         }
         if(action == null) throw new Exception("Proper Action not specified");
@@ -100,6 +104,14 @@ public class CommandParser {
     private GameAction matchCorrectAction(HashSet<GameAction> associatedActions, Player player, HashSet<GameEntity> subjects) throws Exception{
         GameAction resultAction = null;
         for(GameAction action : associatedActions){
+            boolean flag = false;
+            for(GameEntity subject : subjects){
+                if(!action.getSubjects().contains(subject)){
+                    flag = true;
+                    break;
+                }
+            }
+            if(flag) continue;
             HashSet<GameEntity> avblSubjects = player.getAvailableSubjects();
             if(isSuperSet(avblSubjects, subjects) && isSuperSet(avblSubjects, action.getSubjects())){
                 if(resultAction == null) resultAction = action;
@@ -115,6 +127,23 @@ public class CommandParser {
             if(!avblSubjects.contains(subject)) return false;
         }
         return true;
+    }
+
+    public HashSet<GameAction> isAction(int index, ArrayList<String> command, int[] it){
+        String word = command.get(index);
+        for(String actionWord : gameEngine.getActions().keySet()){
+            if(actionWord.startsWith(word)){
+                int len = actionWord.split(" ").length;
+                String newWord = "";
+                for(int i=index;i<index+len && i<command.size();i++){
+                    newWord += (command.get(i) + " ");
+                }
+                newWord = newWord.substring(0, newWord.length()-1);
+                it[0] = len;
+                if(newWord.equals(actionWord)) return gameEngine.getActions().get(actionWord);
+            }
+        }
+        return null;
     }
 
     public boolean isAction(String word) {

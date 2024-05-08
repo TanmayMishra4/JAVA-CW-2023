@@ -29,6 +29,14 @@ public class Location extends GameEntity {
         }
     }
 
+    public HashSet<GameEntity> getAllEntities(){
+        HashSet<GameEntity> res = new HashSet<>();
+        res.addAll(furniture.values());
+        res.addAll(artefacts.values());
+        res.addAll(gameCharacters.values());
+        return res;
+    }
+
     public void removeGameCharacter(Player player){
         gameCharacters.remove(player.getName());
     }

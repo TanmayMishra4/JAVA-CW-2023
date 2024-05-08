@@ -72,6 +72,13 @@ public final class GameServer {
         }
     }
 
+    private HashSet<GameEntity> toLowerCase(HashSet<GameEntity> entities) {
+        for(GameEntity g : entities){
+            g.setName(g.getName().toLowerCase());
+        }
+        return entities;
+    }
+
     private HashSet<String> extractTriggers(Element triggers) {
         HashSet<String> result = new HashSet<>();
         NodeList phrases = triggers.getElementsByTagName("keyphrase");
@@ -86,7 +93,7 @@ public final class GameServer {
         NodeList entities = consumed.getElementsByTagName("entity");
         HashSet<GameEntity> result = new HashSet<>();
         for(int index=0;index<entities.getLength();index++){
-            String entityName = entities.item(index).getTextContent();
+            String entityName = entities.item(index).getTextContent().toLowerCase();
             result.add(gameEngine.getEntityByName(entityName));
         }
         return result;
@@ -100,7 +107,7 @@ public final class GameServer {
         HashMap<String, Location> allLocations = new HashMap<String, Location>();
         for(Graph location : locations){
             var locationDetails = location.getNodes(false);
-            String name = locationDetails.get(0).getId().getId();
+            String name = locationDetails.get(0).getId().getId().toLowerCase();
             String description = locationDetails.get(0).getAttribute("description");
             ArrayList<Artefact> artefacts = extractArtefacts(location.getSubgraphs());
             ArrayList<Furniture> furniture = extractFurniture(location.getSubgraphs());
@@ -150,7 +157,7 @@ public final class GameServer {
             if(subgraph.getId().getId().equals("characters")){
                 var nodeList = subgraph.getNodes(false);
                 for(var node : nodeList){
-                    String name = node.getId().getId();
+                    String name = node.getId().getId().toLowerCase();
                     String description =  node.getAttribute("description");
                     GameCharacter  gameCharacter = new GameCharacter(name, description);
                     gameCharacters.add(gameCharacter);
@@ -167,7 +174,7 @@ public final class GameServer {
             if(subgraph.getId().getId().equals("furniture")){
                 var nodeList = subgraph.getNodes(false);
                 for(var node : nodeList){
-                    String name = node.getId().getId();
+                    String name = node.getId().getId().toLowerCase();
                     String description =  node.getAttribute("description");
                     Furniture  currentFurniture = new Furniture(name, description);
                     furniture.add(currentFurniture);
@@ -184,7 +191,7 @@ public final class GameServer {
             if(subgraph.getId().getId().equals("artefacts")){
                 var nodeList = subgraph.getNodes(false);
                 for(var node : nodeList){
-                    String name = node.getId().getId();
+                    String name = node.getId().getId().toLowerCase();
                     String description =  node.getAttribute("description");
                     Artefact  artefact = new Artefact(name, description);
                     artefacts.add(artefact);

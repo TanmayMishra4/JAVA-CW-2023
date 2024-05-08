@@ -108,11 +108,19 @@ public class GameEngine {
         HashSet<GameEntity> producedEntities = action.getProduced();
         // to check if consumed and produced entities are not in another player's inventory
         checkEntityAvbl(producedEntities, consumedEntities, player);
+        checkSubjectsAvbl(actionSubjects, player);
         for(GameEntity entity : entitySet){
             player.performAction(action, entity);
         }
         consumeEntities(consumedEntities, player);
         produceEntities(producedEntities, player);
+    }
+
+    private void checkSubjectsAvbl(HashSet<GameEntity> actionSubjects, Player player) throws Exception{
+        HashSet<GameEntity> avblItems = player.getAvailableSubjects();
+        for(GameEntity subjectEntity : actionSubjects){
+            if(!avblItems.contains(subjectEntity)) throw new Exception("Subject not avbl");
+        }
     }
 
     private void checkEntityAvbl(HashSet<GameEntity> producedEntities, HashSet<GameEntity> consumedEntities, Player player) throws Exception {
