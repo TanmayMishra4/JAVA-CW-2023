@@ -18,7 +18,7 @@ public class GotoCMD extends GenericCMD{
         for(String name : commands){
             if(cmdParser.isEntity(name)){
                 if(gameEngine.hasDestinationName(name)){
-                    if(destNameFound) throw new Exception("Two destination names not allowed in goto command");
+                    if(destNameFound && !destName.equalsIgnoreCase(name)) throw new Exception("Two destination names not allowed in goto command");
                     destNameFound = true;
                     destName = name;
                 }

@@ -19,14 +19,16 @@ public class GetCMD extends GenericCMD{
         StringBuilder result = new StringBuilder();
         CommandParser cmdParser = ClassContainer.getInstance().getCmdParser();
         for(String token : commands){// TODO check if multiple artefacts check in get should be done or not
-            if(gameEngine.hasEntity(token) && artefact == null) {
+            if(gameEngine.hasEntity(token) && (artefact == null || artefact.getName().equalsIgnoreCase(token))) {
                 artefact = gameEngine.getEntityByName(token);
                 if(artefact.getEntityType() != EntityType.ARTEFACT) {
                     throw new Exception("Cannot pick up " + token);
                 }
             }
-            else if(cmdParser.isAction(token) || UtilityClass.checkIfNormalActionWord(token, "get")) throw new Exception("Action words not allowed in get cmd");
-            else if(gameEngine.hasEntity(token) && artefact != null) throw new Exception("Composite commands not allowed");
+            else if(cmdParser.isAction(token) || UtilityClass.checkIfNormalActionWord(token, "get"))
+                throw new Exception("Action words not allowed in get cmd");
+            else if(gameEngine.hasEntity(token) && artefact != null && !artefact.getName().equalsIgnoreCase(token))
+                throw new Exception("Composite commands not allowed");
         }
         if(artefact != null) gameEngine.pickArtefact(player, artefact);
         else throw new Exception("No entity specified to pick up");

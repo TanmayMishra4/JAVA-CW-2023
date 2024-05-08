@@ -29,6 +29,10 @@ public class CommandParser {
         String[] separatedCommand = command.split(":");
         if(separatedCommand.length == 0) throw new Exception("Invalid command, does not include ':' character");
         playerName = separatedCommand[0];
+        for(char a : playerName.toCharArray()) {
+            if (Character.isLetter(a) || a == ' ' || a == '\'' || a == '-') continue;
+            else throw new Exception("Invalid player name");
+        }
         String remainingCmd = separatedCommand[1].toLowerCase().trim();
         tokenizedCMD = tokenize(remainingCmd);
 //        executeCommand(playerName, tokenizedCMD);
