@@ -122,9 +122,8 @@ public final class GameServer {
             artefacts.forEach((e) -> e.setLocation(currentLocation));
             furniture.forEach((e) -> e.setLocation(currentLocation));
             gameCharacters.forEach((e) -> e.setLocation(currentLocation));
-            if(startingLocation == null){
+            if(startingLocation == null)
                 startingLocation = currentLocation;
-            }
         }
         ArrayList<Edge> paths = sections.get(1).getEdges();
         connectLocations(paths, allLocations);
@@ -209,7 +208,6 @@ public final class GameServer {
     * @param command The incoming command to be processed
     */
     public String handleCommand(String command) {
-        // TODO implement your server logic here
         CommandParser cmdParser;
         try {
             ClassContainer classContainer = ClassContainer.getInstance();

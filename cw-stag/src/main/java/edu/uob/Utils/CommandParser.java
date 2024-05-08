@@ -35,7 +35,6 @@ public class CommandParser {
         }
         String remainingCmd = separatedCommand[1].toLowerCase().trim();
         tokenizedCMD = tokenize(remainingCmd);
-//        executeCommand(playerName, tokenizedCMD);
     }
 
     public String getPlayerName(){
@@ -47,7 +46,6 @@ public class CommandParser {
     }
 
     private ArrayList<String> tokenize(String remainingCmd) {
-        // TODO look for a more robust way to code this
         remainingCmd = remainingCmd.replaceAll("[^A-Za-z0-9]", " ");
         remainingCmd = remainingCmd.replaceAll("\\s+", " ");
         remainingCmd = remainingCmd.replaceAll("\\t", " ");
@@ -68,7 +66,6 @@ public class CommandParser {
     }
 
     private boolean executeAdvancedCMD(Player player, ArrayList<String> command) throws Exception{
-        // TODO what to do when subjects avbl to player but the entity to be consumed is absent?
         HashSet<GameEntity> entitySet = extractEntities(player, command);
         GameAction action = extractActionOperation(player, command, entitySet);
         gameEngine.performAction(player, action, entitySet);
@@ -145,7 +142,7 @@ public class CommandParser {
                 }
                 newWord = newWord.substring(0, newWord.length()-1);
                 it[0] = len;
-                if(newWord.equals(actionWord)) return gameEngine.getActions().get(actionWord);
+                if(newWord.equalsIgnoreCase(actionWord)) return gameEngine.getActions().get(actionWord);
             }
         }
         return null;
