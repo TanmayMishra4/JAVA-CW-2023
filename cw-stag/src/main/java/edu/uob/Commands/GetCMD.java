@@ -22,11 +22,8 @@ public class GetCMD extends GenericCMD{
             if(gameEngine.hasEntity(token) && artefact == null) {
                 artefact = gameEngine.getEntityByName(token);
                 if(artefact.getEntityType() != EntityType.ARTEFACT) {
-                    artefact = null;
                     throw new Exception("Cannot pick up " + token);
                 }
-//                gameEngine.pickArtefact(player, artefact);
-//                break;
             }
             else if(cmdParser.isAction(token) || UtilityClass.checkIfNormalActionWord(token, "get")) throw new Exception("Action words not allowed in get cmd");
             else if(gameEngine.hasEntity(token) && artefact != null) throw new Exception("Composite commands not allowed");

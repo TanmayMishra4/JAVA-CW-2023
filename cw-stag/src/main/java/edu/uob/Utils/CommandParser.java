@@ -92,8 +92,9 @@ public class CommandParser {
             int[] it = new int[]{0};
             HashSet<GameAction> associatedActions = isAction(i, command, it);
             if(associatedActions != null){
-                if(action != null) throw new Exception("Multiple Actions in single command not allowed");
-                action = matchCorrectAction(associatedActions, player, subjects);
+                GameAction newAction = matchCorrectAction(associatedActions, player, subjects);
+                if(action != null && !action.equals(newAction)) throw new Exception("Multiple Actions in single command not allowed");
+                action = newAction;
                 i += (it[0] - 1);
             }
         }
