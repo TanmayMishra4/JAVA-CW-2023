@@ -95,6 +95,7 @@ public class GameEngine {
         Location currentLocation  = player.getCurrentLocation();
         player.dropArtefact(artefact);
         currentLocation.addArtefact((Artefact) artefact);
+        artefact.setLocation(currentLocation);
     }
 
     public HashMap<String, HashSet<GameAction>> getActions() {
@@ -106,7 +107,6 @@ public class GameEngine {
         if(!checkAllEntitiesInCMD(actionSubjects, entitySet)) throw new Exception("Could not match command");
         HashSet<GameEntity> consumedEntities = action.getConsumed();
         HashSet<GameEntity> producedEntities = action.getProduced();
-        // to check if consumed and produced entities are not in another player's inventory
         checkEntityAvbl(producedEntities, consumedEntities, player);
         checkSubjectsAvbl(actionSubjects, player);
         for(GameEntity entity : entitySet){
@@ -140,7 +140,6 @@ public class GameEngine {
     }
 
     private void consumeEntities(HashSet<GameEntity> consumedEntities, Player player) throws Exception {
-        // TODO check if these entities exist or not
         for(GameEntity entity : consumedEntities){
             if(!allEntityMap.containsKey(entity.getName())) throw new Exception("entity does not exist");
             if(entity.getEntityType() == EntityType.LOCATION){
@@ -153,7 +152,6 @@ public class GameEngine {
                 Location currentLocation = entity.getLocation();
                 Location storeRoom = locations.get("storeroom");
                 currentLocation.removeEntity(entity);
-                // TODO remove the consumed entity from the player inventory as well if the player has it
                 player.removeFromInventory(entity);
                 storeRoom.addEntity(entity);
                 entity.setLocation(storeRoom);
@@ -162,15 +160,12 @@ public class GameEngine {
     }
 
     private void produceEntities(HashSet<GameEntity> consumedEntities, Player player) throws Exception {
-        // TODO check if these entities exist or not
         for(GameEntity entity : consumedEntities){
             if(!allEntityMap.containsKey(entity.getName())) throw new Exception("entity does not exist");
-            if(entity.getEntityType() == EntityType.LOCATION){
+            if(entity.getEntityType() == EntityType.LOCATION)
                 player.produceLocation(entity);
-            }
-            else if(entity.getEntityType() == EntityType.HEALTH){
+            else if(entity.getEntityType() == EntityType.HEALTH)
                 player.increaseHealth();
-            }
             else{
                 Location entityLocation = entity.getLocation();
                 Location currentLocation = player.getCurrentLocation();

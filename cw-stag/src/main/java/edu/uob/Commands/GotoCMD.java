@@ -22,13 +22,11 @@ public class GotoCMD extends GenericCMD{
                     destNameFound = true;
                     destName = name;
                 }
-                else{
+                else
                     throw new Exception("Entity name other than location not allowed in goto command");
-                }
             }
-            if(cmdParser.isAction(name) || UtilityClass.checkIfNormalActionWord(name, "goto")){
+            if(cmdParser.isAction(name) || UtilityClass.checkIfNormalActionWord(name, "goto"))
                 throw new Exception("Action not allowed in goto command");
-            }
         }
         if(destNameFound) execute(destName);
         else throw new Exception("Destination name not found");

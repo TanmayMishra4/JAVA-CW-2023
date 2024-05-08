@@ -16,7 +16,7 @@ public class DropCMD extends GenericCMD{
         GameEntity artefact = null;
         StringBuilder result = new StringBuilder();
         CommandParser cmdParser = ClassContainer.getInstance().getCmdParser();
-        for(String token : commands){// TODO check if multiple artefacts check in get should be done or not
+        for(String token : commands){
             if(gameEngine.hasEntity(token) && artefact == null) {
                 artefact = gameEngine.getEntityByName(token);
                 if(artefact.getEntityType() != EntityType.ARTEFACT) {
