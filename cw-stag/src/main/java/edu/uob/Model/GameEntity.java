@@ -16,6 +16,10 @@ public abstract class GameEntity
     private EntityType entityType;
     private String description;
 
+    public void setName(String name){
+        this.name = name;
+    }
+
     public GameEntity(String name, String description, EntityType entityType) {
         this.entityType =  entityType;
         this.name = name;
@@ -37,7 +41,7 @@ public abstract class GameEntity
     }
 
     public boolean equals(GameEntity another){
-        return this.getName().equals(another.getName());
+        return this.getName().equalsIgnoreCase(another.getName());
     }
 
     @Override
